@@ -1,0 +1,278 @@
+SHELL := bash
+.SHELLFLAGS := -ceuo pipefail
+.ONESHELL:
+.SILENT:
+.SECONDEXPANSION:
+
+
+# $(call list_files, glob, dir) ≡ files : List Path
+define list_files
+	$(shell fd -uu -t f -g $(2) $(1))
+endef
+
+
+# $(call format, dir)
+define format
+	$(shell npx prettier --write $(1))
+	$(shell npx prettier --check $(1))
+endef
+
+
+# Where the source files of the pages are saved.
+SOURCE=__SOURCE__
+
+
+# The directory under which the website will be installed.
+PREFIX=__PREFIX__
+
+
+# Where the website is built.
+BUILD_DIR := _build
+$(shell mkdir -p ${BUILD_DIR})
+
+
+help: ## This help.
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+
+
+# cname
+## Context
+CNAME := CNAME
+## Objective
+CNAME_FILE := ${BUILD_DIR}/CNAME
+## Rule
+.PHONY: cname
+cname: ${CNAME_FILE} ## Install the CNAME under ${BUILD_DIR}.
+${CNAME_FILE}: ${CNAME}
+	cp $< $@
+
+
+# manifest
+## Context
+MANIFEST := site.webmanifest
+## Objective
+MANIFEST_FILE := ${BUILD_DIR}/site.webmanifest
+## Rule
+.PHONY: manifest
+manifest: ${MANIFEST_FILE} ## Install the webmanifest under ${BUILD_DIR}.
+${MANIFEST_FILE}: ${MANIFEST}
+	cp $< $@
+
+
+# css
+## Context
+CSS_DIR := css
+CSS_FILES := $(call list_files, ${CSS_DIR}, '*')
+## Objective
+CSS_OBJ := $(CSS_FILES:%=${BUILD_DIR}/%)
+## Rule
+.PHONY: css
+css: ${CSS_OBJ} ## Install the css directory under ${BUILD_DIR}.
+${BUILD_DIR}/${CSS_DIR}/%: ${CSS_DIR}/%
+	OUT="$@"
+	OUT_DIR="$${OUT%/*}"
+	mkdir -p "$${OUT_DIR}"
+	cp $< $@
+
+
+# favicon
+## Context
+FAVICON_DIR := favicon
+FAVICON_FILES := $(call list_files, ${FAVICON_DIR}, '*')
+## Objective
+FAVICON_OBJ := $(FAVICON_FILES:%=${BUILD_DIR}/%)
+## Rule
+.PHONY: favicon
+favicon: ${FAVICON_OBJ} ## Install the favicon directory under ${BUILD_DIR}.
+${BUILD_DIR}/${FAVICON_DIR}/%: ${FAVICON_DIR}/%
+	OUT="$@"
+	OUT_DIR="$${OUT%/*}"
+	mkdir -p "$${OUT_DIR}"
+	cp $< $@
+
+
+# font
+## Context
+FONT_DIR := font
+FONT_FILES := $(call list_files, ${FONT_DIR}, '*')
+## Objective
+FONT_OBJ := $(FONT_FILES:%=${BUILD_DIR}/%)
+## Rule
+.PHONY: font
+font: ${FONT_OBJ} ## Install the font directory under ${BUILD_DIR}.
+${BUILD_DIR}/${FONT_DIR}/%: ${FONT_DIR}/%
+	OUT="$@"
+	OUT_DIR="$${OUT%/*}"
+	mkdir -p "$${OUT_DIR}"
+	cp $< $@
+
+
+# js
+## Context
+JS_DIR := js
+JS_FILES := $(call list_files, ${JS_DIR}, '*')
+## Objective
+JS_OBJ := $(JS_FILES:%=${BUILD_DIR}/%)
+## Rule
+.PHONY: js
+js: ${JS_OBJ} ## Install the js directory under ${BUILD_DIR}.
+${BUILD_DIR}/${JS_DIR}/%: ${JS_DIR}/%
+	OUT="$@"
+	OUT_DIR="$${OUT%/*}"
+	mkdir -p "$${OUT_DIR}"
+	cp $< $@
+
+
+# page ${UUID}
+## Context
+TEMPLATE := template.html
+ARTICLES_DIR := ${SOURCE}
+ARTICLE_DIR := ${ARTICLES_DIR}/${UUID}
+ARTICLE_FILES := $(call list_files, ${ARTICLE_DIR}, '*')
+LANG_FILE := ${ARTICLE_DIR}/lang
+DATA_DIR := ${ARTICLE_DIR}/data
+DESCRIPTION_FILE := ${ARTICLE_DIR}/description
+ARTICLE_FILE := ${ARTICLE_DIR}/article.html
+PAGE_CTX := ${TEMPLATE} ${ARTICLE_FILES}
+PAGES := ${BUILD_DIR}/pages
+PAGE_DIR := ${PAGES}/${UUID}
+## Objective
+PAGE_FILE := ${PAGE_DIR}/page.html
+## Rule
+.PHONY: page
+page: ${PAGE_FILE}  ## Install the page with UUID ${UUID} under ${BUILD_DIR}.
+${PAGE_FILE}: ${PAGE_CTX}
+	mkdir -p ${PAGE_DIR}
+	cp -r ${DATA_DIR} ${PAGE_DIR}
+	sed "s|__LANG__|$$(cat ${LANG_FILE})|g" ${TEMPLATE} > $@
+	sed -i "s|__DESCRIPTION__|$$(cat ${DESCRIPTION_FILE})|g" $@
+	SCRIPT=$$(cat <<'EOF'
+	f = open("${ARTICLE_FILE}")
+	article = f.read()
+	f.close()
+	f = open("$@", "r+")
+	page = f.read()
+	f.seek(0)
+	page = page.replace("__ARTICLE__",article)
+	f.write(page)
+	f.close()
+	EOF
+	)
+	python3 -c "$$SCRIPT"
+
+
+# pages
+## Context
+LANDING_UUID=00000000-0000-0000-0000-000000000000
+ARTICLES_DIRS := $(shell echo ${ARTICLES_DIR}/*)
+
+## Objective
+UUIDS := $(ARTICLES_DIRS:${ARTICLES_DIR}/%=%)
+
+## Rule
+.PHONY: all
+all: ${CNAME_FILE} ${MANIFEST_FILE} ${CSS_OBJ} ${FAVICON_OBJ} ${FONT_OBJ} ${JS_OBJ} ## Build the website under ${BUILD_DIR}. If given ONCHANGE=true, then: rebuild on change.
+	ARR=(${UUIDS})
+	for uuid in "$${ARR[@]}"; do
+		${MAKE} page UUID=$$uuid &
+	done
+	wait
+	ln -sndf pages/${LANDING_UUID}/data ${BUILD_DIR}/data
+	ln -sndf pages/${LANDING_UUID}/page.html ${BUILD_DIR}/index.html
+	if [[ "${ONCHANGE}" == "true" ]]; then
+		inotifywait -q -e create,modify,move,delete -r ${ARTICLES_DIR}
+		${MAKE} pages ONCHANGE=true
+	fi
+
+
+# server
+## Context
+## Objective
+## Rule
+.PHONY: server
+server: all ## Start a web server serving files from the current directory.
+	cd ${BUILD_DIR}
+	python3 -m http.server
+
+
+# new
+## Context
+LANDING_ARTICLE := ${ARTICLES_DIR}/${LANDING_UUID}
+NEW_UUID := $(shell cat /proc/sys/kernel/random/uuid)
+
+## Objective
+NEW_ARTICLE := ${ARTICLES_DIR}/${NEW_UUID}
+
+## Rule
+.PHONY: new
+new: ## Add a new page.
+	cp -r ${LANDING_ARTICLE} ${NEW_ARTICLE}
+	echo ${NEW_ARTICLE}
+
+
+# list
+## Context
+## Objective
+## Rule
+.PHONY: list
+list: ## List pages.
+	PATHS=$$(fd -g '*.html' ${PAGES})
+	for path in $${PATHS}; do
+		desc=$$(rg --no-line-number -or '$$1' '<meta.*name="description".*content="(.*?)"' $$path)
+		echo "$$path  |  $$desc"
+	done
+
+
+# delete
+## Context
+## Objective
+## Rule
+.PHONY: delete
+delete: ## Delete a page with uuid UUID.
+	rm -rvf ${PAGES}/${UUID}
+
+
+# format
+## Context
+## Objective
+## Rule
+.PHONY: format
+format: ## Format files.
+	DIRS=(${JS_DIR} ${CSS_DIR} ${ARTICLES_DIR} ${PAGES} ${BUILD_DIR})
+	for dir in $${DIRS[@]}; do
+		file=($$(echo $$dir/*))
+	    if [[ -e $$file ]]; then
+			npx prettier --write $$dir
+			npx prettier --check $$dir
+		fi
+	done
+
+
+# install
+## Context
+## Objective
+## Rule
+.PHONY: install
+install: all format ## Install the website under ${PREFIX}.
+	cp -rvf ${BUILD_DIR}/* "${PREFIX}/"
+
+
+# publish
+## Context
+## Objective
+## Rule
+.PHONY: publish
+publish: all format ## Publish the website.
+	cd ${PREFIX}
+	git add .
+	git commit -a -m "published."
+	git push
+
+
+# clean
+## Context
+## Objective
+## Rule
+.PHONY: clean
+clean: ## Clean all generated files.
+	rm -rvf ${BUILD_DIR}

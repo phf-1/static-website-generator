@@ -32,7 +32,7 @@ $(shell mkdir -p ${BUILD_DIR})
 
 
 help: ## This help.
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36mmake %-30s\033[0m %s\n", $$1, $$2}'
 
 
 # cname
@@ -181,7 +181,7 @@ all: ${CNAME_FILE} ${MANIFEST_FILE} ${CSS_OBJ} ${FAVICON_OBJ} ${FONT_OBJ} ${JS_O
 	ln -sndf pages/${LANDING_UUID}/page.html ${BUILD_DIR}/index.html
 	if [[ "${ONCHANGE}" == "true" ]]; then
 		inotifywait -q -e create,modify,move,delete -r ${ARTICLES_DIR}
-		${MAKE} pages ONCHANGE=true
+		${MAKE} all ONCHANGE=true
 	fi
 
 

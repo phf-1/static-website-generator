@@ -7,32 +7,32 @@ set -euo pipefail
 IFS=$'\n\t'
 
 
-
 SOURCE=""
 PREFIX="_install"
 while (( $# )); do
   case $1 in
-    --source)
-      shift
-      SOURCE="$(realpath $1)"
-      ;;	
-    --prefix)
-      shift
-      PREFIX="$(realpath $1)"
-      ;;
-    *)
-      echo "Error. Unexpected argument: "
-      exit 1
-      ;;
+	--source)
+	  shift
+	  SOURCE="$(realpath $1)"
+	  ;;
+	--prefix)
+	  shift
+	  PREFIX="$(realpath $1)"
+	  ;;
+	*)
+	  echo "Error. Unexpected argument: "
+	  exit 1
+	  ;;
   esac
   shift
 done
- 
+
 
 if [[ ! -d "${SOURCE}" ]]; then
   echo '--source ${SOURCE} must be specified and ${SOURCE} must be a directory.'
   exit 1
 fi
+
 
 chmod +w Makefile
 sed "s|__PREFIX__|${PREFIX}|g" Makefile.in > Makefile
@@ -41,4 +41,3 @@ chmod -w Makefile
 echo Makefile
 echo "  SOURCE = ${SOURCE}"
 echo "  PREFIX = ${PREFIX}"
-

@@ -1,3 +1,7 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 SHELL := bash
 .SHELLFLAGS := -ceuo pipefail
 .ONESHELL:
@@ -253,7 +257,8 @@ format: ## Format files.
 ## Objective
 ## Rule
 .PHONY: install
-install: all format ## Install the website under ${PREFIX}.
+install: clean ## Install the website under ${PREFIX}.
+	${MAKE} all format
 	cp -rvf ${BUILD_DIR}/* "${PREFIX}/"
 
 
@@ -262,7 +267,7 @@ install: all format ## Install the website under ${PREFIX}.
 ## Objective
 ## Rule
 .PHONY: publish
-publish: all format ## Publish the website.
+publish: install ## Publish the website.
 	cd ${PREFIX}
 	git add .
 	git commit -a -m "published."

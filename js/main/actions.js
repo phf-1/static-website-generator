@@ -4,8 +4,6 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-const toc_id = "table-of-content";
-
 const toggle_toc = (function (id) {
   const func = function () {
     const toc_el = document.getElementById(id);

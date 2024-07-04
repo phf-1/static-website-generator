@@ -265,8 +265,8 @@ format: ## Format files.
 	for dir in $${DIRS[@]}; do
 		file=($$(echo $$dir/*))
 	    if [[ -e $$file ]]; then
-			npx prettier --write $$dir
-			npx prettier --check $$dir
+			npx prettier --config .prettierrc.json --write $$dir
+			npx prettier --config .prettierrc.json --check $$dir
 		fi
 	done
 

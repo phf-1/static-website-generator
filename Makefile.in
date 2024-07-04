@@ -216,6 +216,23 @@ new: ## Add a new page.
 	echo ${NEW_ARTICLE}
 
 
+# new-actor
+## Context
+ACTOR_MODEL := ${ARTICLES_DIR}/8960e1c9-07bc-406b-a993-02e7f87ac3b7
+ACTOR_MODEL_UUID := 101e3f53-f9e2-465a-a0e3-d0685b8e4f21
+NEW_ACTOR_UUID := $(shell cat /proc/sys/kernel/random/uuid)
+
+## Objective
+NEW_ARTICLE := ${ARTICLES_DIR}/${NEW_ACTOR_UUID}
+
+## Rule
+.PHONY: new-actor
+new-actor: ## Add a new actor page.
+	cp -r ${ACTOR_MODEL} ${NEW_ARTICLE}
+	sed -i 's/101e3f53-f9e2-465a-a0e3-d0685b8e4f21/${NEW_ACTOR_UUID}/' ${NEW_ARTICLE}/article.html
+	echo ${NEW_ARTICLE}
+
+
 # list
 ## Context
 ## Objective

@@ -1,4 +1,6 @@
 {
+	"printWidth": 200,
 	"bracketSameLine": true,
-	"printWidth": 120
+	"bracketSpacing": true,
+	"htmlWhitespaceSensitivity": "ignore"
 }

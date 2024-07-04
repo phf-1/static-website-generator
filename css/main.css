@@ -19,8 +19,8 @@
   --note-border: #33691e;
   --abstract-bg: #f3e5f5;
   --abstract-border: #4a148c;
-  --definition-bg: #e0f2f1;
-  --definition-border: #004d40;
+  --definition-bg: #eceff1;
+  --definition-border: #263238;
   --quote-bg: #fff3e0;
   --quote-border: #e65100;
   --aside-border: #1b5e20;
@@ -33,6 +33,7 @@
   --kw-doing: var(--quote-border);
   --kw-waiting: var(--kw-doing);
   --kw-done: var(--aside-border);
+  --kw-failed: var(--main-text);
   --line-height: 1.4;
   --annotation: #777;
   --button-over: #fffff0;
@@ -166,7 +167,7 @@ h6 {
 }
 
 hr + * {
-    padding-top: 0;
+  padding-top: 0;
 }
 
 .navbar {
@@ -231,7 +232,7 @@ p {
 
 .cartridge {
   position: relative;
-  max-width: 80%;
+  max-width: 90%;
   margin: 4rem auto;
   padding: 1rem;
   border-radius: var(--radius);
@@ -243,6 +244,7 @@ p {
   &.abstract {
     background-color: var(--abstract-bg);
     border: 1px solid var(--abstract-border);
+	max-width: 80%;	
   }
 
   &.abstract::before {
@@ -432,7 +434,7 @@ hr {
   border: 0;
   height: 1px;
   background: var(--hr);
-  margin: 2rem 0;
+  margin: 4rem 0; /* max of content elements margins. */
 }
 
 aside {
@@ -490,6 +492,14 @@ aside p {
 
   &.done::before {
     content: "done";
+  }
+
+  &.failed {
+    background-color: var(--kw-failed);
+  }
+
+  &.failed::before {
+    content: "failed";
   }
 }
 

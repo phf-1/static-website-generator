@@ -143,7 +143,7 @@ DATA_DIR := ${ARTICLE_DIR}/data
 DESCRIPTION_FILE := ${ARTICLE_DIR}/description
 ARTICLE_FILE := ${ARTICLE_DIR}/article.html
 PAGE_CTX := ${TEMPLATE} ${ARTICLE_FILES}
-PAGES := ${BUILD_DIR}/pages
+PAGES := ${BUILD_DIR}/page
 PAGE_DIR := ${PAGES}/${UUID}
 ## Objective
 PAGE_FILE := ${PAGE_DIR}/index.html
@@ -186,8 +186,8 @@ all: ${CNAME_FILE} ${MANIFEST_FILE} ${CSS_OBJ} ${FAVICON_OBJ} ${FONT_OBJ} ${JS_O
 		${MAKE} page UUID=$$uuid &
 	done
 	wait
-	ln -sndf pages/${LANDING_UUID}/data ${BUILD_DIR}/data
-	ln -sndf pages/${LANDING_UUID}/index.html ${BUILD_DIR}/index.html
+	ln -sndf page/${LANDING_UUID}/data ${BUILD_DIR}/data
+	ln -sndf page/${LANDING_UUID}/index.html ${BUILD_DIR}/index.html
 	if [[ "${ONCHANGE}" == "true" ]]; then
 		inotifywait -q -e create,modify,move,delete -r ${ARTICLES_DIR}
 		${MAKE} all ONCHANGE=true

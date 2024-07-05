@@ -477,6 +477,7 @@ aside p {
   border-radius: var(--radius);
   font-weight: bold;
   text-transform: uppercase;
+  font-size: 0.75em;
 
   &.todo {
     background-color: var(--kw-todo);

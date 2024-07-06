@@ -4,7 +4,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-import hljs from "highlight.js";
+import hljs from 'highlight.js/lib/core';
+import scheme from 'highlight.js/lib/languages/scheme';
 import { main as main_id } from "./module/id";
 import { content as content_id } from "./module/id";
 import { toggle_toc_btn as toggle_toc_btn_id } from "./module/id";
@@ -34,6 +35,7 @@ const on_dom_content_loaded = (function (main_id, content_id) {
 		main.appendChild(toc);
 		const toggle_toc_btn = document.getElementById(toggle_toc_btn_id);
 		toggle_toc_btn.onclick = toggle_toc
+		hljs.registerLanguage('scheme', scheme);
 		hljs.highlightAll();
 	};
 })(main_id, content_id);

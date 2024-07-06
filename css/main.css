@@ -10,7 +10,7 @@
 :root {
 	/* https://m2.material.io/design/color/the-color-system.html#tools-for-picking-colors */
 	--font-size: 18px;
-	--font-h-factor: 1.1;
+	--font-h-factor: 1.15;
 	--h6-size: calc(var(--font-size) * var(--font-h-factor));
 	--h5-size: calc(var(--h6-size) * var(--font-h-factor));
 	--h4-size: calc(var(--h5-size) * var(--font-h-factor));
@@ -179,7 +179,7 @@ h6 {
 
 #content {
   position: relative;
-  max-width: 80ch;
+  max-width: 70ch;
   flex-grow: 1;
   border: 1px solid var(--annotation);
   padding: 1rem;
@@ -425,29 +425,23 @@ thead th {
 }
 
 figure {
-  margin: 0 auto;
-  margin-bottom: 1.5rem;
-  text-align: center;
+  margin: 4rem auto;
 }
 
-figure img {
-  max-width: 100%;
-}
+figure {
+	img {
+		max-width: 100%;
+	}
 
-figure figcaption {
-  text-align: center;
+	figcaption {
+		text-align: center;
+	}
 }
 
 img {
   border: 1px solid;
   padding: 2px;
   border-radius: var(--radius);
-}
-
-figcaption {
-  margin-top: 0.5rem;
-  font-size: 0.875rem;
-  color: var(--main-text);
 }
 
 footer {

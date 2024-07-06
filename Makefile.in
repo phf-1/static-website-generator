@@ -3,7 +3,7 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 SHELL := bash
-.SHELLFLAGS := -cxeuo pipefail
+.SHELLFLAGS := -ceuo pipefail
 .ONESHELL:
 .SILENT:
 .SECONDEXPANSION:
@@ -115,7 +115,7 @@ ${BUILD_DIR}/${FONT_DIR}/%: ${FONT_DIR}/%
 # js
 ## Context
 JS_DIR := js
-JS_MAIN_FILES := $(shell echo js/module/{id.js,dom.js,predicate.js,action.js,toc.js} js/main.js)
+JS_MAIN_FILES := $(shell echo js/module/* js/main.js)
 JS_BUILD_DIR := ${BUILD_DIR}/${JS_DIR}
 ## Objective
 JS_OBJ := ${JS_BUILD_DIR}/main/main.min.js

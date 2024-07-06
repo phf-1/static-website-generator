@@ -4,8 +4,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-import { toc as toc_id } from "/js/module/id.js";
-import { children_depth_first, is_heading } from "/js/module/dom.js";
+import { toc as toc_id } from "./id";
+import { children_depth_first, is_heading } from "./dom";
 
 
 // return a new id for each invocation.

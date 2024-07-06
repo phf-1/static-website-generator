@@ -71,15 +71,13 @@ ${MANIFEST_FILE}: ${MANIFEST}
 CSS_DIR := css
 CSS_FILES := $(call list_files, ${CSS_DIR}, '*')
 ## Objective
-CSS_OBJ := $(CSS_FILES:%=${BUILD_DIR}/%)
+CSS_OBJ := ${BUILD_DIR}/${CSS_DIR}/main.css
 ## Rule
 .PHONY: css
 css: ${CSS_OBJ} ## Install the css directory under ${BUILD_DIR}.
-${BUILD_DIR}/${CSS_DIR}/%: ${CSS_DIR}/%
-	OUT="$@"
-	OUT_DIR="$${OUT%/*}"
-	mkdir -p "$${OUT_DIR}"
-	cp $< $@
+${CSS_OBJ}: ${CSS_FILES}
+	mkdir -p ${BUILD_DIR}/${CSS_DIR}
+	npx esbuild --bundle css/main.css --loader:.ttf=file --outfile=$@ --target=chrome58,edge16,firefox57,safari11
 
 
 # favicon
@@ -118,14 +116,15 @@ ${BUILD_DIR}/${FONT_DIR}/%: ${FONT_DIR}/%
 ## Context
 JS_DIR := js
 JS_MAIN_FILES := $(shell echo js/module/{id.js,dom.js,predicate.js,action.js,toc.js} js/main.js)
+JS_BUILD_DIR := ${BUILD_DIR}/${JS_DIR}
 ## Objective
-JS_OBJ := ${BUILD_DIR}/${JS_DIR}/main.min.js
+JS_OBJ := ${JS_BUILD_DIR}/main/main.min.js
 ## Rule
 .PHONY: js
 js: ${JS_OBJ} ## Intall the minified javascript under ${BUILD_DIR}.
 ${JS_OBJ}: ${JS_MAIN_FILES}
-	rsync -a ${JS_DIR} ${BUILD_DIR}/
-	npx uglifyjs --compress --source-map "url='main.min.js.map'" --output $@ -- $^
+	npx esbuild ${JS_DIR}/main.js --bundle --minify --sourcemap  --outfile=${JS_BUILD_DIR}/main.min.js
+
 
 
 # page ${UUID}

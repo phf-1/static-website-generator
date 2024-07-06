@@ -4,12 +4,13 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-import { main as main_id } from "/js/module/id.js";
-import { content as content_id } from "/js/module/id.js";
-import { toggle_toc_btn as toggle_toc_btn_id } from "/js/module/id.js";
-import { is_h1 } from "/js/module/dom.js";
-import { element_toc } from "/js/module/toc.js";
-import { toggle_toc } from "/js/module/action.js";
+import hljs from "highlight.js";
+import { main as main_id } from "./module/id";
+import { content as content_id } from "./module/id";
+import { toggle_toc_btn as toggle_toc_btn_id } from "./module/id";
+import { is_h1 } from "./module/dom";
+import { element_toc } from "./module/toc";
+import { toggle_toc } from "./module/action";
 
 
 // Position the toc in the page.

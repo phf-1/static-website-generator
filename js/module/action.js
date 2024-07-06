@@ -4,7 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-import { toc as toc_id } from "/js/module/id.js"
+import { toc as toc_id } from "./id"
 
 const toggle_toc = (function (id) {
   const func = function () {

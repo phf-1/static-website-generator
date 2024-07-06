@@ -4,8 +4,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-@import url(/css/highlight/atom-one-dark.min.css);
-@import url(/css/font.css);
+@import url(./highlight/atom-one-dark.min.css);
+@import url(./font.css);
 
 :root {
 	/* https://m2.material.io/design/color/the-color-system.html#tools-for-picking-colors */

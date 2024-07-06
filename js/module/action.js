@@ -4,14 +4,18 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+import { toc as toc_id } from "/js/module/id.js"
+
 const toggle_toc = (function (id) {
   const func = function () {
-    const toc_el = document.getElementById(id);
-    if (toc_el.checkVisibility()) {
-      toc_el.style.display = "none";
-    } else {
-      toc_el.style.display = "unset";
-    }
+	const toc_el = document.getElementById(id);
+	if (toc_el.checkVisibility()) {
+	  toc_el.style.display = "none";
+	} else {
+	  toc_el.style.display = "unset";
+	}
   };
   return func;
 })(toc_id);
+
+export { toggle_toc };

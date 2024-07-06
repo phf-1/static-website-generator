@@ -4,6 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-const main_id = "main";
-const content_id = "content";
-const toc_id = "table-of-content";
+export const main = "main";
+export const content = "content";
+export const toc = "table-of-content";
+export const toggle_toc_btn = "toggle_toc_btn";

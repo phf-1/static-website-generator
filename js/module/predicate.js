@@ -4,4 +4,4 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-const Heading = ["H1", "H2", "H3", "H4", "H5", "H6"];
+export const for_all_true = (x) => true;

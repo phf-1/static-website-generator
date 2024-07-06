@@ -4,6 +4,14 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+import { main as main_id } from "/js/module/id.js";
+import { content as content_id } from "/js/module/id.js";
+import { toggle_toc_btn as toggle_toc_btn_id } from "/js/module/id.js";
+import { is_h1 } from "/js/module/dom.js";
+import { element_toc } from "/js/module/toc.js";
+import { toggle_toc } from "/js/module/action.js";
+
+
 // Position the toc in the page.
 const position_toc = function (main, content, toc) {
 	const content_rect = content.getBoundingClientRect();
@@ -22,8 +30,9 @@ const on_dom_content_loaded = (function (main_id, content_id) {
 		const main = document.getElementById(main_id);
 		const content = document.getElementById(content_id);
 		const toc = element_toc(content);
-		main.appendChild(toc);	  
-		// position_toc(main, content, toc);
+		main.appendChild(toc);
+		const toggle_toc_btn = document.getElementById(toggle_toc_btn_id);
+		toggle_toc_btn.onclick = toggle_toc
 		hljs.highlightAll();
 	};
 })(main_id, content_id);

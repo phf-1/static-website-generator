@@ -3,7 +3,7 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 SHELL := bash
-.SHELLFLAGS := -ceuo pipefail
+.SHELLFLAGS := -cxeuo pipefail
 .ONESHELL:
 .SILENT:
 .SECONDEXPANSION:
@@ -117,18 +117,14 @@ ${BUILD_DIR}/${FONT_DIR}/%: ${FONT_DIR}/%
 # js
 ## Context
 JS_DIR := js
-JS_MAIN_DIR := ${JS_DIR}/main
-JS_MAIN_FILES := $(shell echo js/main/{dom.js,ids.js,predicates.js,actions.js,toc.js,main.js})
-JS_HIGHLIGHT_DIR := ${JS_DIR}/highlight
-JS_BUILD_DIR := ${BUILD_DIR}/${JS_DIR}
+JS_MAIN_FILES := $(shell echo js/module/{id.js,dom.js,predicate.js,action.js,toc.js} js/main.js)
 ## Objective
-JS_OBJ := ${BUILD_DIR}/main.min.js
+JS_OBJ := ${BUILD_DIR}/${JS_DIR}/main.min.js
 ## Rule
 .PHONY: js
 js: ${JS_OBJ} ## Intall the minified javascript under ${BUILD_DIR}.
 ${JS_OBJ}: ${JS_MAIN_FILES}
-	rsync -a ${JS_HIGHLIGHT_DIR} ${JS_BUILD_DIR}
-	rsync -a ${JS_MAIN_DIR} ${JS_BUILD_DIR}
+	rsync -a ${JS_DIR} ${BUILD_DIR}/
 	npx uglifyjs --compress --source-map "url='main.min.js.map'" --output $@ -- $^
 
 

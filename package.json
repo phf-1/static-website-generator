@@ -1,8 +1,9 @@
 {
   "devDependencies": {
-	"esbuild": "0.23.0"
+    "esbuild": "0.23.0",
+    "highlightjs-lean": "^1.2.0"
   },
   "dependencies": {
-	"highlight.js": "^11.9.0"
+    "highlight.js": "^11.9.0"
   }
 }

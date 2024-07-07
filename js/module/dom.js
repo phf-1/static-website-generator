@@ -10,10 +10,4 @@ const is_h1 = (el) => el.tagName === Heading[0];
 
 const is_heading = (el) => Heading.includes(el.tagName);
 
-const children_depth_first = (function () {
-	const concat = (arr1, arr2) => arr1.concat(arr2);
-	const phi = (el) => concat([el], children_depth_first(el));
-	return (el) => Array.from(el.children).map(phi).reduce(concat, []);
-})();
-
-export { is_heading, is_h1, children_depth_first };
+export { is_heading, is_h1 };

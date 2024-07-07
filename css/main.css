@@ -17,6 +17,7 @@
 	--h3-size: calc(var(--h4-size) * var(--font-h-factor));
 	--h2-size: calc(var(--h3-size) * var(--font-h-factor));
 	--h1-size: calc(var(--h2-size) * var(--font-h-factor));
+	--title-font-size: 2rem;
 	--main-bg: #fffff8;
 	--main-text: #111111;
 	--heading: #b71c1c;
@@ -29,6 +30,8 @@
 	--abstract-border: #4a148c;
 	--definition-bg: #eceff1;
 	--definition-border: #263238;
+	--example-bg: #FBE9E7;
+	--example-border: #BF360C;
 	--quote-bg: #fff3e0;
 	--quote-border: #e65100;
 	--aside-border: #1b5e20;
@@ -119,7 +122,9 @@ main {
   display: none;
 }
 
-.title {
+/* Title */
+section > h1 {
+  font-size: var(--title-font-size);
   display: block;
   text-align: center;
   border-bottom: none;
@@ -132,40 +137,31 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: "Sans";
-  display: table;
-  line-height: 1.2;
-  padding-top: 1rem;
-  font-weight: normal;
-  padding-bottom: 0.1em;
+	display: table;
 
-  color: var(--heading);
-  border-bottom: 1px solid currentColor;
+	padding-top: 1rem;
+	font-size: 1.2rem;
+	line-height: 1.2;
+	padding-bottom: 0.1em;
+	border-bottom: 1px solid currentColor;
+	margin-bottom: 1.2rem;
+
+	font-family: "Sans";
+	font-weight: normal;
+	color: var(--heading);
+
 }
 
-h1 {
-  font-size: var(--h1-size);
-  margin-bottom: var(--h1-size);
+#content section:has(h1, h2, h3, h4, h5, h6) {
+	padding-left: 1rem;
 }
-h2 {
-  font-size: var(--h2-size);
-  margin-bottom: var(--h2-size);
+
+#content > section:has(h1) > section:has(h2) {
+	padding-left: 0;
 }
-h3 {
-  font-size: var(--h3-size);
-  margin-bottom: var(--h3-size);
-}
-h4 {
-  font-size: var(--h4-size);
-  margin-bottom: var(--h4-size);
-}
-h5 {
-  font-size: var(--h5-size);
-  margin-bottom: var(--h5-size);
-}
-h6 {
-  font-size: var(--h6-size);
-  margin-bottom: var(--h6-size);
+
+#content > section:has(h1) {
+	padding-left: 0;
 }
 
 .small-caps {
@@ -203,41 +199,42 @@ hr + * {
   margin-left: 1rem;
   max-width: 40ch;
 
-  h1,
+  h1 {
+	  display: none;
+  }
+
   h2,
   h3,
   h4,
   h5,
   h6 {
 	text-align: left;
-	font-size: 1rem;
+	font-size: 0.9rem;
 	font-weight: normal;
+	line-height: 1;
 	padding: 0;
 	margin: 0;
-	margin-bottom: 0.75em;
+	margin-bottom: 0.5em;
 
 	color: var(--main-text);
 	display: block;
 	border: none;
   }
 
-  h1 {
+  h2 {
 	margin-left: 0em;
   }
-  h2 {
+  h3 {
 	margin-left: 1em;
   }
-  h3 {
+  h4 {
 	margin-left: 2em;
   }
-  h4 {
+  h5 {
 	margin-left: 3em;
   }
-  h5 {
-	margin-left: 4em;
-  }
   h6 {
-	margin-left: 5rem;
+	margin-left: 4rem;
   }
 }
 
@@ -313,6 +310,20 @@ p {
 
   &.algorithm::before {
 	content: "Algorithm";
+	position: absolute;
+	top: calc(-1 * (1em + 1px + 0.75em));
+	right: 0;
+	font-size: 0.75em;
+	color: var(--annotation);
+  }
+
+  &.example {
+	background-color: var(--example-bg);
+	border: 1px solid var(--example-border);
+  }
+
+  &.example::before {
+	content: "Example";
 	position: absolute;
 	top: calc(-1 * (1em + 1px + 0.75em));
 	right: 0;
@@ -429,16 +440,27 @@ figure {
 }
 
 figure {
-	img {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+
+	img, iframe {
 		max-width: 100%;
 	}
 
+	iframe {
+		aspect-ratio: 16 / 9;
+		height: 100%;
+		width: 100%;
+	}
+
 	figcaption {
+		margin-top: 1rem;
 		text-align: center;
 	}
 }
 
-img {
+img, iframe {
   border: 1px solid;
   padding: 2px;
   border-radius: var(--radius);
@@ -523,6 +545,32 @@ aside p {
   &.failed::before {
 	content: "failed";
   }
+}
+
+.theorem {
+	padding-left: 1rem;
+	background-color: blue;
+
+	.actions {
+		display: flex;
+		justify-content: end;
+	}
+
+	.button {
+	background-color: aqua;
+	position: relative;
+	padding: 0;
+	margin: 0;
+	}
+
+	.assertion {
+		background-color: red;
+	}
+
+	.proof {
+		background-color: green;
+		display: none;
+	}
 }
 
 @media (max-width: 800px) {

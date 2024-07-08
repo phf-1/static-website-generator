@@ -48,6 +48,8 @@
 	--line-height: 1.5;
 	--annotation: #777;
 	--button-over: #fffff0;
+	--p-margin-bottom: calc(var(--line-height) * 1em);
+	--sep-margin: 4rem;
 }
 
 * {
@@ -124,7 +126,7 @@ main {
 
 /* Title */
 section > h1 {
-  font-size: var(--title-font-size);
+  font-size: var(--title-font-size); 
   display: block;
   text-align: center;
   border-bottom: none;
@@ -244,13 +246,13 @@ hr + * {
 }
 
 p {
-  margin-bottom: calc(var(--line-height) * 1em);
+  margin-bottom: var(--p-margin-bottom);
 }
 
 .cartridge {
   position: relative;
   max-width: 90%;
-  margin: 4rem auto;
+  margin: var(--sep-margin) auto;
   padding: 1rem;
   border-radius: var(--radius);
 
@@ -355,7 +357,7 @@ code {
 }
 
 pre {
-	margin-bottom: 1rem;
+	margin-bottom: var(--p-margin-bottom);
 	overflow-x: auto;
 }
 
@@ -421,7 +423,7 @@ li {
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--p-margin-bottom);
 }
 
 th,
@@ -435,8 +437,25 @@ thead th {
   text-align: left;
 }
 
+.columns {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
+    column-gap: var(--p-margin-bottom);
+
+	.column {
+		display: flex;
+		flex-direction: column;
+		margin-bottom: var(--p-margin-bottom);
+		border: 1px solid var(--annotation);
+		border-radius: 2px;
+		padding: 1em;
+	}
+}
+
 figure {
-  margin: 4rem auto;
+  margin: var(--sep-margin) auto;
 }
 
 figure {
@@ -477,7 +496,7 @@ hr {
   border: 0;
   height: 1px;
   background: var(--hr);
-  margin: 4rem 0; /* max of content elements margins. */
+  margin: var(--sep-margin) 0; /* max of content elements margins. */
 }
 
 aside {

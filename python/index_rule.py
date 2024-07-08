@@ -26,5 +26,6 @@ if __name__ == "__main__":
     index_path = sys.argv[1]
     articles_dir = sys.argv[2]
     uuids = sys.argv[3].split(" ")
+    # TODO: uuids is not necessary. articles_dir ⊢ uuids.
     main(index_path, articles_dir, uuids)
     sys.exit(0)

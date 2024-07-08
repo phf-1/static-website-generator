@@ -3,7 +3,7 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 SHELL := bash
-.SHELLFLAGS := -cxeuo pipefail
+.SHELLFLAGS := -ceuo pipefail
 .ONESHELL:
 .SILENT:
 .SECONDEXPANSION:
@@ -169,6 +169,10 @@ ${PAGE_FILE}: ${PAGE_CTX}
 ## Context
 LANDING_UUID=00000000-0000-0000-0000-000000000000
 ARTICLES_DIRS := $(shell echo ${ARTICLES_DIR}/*)
+INDEX_UUID=8e11bcd7-a050-40d6-ab93-71bee0640990
+INDEX_DIR := ${PAGES}/${INDEX_UUID}
+BUILD_INDEX=python/index_rule.py
+INDEX_FILE := ${INDEX_DIR}/index.html
 ## Objective
 UUIDS := $(ARTICLES_DIRS:${ARTICLES_DIR}/%=%)
 ## Rule
@@ -181,24 +185,11 @@ all: ${CNAME_FILE} ${MANIFEST_FILE} ${CSS_OBJ} ${FAVICON_OBJ} ${FONT_OBJ} ${JS_O
 	wait
 	ln -sndf page/${LANDING_UUID}/data ${BUILD_DIR}/data
 	ln -sndf page/${LANDING_UUID}/index.html ${BUILD_DIR}/index.html
-	${MAKE} index
+	python3 ${BUILD_INDEX} ${INDEX_FILE} ${ARTICLES_DIR} "${UUIDS}"
 	if [[ "${ONCHANGE}" == "true" ]]; then
 		inotifywait -q -e create,modify,move,delete -r "$$PWD" ${ARTICLES_DIR}
 		${MAKE} all ONCHANGE=true
 	fi
-
-
-# index
-## Context
-INDEX_UUID=8e11bcd7-a050-40d6-ab93-71bee0640990
-INDEX_DIR := ${PAGES}/${INDEX_UUID}
-INDEX_RULE=python/index_rule.py
-## Objective
-INDEX_FILE := ${INDEX_DIR}/index.html
-## Rule
-.PHONY: index
-index:  ## Build the index.
-	python3 ${INDEX_RULE} ${INDEX_FILE} ${ARTICLES_DIR} "${UUIDS}"
 
 
 # server

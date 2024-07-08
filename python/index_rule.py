@@ -6,15 +6,15 @@ def main(index_path, articles_dir, uuids):
     def read_desc(uuid):
         path = Path(articles_dir) / uuid / "description"
         with open(path) as f:
-            return f.read()
+            return f.read().strip()
 
     uuid_desc = [(uuid, read_desc(uuid)) for uuid in uuids]
     uuid_desc.sort(key=lambda pair: pair[1])
-    
+
     def build_li(uuid, desc):
         return f'<li><a href="/page/{uuid}/">{desc}</a></li>'
 
-    items = "\n".join([build_li(uuid,desc.strip()) for (uuid,desc) in uuid_desc])
+    items = "\n".join([build_li(uuid,desc) for (uuid,desc) in uuid_desc])
     
     with open(index_path, "r+") as index:
         index_str = index.read()

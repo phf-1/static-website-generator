@@ -140,44 +140,40 @@ ARTICLE_FILE := ${ARTICLE_DIR}/article.html
 PAGE_CTX := ${TEMPLATE} ${ARTICLE_FILES}
 PAGES := ${BUILD_DIR}/page
 PAGE_DIR := ${PAGES}/${UUID}
+PAGE_RULE := python/page_rule.py
 ## Objective
 PAGE_FILE := ${PAGE_DIR}/index.html
 ## Rule
 .PHONY: page
 page: ${PAGE_FILE}  ## Install the page with UUID ${UUID} under ${BUILD_DIR}.
 ${PAGE_FILE}: ${PAGE_CTX}
-	mkdir -p ${PAGE_DIR}
-	cp -r ${DATA_DIR} ${PAGE_DIR}
-	sed "s|__LANG__|$$(cat ${LANG_FILE})|g" ${TEMPLATE} > $@
-	sed -i "s|__DESCRIPTION__|$$(cat ${DESCRIPTION_FILE})|g" $@
-	SCRIPT=$$(cat <<'EOF'
-	f = open("${ARTICLE_FILE}")
-	article = f.read()
-	f.close()
-	f = open("$@", "r+")
-	page = f.read()
-	f.seek(0)
-	page = page.replace("__ARTICLE__",article)
-	f.write(page)
-	f.close()
-	EOF
-	)
-	python3 -c "$$SCRIPT"
+	python3 ${PAGE_RULE} ${ARTICLE_DIR} ${TEMPLATE} ${PAGE_DIR}
+
+
+# index
+## Context
+ARTICLES_FILES := $(call list_files,${ARTICLES_DIR}, '*')
+INDEX_UUID=8e11bcd7-a050-40d6-ab93-71bee0640990
+INDEX_DIR := ${PAGES}/${INDEX_UUID}
+## Objective
+INDEX_FILE := ${INDEX_DIR}/index.html
+## Rule
+.PHONY: index
+index: ${INDEX_FILE}
+${INDEX_FILE}: ${ARTICLES_FILES}
+	python3 ${PAGE_RULE} ${ARTICLES_DIR}/${INDEX_UUID} ${TEMPLATE} ${PAGES}/${INDEX_UUID}
 
 
 # pages
 ## Context
 LANDING_UUID=00000000-0000-0000-0000-000000000000
 ARTICLES_DIRS := $(shell echo ${ARTICLES_DIR}/*)
-INDEX_UUID=8e11bcd7-a050-40d6-ab93-71bee0640990
-INDEX_DIR := ${PAGES}/${INDEX_UUID}
 BUILD_INDEX=python/index_rule.py
-INDEX_FILE := ${INDEX_DIR}/index.html
 ## Objective
 UUIDS := $(ARTICLES_DIRS:${ARTICLES_DIR}/%=%)
 ## Rule
 .PHONY: all
-all: ${CNAME_FILE} ${MANIFEST_FILE} ${CSS_OBJ} ${FAVICON_OBJ} ${FONT_OBJ} ${JS_OBJ} ## Build the website under ${BUILD_DIR}. If given ONCHANGE=true, then: rebuild on change.
+all: ${CNAME_FILE} ${MANIFEST_FILE} ${CSS_OBJ} ${FAVICON_OBJ} ${FONT_OBJ} ${JS_OBJ} ${INDEX_FILE} ## Build the website under ${BUILD_DIR}. If given ONCHANGE=true, then: rebuild on change
 	ARR=(${UUIDS})
 	for uuid in "$${ARR[@]}"; do
 		${MAKE} page UUID=$$uuid &

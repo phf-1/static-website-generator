@@ -637,6 +637,10 @@ aside p {
 }
 
 @media (max-width: 1000px) {
+	body {
+		margin-top: 1rem;
+	}
+
 	#bg-image {
 		display: none;
 	}

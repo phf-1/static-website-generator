@@ -365,6 +365,20 @@ p {
 		color: var(--annotation);
 	}
 
+	&.math {
+		background-color: var(--algorithm-bg);
+		border: 1px solid var(--algorithm-border);
+	}
+
+	&.math::before {
+		content: "Math";
+		position: absolute;
+		top: calc(-1 * (1em + 1px + 0.75em));
+		right: 0;
+		font-size: 0.75em;
+		color: var(--annotation);
+	}
+
 	&.example {
 		background-color: var(--example-bg);
 		border: 1px solid var(--example-border);

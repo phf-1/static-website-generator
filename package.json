@@ -4,6 +4,7 @@
     "highlightjs-lean": "^1.2.0"
   },
   "dependencies": {
-    "highlight.js": "^11.9.0"
+    "highlight.js": "^11.9.0",
+    "katex": "^0.16.11"
   }
 }

@@ -7,6 +7,7 @@
 
 import { Toc } from "./module/toc";
 import { Theorem } from "./module/theorem";
+import { Math } from "./module/math";
 import { Highlight } from "./module/highlight";
 
 
@@ -18,6 +19,7 @@ const toggle_toc_btn_id = "toggle_toc_btn";
 const theorem = new Theorem();
 const highlight = new Highlight();
 const toc = new Toc();
+const math = new Math();
 
 
 const on_dom_content_loaded = function (event) {
@@ -29,6 +31,7 @@ const on_dom_content_loaded = function (event) {
 	);
 	highlight.start(content);
 	theorem.start(content);
+	math.start(content);
 };
 
 

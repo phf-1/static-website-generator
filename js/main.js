@@ -10,7 +10,7 @@ import { Theorem } from "./module/theorem";
 import { Highlight } from "./module/highlight";
 
 
-const main_id = "main";
+const container_id = "container";
 const content_id = "content";
 const toggle_toc_btn_id = "toggle_toc_btn";
 
@@ -21,10 +21,13 @@ const toc = new Toc();
 
 
 const on_dom_content_loaded = function (event) {
-	const main = document.getElementById(main_id);
 	const content = document.getElementById(content_id);
 	const toggle_toc_btn = document.getElementById(toggle_toc_btn_id);		
-	toc.start(content, main, toggle_toc_btn)
+	toc.start(
+		content,
+		document.getElementById(container_id),
+		toggle_toc_btn
+	);
 	highlight.start(content);
 	theorem.start(content);		
 };

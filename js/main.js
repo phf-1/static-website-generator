@@ -22,14 +22,13 @@ const toc = new Toc();
 
 const on_dom_content_loaded = function (event) {
 	const content = document.getElementById(content_id);
-	const toggle_toc_btn = document.getElementById(toggle_toc_btn_id);		
 	toc.start(
 		content,
 		document.getElementById(container_id),
-		toggle_toc_btn
+		document.getElementById(toggle_toc_btn_id)
 	);
 	highlight.start(content);
-	theorem.start(content);		
+	theorem.start(content);
 };
 
 

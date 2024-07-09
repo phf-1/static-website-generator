@@ -75,12 +75,12 @@ body {
 }
 
 main {
-    position: relative;
+	position: relative;
 	max-width: 1500px;
 	margin: auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
 }
 
 /* display: flex; */
@@ -89,33 +89,33 @@ main {
 /* margin: 0 auto; */
 /* padding: 20px; */
 /* margin-bottom: 66vh; */
-/* padding-top: 300px;  	 */
+/* padding-top: 300px;		 */
 
 .bg-image {
-    /* position: absolute; */
-    display: block;
-    overflow-y: clip;
-    width: 100%;
+	/* position: absolute; */
+	display: block;
+	overflow-y: clip;
+	width: 100%;
 	max-width: 1600px;
-    aspect-ratio: 16 / 9;
-    top: 0;
-    left: 0;
-    margin: 0;
-    padding: 0;
-    z-index: -1;
-    text-align: center;
+	aspect-ratio: 16 / 9;
+	top: 0;
+	left: 0;
+	margin: 0;
+	padding: 0;
+	z-index: -1;
+	text-align: center;
 
 	img {
 		border: none;
 		margin: 0;
 		padding: 0;
-		width: 100%;		
+		width: 100%;
 	}
 }
 
 #container {
-    position: absolute;
-    top: 18vh;	
+	position: absolute;
+	top: 18vh;
 	display: flex;
 	justify-content: center;
 	background-color: var(--main-bg);
@@ -140,12 +140,12 @@ main {
 	}
 
 	#table-of-content {
-		/* display: none; */
+		display: none;
 		padding: 1rem 0.5rem 1rem 0.5rem;
 		max-width: 40ch;
 		border-top: 1px solid var(--annotation);
 		border-right: 1px solid var(--annotation);
-		border-bottom: 1px solid var(--annotation);				
+		border-bottom: 1px solid var(--annotation);
 
 		h1 {
 			display: none;
@@ -189,7 +189,7 @@ main {
 	#table-of-content::before {
 		content: "Contents";
 		color: var(--heading);
-	}		
+	}
 }
 
 .topbar {
@@ -235,7 +235,7 @@ main {
 
 /* Title */
 section > h1 {
-	font-size: var(--title-font-size); 
+	font-size: var(--title-font-size);
 	display: block;
 	text-align: center;
 	border-bottom: none;
@@ -481,11 +481,11 @@ thead th {
 }
 
 .columns {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    width: 100%;
-    column-gap: var(--p-margin-bottom);
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	width: 100%;
+	column-gap: var(--p-margin-bottom);
 
 	.column {
 		display: flex;
@@ -637,18 +637,18 @@ aside p {
 
 @media (max-width: 1000px) {
 	.bg-image {
-		display: none;		
+		display: none;
 	}
 
 	#container {
 		position: static;
 		width: 100%
-	}	
-	
+	}
+
 	#container #content {
 		max-width: 70ch;
 		flex: 1;
-	}	
+	}
 }
 
 @media (max-width: 800px) {
@@ -677,4 +677,3 @@ aside p {
 		display: none;
 	}
 }
-

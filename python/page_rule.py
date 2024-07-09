@@ -26,6 +26,12 @@ def main(article_dir, template_file, page_dir):
     with open(article_dir / "description") as f:
         index_value = index_value.replace("__DESCRIPTION__", f.read().strip())
 
+    # index_value/__CSS__ = article_dir/article.css
+    article_css = article_dir / "article.css"
+    if article_css.exists():
+        with open(article_css) as f:
+            index_value = index_value.replace("__CSS__", f.read().strip())
+
     # index_value/__ARTICLE__ = article_dir/article.html
     with open(article_dir / "article.html") as f:
         index_value = index_value.replace("__ARTICLE__", f.read())

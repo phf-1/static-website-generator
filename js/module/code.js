@@ -10,7 +10,7 @@ import scheme from 'highlight.js/lib/languages/scheme';
 import lean from 'highlightjs-lean';
 
 
-const Highlight = class {
+const Code = class {
 	constructor() {
 		hljs.registerLanguage('scheme', scheme);
 		hljs.registerLanguage('lean', lean);
@@ -27,4 +27,4 @@ const Highlight = class {
 }
 
 
-export { Highlight };
+export { Code };

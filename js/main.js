@@ -40,9 +40,6 @@ const Root = class {
 			show_body()
 		} else {
 			img.addEventListener('load', show_body)
-			img.addEventListener('error', function() {
-				alert('error')
-			})
 		}
 	}
 };

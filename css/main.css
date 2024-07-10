@@ -71,6 +71,7 @@ html {
 }
 
 body {
+	visibility: hidden;
 	margin: 0 1rem;
 }
 
@@ -82,14 +83,6 @@ main {
 	flex-direction: column;
 	align-items: center;
 }
-
-/* display: flex; */
-/* justify-content: center; */
-/* max-width: 125ch; */
-/* margin: 0 auto; */
-/* padding: 20px; */
-/* margin-bottom: 66vh; */
-/* padding-top: 300px;		 */
 
 #bg-image {
 	/* position: absolute; */
@@ -116,8 +109,9 @@ main {
 }
 
 #container {
+	visibility: hidden;
 	position: absolute;
-	top: 35vh;
+	top: 0;
 	display: flex;
 	justify-content: center;
 
@@ -688,7 +682,7 @@ aside p {
 	}
 
 	main {
-		padding: 0.5rem;
+		padding: 0.25rem;
 	}
 
 	.topbar {

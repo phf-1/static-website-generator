@@ -28,14 +28,22 @@
 	--note-border: #33691e;
 	--abstract-bg: #f3e5f5;
 	--abstract-border: #4a148c;
-	--definition-bg: #eceff1;
-	--definition-border: #263238;
-	--example-bg: #FBE9E7;
-	--example-border: #BF360C;
+	--example-bg: #eceff1;
+	--example-border: #263238;
+	--definition-bg: #FBE9E7;
+	--definition-border: #BF360C;
 	--quote-bg: #fff3e0;
 	--quote-border: #e65100;
 	--aside-border: #1b5e20;
 	--aside-bg: #e8f5e9;
+	--objective-bg: var(--definition-bg);
+	--objective-border: var(--definition-border);
+	--result-bg: var(--example-bg);
+	--result-border: var(--example-border);
+	--method-bg: var(--algorithm-bg);
+	--method-border: var(--algorithm-border);
+	--context-bg: #f1f8e9;
+	--context-border: #33691e;
 	--link: #007acc;
 	--code: #ddd;
 	--hr: #ddd;
@@ -319,11 +327,42 @@ p {
 
 	&.abstract::before {
 		content: "Abstract";
-		position: absolute;
-		top: calc(-1 * (1em + 1px + 0.75em));
-		right: 0;
-		font-size: 0.75em;
-		color: var(--annotation);
+	}
+
+	&.objective {
+		background-color: var(--objective-bg);
+		border-color: var(--objective-border);
+	}
+
+	&.objective::before {
+		content: "Objective";
+	}
+
+	&.result {
+		background-color: var(--result-bg);
+		border-color: var(--result-border);
+	}
+
+	&.result::before {
+		content: "Result";
+	}
+
+	&.method {
+		background-color: var(--method-bg);
+		border-color: var(--method-border);
+	}
+
+	&.method::before {
+		content: "Method";
+	}
+
+	&.context {
+		background-color: var(--context-bg);
+		border-color: var(--context-border);
+	}
+
+	&.context::before {
+		content: "Context";
 	}
 
 	&.definition {
@@ -333,11 +372,6 @@ p {
 
 	&.definition::before {
 		content: "Definition";
-		position: absolute;
-		top: calc(-1 * (1em + 1px + 0.75em));
-		right: 0;
-		font-size: 0.75em;
-		color: var(--annotation);
 	}
 
 	&.note {
@@ -347,11 +381,6 @@ p {
 
 	&.note::before {
 		content: "Note";
-		position: absolute;
-		top: calc(-1 * (1em + 1px + 0.75em));
-		right: 0;
-		font-size: 0.75em;
-		color: var(--annotation);
 	}
 
 	&.algorithm {
@@ -361,11 +390,6 @@ p {
 
 	&.algorithm::before {
 		content: "Algorithm";
-		position: absolute;
-		top: calc(-1 * (1em + 1px + 0.75em));
-		right: 0;
-		font-size: 0.75em;
-		color: var(--annotation);
 	}
 
 	&.math {
@@ -375,11 +399,6 @@ p {
 
 	&.math::before {
 		content: "Math";
-		position: absolute;
-		top: calc(-1 * (1em + 1px + 0.75em));
-		right: 0;
-		font-size: 0.75em;
-		color: var(--annotation);
 	}
 
 	&.example {
@@ -389,13 +408,18 @@ p {
 
 	&.example::before {
 		content: "Example";
-		position: absolute;
-		top: calc(-1 * (1em + 1px + 0.75em));
-		right: 0;
-		font-size: 0.75em;
-		color: var(--annotation);
 	}
 }
+
+.cartridge::before {
+	content: "Cartridge";
+	position: absolute;
+	top: calc(-1 * (1em + 1px + 0.75em));
+	right: 0;
+	font-size: 0.75em;
+	color: var(--annotation);
+}
+
 
 a {
 	color: var(--link);
@@ -446,12 +470,7 @@ blockquote {
 	border-color: var(--quote-border) !important;
 
 	&::before {
-		content: "Quote";
-		position: absolute;
-		top: calc(-1 * (1em + 1px + 0.75em));
-		right: 0;
-		font-size: 0.75em;
-		color: var(--annotation);
+		content: "Quote" !important;
 	}
 }
 

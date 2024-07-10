@@ -9,6 +9,15 @@ import { Toc } from "./module/toc";
 import { Theorem } from "./module/theorem";
 import { Math } from "./module/math";
 import { Highlight } from "./module/highlight";
+import { Abstract } from "./module/abstract";
+customElements.define('x-abstract', Abstract);
+import { Note } from "./module/note";
+customElements.define('x-note', Note);
+import { H3 } from "./module/h3";
+customElements.define('x-h3', H3);
+import { Cartridge } from "./module/cartridge";
+customElements.define('x-cartridge', Cartridge);
+
 const Container = class {
 	constructor(bg_pic_id) {
 		this.bg_pic_id = bg_pic_id

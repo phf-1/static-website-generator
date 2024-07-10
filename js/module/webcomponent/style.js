@@ -48,6 +48,8 @@ export const sharedStyles = css`
     --result-border: var(--example-border);
     --method-bg: var(--algorithm-bg);
     --method-border: var(--algorithm-border);
+    --math-bg: var(--algorithm-bg);
+    --math-border: var(--algorithm-border);
     --context-bg: #f1f8e9;
     --context-border: #33691e;
     --link: #007acc;
@@ -77,6 +79,10 @@ export const sharedStyles = css`
     margin-bottom: var(--p-margin-bottom);
   }
 
+a {
+    color: var(--link);
+    text-decoration: none;
+}
 
 h1,
 h2,

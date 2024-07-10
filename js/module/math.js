@@ -9,9 +9,6 @@ import katex from 'katex';
 
 
 const Math = class {
-	constructor() {
-
-	}
 
 	/*
 	 * For all math element under content, render it to MathML.
@@ -23,7 +20,7 @@ const Math = class {
 		const render_element = function (el) {
 			katex.render(el.textContent, el, { output: "mathml" });
 		}
-		math_elements.forEach(render_element)		
+		math_elements.forEach(render_element)
 	}
 }
 

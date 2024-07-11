@@ -6,15 +6,18 @@ export class Context extends Cartridge {
   static styles = [
     Cartridge.styles,
     css`
-	.context {
-		background-color: var(--context-bg);
-		border-color: var(--context-border);
-	}
+.context {
+    color: var(--x-context-color, black);
+    margin: var(--x-context-margin, 2rem) auto;
+    background-color: var(--x-context-bg-color, white);
+    border-color: var(--x-context-border-color, black);
+}
 
-	.context::before {
-		content: "Context";
-	}
-    `
+.context::before {
+    content: "Context";
+    color: var(--x-context-annotation-color, black);
+}
+`
   ];
 
   constructor() {

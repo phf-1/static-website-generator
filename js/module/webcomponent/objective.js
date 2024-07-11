@@ -6,15 +6,18 @@ export class Objective extends Cartridge {
   static styles = [
     Cartridge.styles,
     css`
-	.objective {
-		background-color: var(--objective-bg);
-		border-color: var(--objective-border);
-	}
+.objective {
+    color: var(--x-objective-color, black);
+    margin: var(--x-objective-margin, 2rem) auto;
+    background-color: var(--x-objective-bg-color, white);
+    border-color: var(--x-objective-border-color, black);
+}
 
-	.objective::before {
-		content: "Objective";
-	}
-    `
+.objective::before {
+    content: "Objective";
+    color: var(--x-objective-annotation-color, black);
+}
+`
   ];
 
   constructor() {

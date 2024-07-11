@@ -7,7 +7,7 @@ export class Done extends Keyword {
     Keyword.styles,
     css`
 .done {
-	background-color: var(--kw-done);
+	background-color: var(--x-done-bg-color, green);
 }
 
 .done::before {

@@ -12,23 +12,23 @@ export class Blockquote extends Cartridge {
     static styles = [
         Cartridge.styles,
         css`
-    .blockquote {
-        font-style: italic;
-        color: var(--main-text);
-        background-color: var(--quote-bg);
-        border-color: var(--quote-border);
-    }
+.blockquote {
+    color: var(--x-blockquote-color, black);
+    background-color: var(--x-blockquote-bg-color, white);
+    border-color: var(--x-blockquote-border-color, black);
+}
 
-    .blockquote::before {
-        content: "Quote";
-    }
+.blockquote::before {
+    content: "Quote";
+    color: var(--x-blockquote-annotation-color, black);
+}
 
-    footer {
-        text-align: right;
-        font-size: 0.875rem;
-        color: var(--main-text);
-    }
-    `
+footer {
+    text-align: right;
+    font-size: 0.875rem;
+    color: var(--x-blockquote-color, black);
+}
+`
     ];
 
     constructor() {

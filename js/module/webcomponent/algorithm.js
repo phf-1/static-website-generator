@@ -6,20 +6,19 @@ export class Algorithm extends Cartridge {
   static styles = [
     Cartridge.styles,
     css`
-	.algorithm {
-		background-color: var(--algorithm-bg);
-		border-color: var(--algorithm-border);
-	}
+.algorithm {
+    color: var(--x-algorithm-color, black);
+    margin: var(--x-algorithm-margin, 2rem) auto;
+    background-color: var(--x-algorithm-bg-color, white);
+    border-color: var(--x-algorithm-border-color, black);
+}
 
-	.algorithm::before {
-		content: "Algorithm";
-	}
-    `
+.algorithm::before {
+    content: "Algorithm";
+    color: var(--x-algorithm-annotation-color, black);
+}
+`
   ];
-
-  constructor() {
-    super();
-  }
 
   render() {
     return html`

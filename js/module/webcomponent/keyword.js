@@ -11,12 +11,12 @@ export class Keyword extends LitElement {
     font-family: "Mono";
     padding: 0 0.2em;
     margin-right: 0.5em;
-    color: var(--main-bg);
-    border-radius: var(--radius);
+    color: var(--x-keyword-color, white);
+    border-radius: 2px;
     font-weight: bold;
     text-transform: uppercase;
     font-size: 0.75em;
-    background-color: var(--main-text);
+    background-color: var(--x-keyword-bg-color, black);
 }
 
 .keyword::before {

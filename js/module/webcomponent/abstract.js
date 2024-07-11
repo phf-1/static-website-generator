@@ -8,14 +8,15 @@ export class Abstract extends Cartridge {
     css`
 	.abstract {
         font-size: 0.9em;
-		background-color: var(--abstract-bg);
-		border-color: var(--abstract-border);
+		background-color: var(--x-abstract-bg-color, white);
+		border-color: var(--x-abstract-border-color, black);
         max-width: 70%;
         margin: 15vh auto;
 	}
 
 	.abstract::before {
 		content: "Abstract";
+        color: var(--x-abstract-annotation-color, black);
 	}
     `
   ];

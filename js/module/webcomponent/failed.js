@@ -7,7 +7,7 @@ export class Failed extends Keyword {
     Keyword.styles,
     css`
 .failed {
-	background-color: var(--kw-failed);
+	background-color: var(--x-failed-bg-color, black);
 }
 
 .failed::before {

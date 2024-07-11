@@ -6,20 +6,19 @@ export class Definition extends Cartridge {
   static styles = [
     Cartridge.styles,
     css`
-	.definition {
-		background-color: var(--definition-bg);
-		border-color: var(--definition-border);
-	}
+.definition {
+    color: var(--x-definition-color, black);
+    margin: var(--x-definition-margin, 2rem) auto;
+    background-color: var(--x-definition-bg-color, white);
+    border-color: var(--x-definition-border-color, black);
+}
 
-	.definition::before {
-		content: "Definition";
-	}
-    `
+.definition::before {
+    content: "Definition";
+    color: var(--x-definition-annotation-color, black);
+}
+`
   ];
-
-  constructor() {
-    super();
-  }
 
   render() {
     return html`

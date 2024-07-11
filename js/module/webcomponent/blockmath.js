@@ -12,15 +12,18 @@ export class Blockmath extends Cartridge {
 	static styles = [
 		Cartridge.styles,
 		css`
-	.math {
-		background-color: var(--math-bg);
-		border-color: var(--math-border);
-	}
+.blockmath {
+    color: var(--x-blockmath-color, black);
+    margin: var(--x-blockmath-margin, 2rem) auto;
+    background-color: var(--x-blockmath-bg-color, white);
+    border-color: var(--x-blockmath-border-color, black);
+}
 
-	.math::before {
-		content: "Math";
-	}
-	`
+.blockmath::before {
+    content: "Math";
+    color: var(--x-blockmath-annotation-color, black);
+}
+`
 	];
 
 	constructor() {
@@ -31,7 +34,7 @@ export class Blockmath extends Cartridge {
 	render() {
 		const content = this._mathml === "" ?  html`<slot></slot>` : html`${this._mathml}`;
 		return html`
-<div class="${Cartridge.css.class} math">
+<div class="${Cartridge.css.class} blockmath">
   ${content}
 </div>
 `;

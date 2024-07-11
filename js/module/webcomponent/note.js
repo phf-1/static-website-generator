@@ -6,20 +6,19 @@ export class Note extends Cartridge {
   static styles = [
     Cartridge.styles,
     css`
-	.note {
-		background-color: var(--note-bg);
-		border-color: var(--note-border);
-	}
+.note {
+    color: var(--x-note-color, black);
+    margin: var(--x-note-margin, 2rem) auto;
+    background-color: var(--x-note-bg-color, white);
+    border-color: var(--x-note-border-color, black);
+}
 
-	.note::before {
-		content: "Note";
-	}
-    `
+.note::before {
+    content: "Note";
+    color: var(--x-note-annotation-color, black);
+}
+`
   ];
-
-  constructor() {
-    super();
-  }
 
   render() {
     return html`

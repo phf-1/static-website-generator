@@ -7,7 +7,7 @@ export class Waiting extends Keyword {
     Keyword.styles,
     css`
 .waiting {
-	background-color: var(--kw-waiting);
+	background-color: var(--x-waiting-bg-color, orange);
 }
 
 .waiting::before {

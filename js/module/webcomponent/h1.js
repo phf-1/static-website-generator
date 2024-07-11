@@ -14,12 +14,17 @@ export class H1 extends LitElement {
 	static styles = [
 		sharedStyles,
 		css`
-h1 {
-	font-size: var(--title-font-size);
+h1 {    
 	display: block;
-	text-align: center;
+	margin: var(--x-h1-margin, 10vh) auto;
 	border-bottom: none;
-	margin: 10vh auto;
+
+	text-align: center;
+
+	font-size: var(--x-h1-font-size, 2rem);
+	font-weight: var(--x-h1-font-weight, 400);
+    font-family: var(--x-h1-font-family, sans-serif);
+	color: var(--x-h1-color, black);
 }
 `];
 

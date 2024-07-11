@@ -7,7 +7,7 @@ export class Todo extends Keyword {
     Keyword.styles,
     css`
 .todo {
-	background-color: var(--kw-todo);
+	background-color: var(--x-todo-bg-color, red);
 }
 
 .todo::before {

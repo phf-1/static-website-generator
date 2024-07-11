@@ -10,13 +10,12 @@ export class Cartridge extends LitElement {
 .cartridge {
   position: relative;
   width: 100%;
-  margin: var(--sep-margin) auto;
+  margin: var(--x-cartridge-margin, 2rem) auto;
   padding: 1rem;
-  border-radius: var(--radius);
-  border-top: 1px solid var(--annotation);
-  border-bottom: 1px solid var(--annotation);
-  background-color: var(--cartridge-bg);
-  border-color: var(--cartridge-border);
+  border-radius: 2px;
+  border-top: 1px solid var(--x-cartridge-border-color, black);
+  border-bottom: 1px solid var(--x-cartridge-border-color, black);
+  background-color: var(--x-cartridge-bg-color, white);
 }
 
 .cartridge::before {
@@ -25,17 +24,13 @@ export class Cartridge extends LitElement {
   top: calc(-1*(1em + 1px + 0.75em));
   right: 0;
   font-size: 0.75em;
-  color: var(--annotation);
+  color: var(--x-cartridge-annotation-color, black);
 }
 `];
 
-  constructor() {
-      super();
-  }
-
   render() {
     return html`
-      <div class="cartridge">
+      <div class="${Cartridge.css.class}">
         <slot></slot>
       </div>
     `;

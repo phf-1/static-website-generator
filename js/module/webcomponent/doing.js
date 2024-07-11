@@ -7,7 +7,7 @@ export class Doing extends Keyword {
     Keyword.styles,
     css`
 .doing {
-	background-color: var(--kw-doing);
+	background-color: var(--x-doing-bg-color, orange);
 }
 
 .doing::before {

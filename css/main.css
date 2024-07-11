@@ -126,16 +126,8 @@ main {
 	display: flex;
 	justify-content: center;
 
-	#content section:has(h1, h2, h3, h4, h5, h6) {
+	#content section:has(> h3, > h4, > h5, > h6) {
 		padding-left: 1rem;
-	}
-
-	#content > section:has(h1) > section:has(h2) {
-		padding-left: 0;
-	}
-
-	#content > section:has(h1) {
-		padding-left: 0;
 	}
 
 	#content {

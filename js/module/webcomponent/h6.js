@@ -1,7 +1,8 @@
 import { html, css, LitElement } from 'lit';
 import { sharedStyles } from './style.js';
 
-export class H3 extends LitElement {
+// TODO: factorize h1,h2,…
+export class H6 extends LitElement {
 	static properties = {
 		name: {}
 	}
@@ -10,15 +11,17 @@ export class H3 extends LitElement {
 		super();
 		this.name = "Section name"
 	}
-
+	
   static styles = [sharedStyles];
 
   render() {
-	return html`
-	  <section>
-		<h3>(WebComponent) ${this.name}</h3>
-		<slot></slot>
-	  </section>
-	`;
+    return html`
+      <section>
+        <h6>(WebComponent) ${this.name}</h6>
+        <slot></slot>
+      </section>
+    `;
   }
 }
+
+

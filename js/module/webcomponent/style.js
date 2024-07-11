@@ -121,4 +121,8 @@ pre {
 	margin-bottom: var(--p-margin-bottom);
 	overflow-x: auto;
 }
+
+section:has(> h3, > h4, > h5, > h6) {
+	padding-left: 1rem;
+}
 `;

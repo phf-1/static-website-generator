@@ -8,7 +8,6 @@
 import { Abstract } from "./webcomponent/abstract";
 import { Algorithm } from "./webcomponent/algorithm";
 import { Blockquote } from "./webcomponent/blockquote";
-import { Cartridge } from "./webcomponent/cartridge";
 import { Context } from "./webcomponent/context";
 import { Definition } from "./webcomponent/definition";
 import { Example } from "./webcomponent/example";
@@ -19,6 +18,11 @@ import { Method } from "./webcomponent/method";
 import { Note } from "./webcomponent/note";
 import { Objective } from "./webcomponent/objective";
 import { Result } from "./webcomponent/result";
+import { Todo } from "./webcomponent/todo";
+import { Doing } from "./webcomponent/doing";
+import { Waiting } from "./webcomponent/waiting";
+import { Done } from "./webcomponent/done";
+import { Failed } from "./webcomponent/failed";
 
 
 const WebComponent = class {
@@ -34,7 +38,6 @@ const WebComponent = class {
 		customElements.define('x-abstract', Abstract);
 		customElements.define('x-note', Note);
 		customElements.define('x-h3', H3);
-		customElements.define('x-cartridge', Cartridge);
 		customElements.define('x-algorithm', Algorithm);
 		customElements.define('x-blockquote', Blockquote);
 		customElements.define('x-context', Context);
@@ -43,6 +46,11 @@ const WebComponent = class {
 		customElements.define('x-method', Method);
 		customElements.define('x-blockmath', Blockmath);
 		customElements.define('x-math', Math);
+		customElements.define('x-failed', Failed);
+		customElements.define('x-done', Done);
+		customElements.define('x-waiting', Waiting);
+		customElements.define('x-doing', Doing);
+		customElements.define('x-todo', Todo);				
 		customElements.define('x-objective', Objective);
 		customElements.define('x-result', Result);
 	}

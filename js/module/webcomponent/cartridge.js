@@ -18,6 +18,7 @@ export class Cartridge extends LitElement {
   background-color: var(--x-cartridge-bg-color, white);
 }
 
+
 .cartridge::before {
   content: "Cartridge";
   position: absolute;

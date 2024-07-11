@@ -1,16 +1,8 @@
 import { html, css, LitElement } from 'lit';
-import { sharedStyles } from './style.js';
+import { sharedStyles } from './style';
+import { Heading } from './heading';
 
-export class H3 extends LitElement {
-	static properties = {
-		name: {}
-	}
-
-	constructor() {
-		super();
-		this.name = "Section name"
-	}
-
+export class H3 extends Heading {
 	static styles = [
 		sharedStyles,
 		css`
@@ -34,13 +26,14 @@ h3 {
 }
 `];
 
-
-  render() {
-	return html`
-	  <section>
-		<h3>${this.name}</h3>
-		<slot></slot>
-	  </section>
-	`;
-  }
+	render() {
+		return html`
+      <section>
+        <h3>${this.keyword()}${this.name}</h3>
+        <slot></slot>
+      </section>
+    `;
+	}
 }
+
+

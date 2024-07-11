@@ -58,6 +58,96 @@
     --button-over: #fffff0;
     --p-margin-bottom: calc(var(--line-height) * 1em);
     --sep-margin: 4rem;
+
+
+
+    /************************/
+    /* Web component style. */
+    /************************/
+
+    --x-keyword-color: var(--main-bg);
+    --x-h1-font-size: var(--title-font-size);
+    --x-h1-margin: 10vh;
+    --x-h1-font-family: "Sans";
+    --x-h1-font-weight: 400;
+    --x-h1-color: var(--heading);
+    --x-h2-font-size: 1.2rem;
+    --x-h2-font-family: "Sans";
+    --x-h2-color: var(--heading);
+    --x-h3-font-size: 1.2rem;
+    --x-h3-font-family: "Sans";
+    --x-h3-color: var(--heading);
+    --x-h4-font-size: 1.2rem;
+    --x-h4-font-family: "Sans";
+    --x-h4-color: var(--heading);
+    --x-h5-font-size: 1.2rem;
+    --x-h5-font-family: "Sans";
+    --x-h5-color: var(--heading);
+    --x-h6-font-size: 1.2rem;
+    --x-h6-font-family: "Sans";
+    --x-h6-color: var(--heading);
+    --x-cartridge-margin: var(--sep-margin);
+    --x-cartridge-bg-color: var(--cartridge-bg);
+    --x-cartridge-border-color: var(--annotation);
+    --x-cartridge-annotation-color: var(--annotation);
+    --x-blockquote-border-color: var(--quote-border);
+    --x-blockquote-color: var(--main-text);
+    --x-blockquote-bg-color: var(--quote-bg);
+    --x-blockquote-annotation-color: var(--annotation);
+    --x-note-border-color: var(--note-border);
+    --x-note-color: var(--main-text);
+    --x-note-margin: var(--sep-margin);
+    --x-note-bg-color: var(--note-bg);
+    --x-note-annotation-color: var(--annotation);
+    --x-objective-border-color: var(--objective-border);
+    --x-objective-color: var(--main-text);
+    --x-objective-margin: var(--sep-margin);
+    --x-objective-bg-color: var(--objective-bg);
+    --x-objective-annotation-color: var(--annotation);
+    --x-result-border-color: var(--result-border);
+    --x-result-color: var(--main-text);
+    --x-result-margin: var(--sep-margin);
+    --x-result-bg-color: var(--result-bg);
+    --x-result-annotation-color: var(--annotation);
+    --x-method-border-color: var(--method-border);
+    --x-method-color: var(--main-text);
+    --x-method-margin: var(--sep-margin);
+    --x-method-bg-color: var(--method-bg);
+    --x-method-annotation-color: var(--annotation);
+    --x-context-border-color: var(--context-border);
+    --x-context-color: var(--main-text);
+    --x-context-margin: var(--sep-margin);
+    --x-context-bg-color: var(--context-bg);
+    --x-context-annotation-color: var(--annotation);
+    --x-algorithm-border-color: var(--algorithm-border);
+    --x-algorithm-color: var(--main-text);
+    --x-algorithm-margin: var(--sep-margin);
+    --x-algorithm-bg-color: var(--algorithm-bg);
+    --x-algorithm-annotation-color: var(--annotation);
+    --x-definition-border-color: var(--definition-border);
+    --x-definition-color: var(--main-text);
+    --x-definition-margin: var(--sep-margin);
+    --x-definition-bg-color: var(--definition-bg);
+    --x-definition-annotation-color: var(--annotation);
+    --x-example-border-color: var(--example-border);
+    --x-example-color: var(--main-text);
+    --x-example-margin: var(--sep-margin);
+    --x-example-bg-color: var(--example-bg);
+    --x-example-annotation-color: var(--annotation);
+    --x-blockmath-border-color: var(--algorithm-border);
+    --x-blockmath-color: var(--main-text);
+    --x-blockmath-margin: var(--sep-margin);
+    --x-blockmath-bg-color: var(--algorithm-bg);
+    --x-blockmath-annotation-color: var(--annotation);
+    --x-abstract-bg-color: var(--abstract-bg);
+    --x-abstract-border-color: var(--abstract-border);
+    --x-abstract-annotation-color: var(--annotation);
+    --x-keyword-bg-color: var(--main-text);
+    --x-todo-bg-color: var(--kw-todo);
+    --x-doing-bg-color: var(--kw-doing);
+    --x-waiting-bg-color: var(--kw-waiting);
+    --x-failed-bg-color: var(--kw-failed);
+    --x-done-bg-color: var(--kw-done);
 }
 
 
@@ -459,166 +549,8 @@ aside p {
     }
 }
 
-
-
-/************************/
-/* Web component style. */
-/************************/
-
-
-x-h1 {
-    --x-h1-font-size: var(--title-font-size);
-    --x-h1-margin: 10vh;
-    --x-h1-font-family: "Sans";
-    --x-h1-font-weight: 400;
-    --x-h1-color: var(--heading);
-}
-
-x-h2 {
-    --x-h2-font-size: 1.2rem;
-    --x-h2-font-family: "Sans";
-    --x-h2-color: var(--heading);
-}
-
-x-h3 {
-    --x-h3-font-size: 1.2rem;
-    --x-h3-font-family: "Sans";
-    --x-h3-color: var(--heading);
-}
-
-x-h4 {
-    --x-h4-font-size: 1.2rem;
-    --x-h4-font-family: "Sans";
-    --x-h4-color: var(--heading);
-}
-
-x-h5 {
-    --x-h5-font-size: 1.2rem;
-    --x-h5-font-family: "Sans";
-    --x-h5-color: var(--heading);
-}
-
-x-h6 {
-    --x-h6-font-size: 1.2rem;
-    --x-h6-font-family: "Sans";
-    --x-h6-color: var(--heading);
-}
-
-x-cartridge {
-    --x-cartridge-margin: var(--sep-margin);
-    --x-cartridge-bg-color: var(--cartridge-bg);
-    --x-cartridge-border-color: var(--annotation);
-    --x-cartridge-annotation-color: var(--annotation);
-}
-
-x-blockquote {
-    --x-blockquote-border-color: var(--quote-border);
-    --x-blockquote-color: var(--main-text);
-    --x-blockquote-bg-color: var(--quote-bg);
-    --x-blockquote-annotation-color: var(--annotation);
-}
-
-x-note {
-    --x-note-border-color: var(--note-border);
-    --x-note-color: var(--main-text);
-    --x-note-margin: var(--sep-margin);
-    --x-note-bg-color: var(--note-bg);
-    --x-note-annotation-color: var(--annotation);
-}
-
-x-objective {
-    --x-objective-border-color: var(--objective-border);
-    --x-objective-color: var(--main-text);
-    --x-objective-margin: var(--sep-margin);
-    --x-objective-bg-color: var(--objective-bg);
-    --x-objective-annotation-color: var(--annotation);
-}
-
-x-result {
-    --x-result-border-color: var(--result-border);
-    --x-result-color: var(--main-text);
-    --x-result-margin: var(--sep-margin);
-    --x-result-bg-color: var(--result-bg);
-    --x-result-annotation-color: var(--annotation);
-}
-
-x-method {
-    --x-method-border-color: var(--method-border);
-    --x-method-color: var(--main-text);
-    --x-method-margin: var(--sep-margin);
-    --x-method-bg-color: var(--method-bg);
-    --x-method-annotation-color: var(--annotation);
-}
-
-x-context {
-    --x-context-border-color: var(--context-border);
-    --x-context-color: var(--main-text);
-    --x-context-margin: var(--sep-margin);
-    --x-context-bg-color: var(--context-bg);
-    --x-context-annotation-color: var(--annotation);
-}
-
-x-algorithm {
-    --x-algorithm-border-color: var(--algorithm-border);
-    --x-algorithm-color: var(--main-text);
-    --x-algorithm-margin: var(--sep-margin);
-    --x-algorithm-bg-color: var(--algorithm-bg);
-    --x-algorithm-annotation-color: var(--annotation);
-}
-
-x-definition {
-    --x-definition-border-color: var(--definition-border);
-    --x-definition-color: var(--main-text);
-    --x-definition-margin: var(--sep-margin);
-    --x-definition-bg-color: var(--definition-bg);
-    --x-definition-annotation-color: var(--annotation);
-}
-
-x-example {
-    --x-example-border-color: var(--example-border);
-    --x-example-color: var(--main-text);
-    --x-example-margin: var(--sep-margin);
-    --x-example-bg-color: var(--example-bg);
-    --x-example-annotation-color: var(--annotation);
-}
-
-x-blockmath {
-    --x-blockmath-border-color: var(--algorithm-border);
-    --x-blockmath-color: var(--main-text);
-    --x-blockmath-margin: var(--sep-margin);
-    --x-blockmath-bg-color: var(--algorithm-bg);
-    --x-blockmath-annotation-color: var(--annotation);
-}
-
-x-abstract {
-    --x-abstract-bg-color: var(--abstract-bg);
-    --x-abstract-border-color: var(--abstract-border);
-    --x-abstract-annotation-color: var(--annotation);
-}
-
-x-keyword {
-    --x-keyword-color: var(--main-bg);
-    --x-keyword-bg-color: var(--main-text);
-}
-
-x-todo {
-    --x-todo-bg-color: var(--kw-todo);
-}
-
-x-doing {
-    --x-doing-bg-color: var(--kw-doing);
-}
-
-x-waiting {
-    --x-waiting-bg-color: var(--kw-waiting);
-}
-
-x-failed {
-    --x-failed-bg-color: var(--kw-failed);
-}
-
-x-done {
-    --x-done-bg-color: var(--kw-done);
+x-objective *:last-child, x-result *:last-child, x-method *:last-child, x-context *:last-child, x-definition *:last-child, x-abstract *:last-child {
+    margin-bottom: 0;
 }
 
 

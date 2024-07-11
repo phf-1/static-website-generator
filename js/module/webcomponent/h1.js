@@ -1,16 +1,8 @@
 import { html, css, LitElement } from 'lit';
-import { sharedStyles } from './style.js';
+import { sharedStyles } from './style';
+import { Heading } from './heading';
 
-export class H1 extends LitElement {
-	static properties = {
-		name: {}
-	}
-
-	constructor() {
-		super();
-		this.name = "Section name"
-	}
-	
+export class H1 extends Heading {
 	static styles = [
 		sharedStyles,
 		css`
@@ -31,7 +23,7 @@ h1 {
 	render() {
 		return html`
       <section>
-        <h1>${this.name}</h1>
+        <h1>${this.keyword()}${this.name}</h1>
         <slot></slot>
       </section>
     `;

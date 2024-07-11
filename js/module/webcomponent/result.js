@@ -24,7 +24,6 @@ export class Result extends Cartridge {
   render() {
     return html`
       <div class="${Cartridge.css.class} result">
-        (WIP: WebComponent)
         <slot></slot>
       </div>
     `;

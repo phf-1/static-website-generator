@@ -41,7 +41,6 @@ export class Blockquote extends Cartridge {
     render() {
         return html`
       <blockquote class="${Cartridge.css.class} blockquote">
-        (WIP: WebComponent)
         <slot></slot>
         <footer>— ${this.author}, <cite><a href="${this.url}">${this.source}</a></cite></footer>
       </blockquote>

@@ -26,7 +26,7 @@ h1 {
 	render() {
 		return html`
       <section>
-        <h1>(WebComponent) ${this.name}</h1>
+        <h1>${this.name}</h1>
         <slot></slot>
       </section>
     `;

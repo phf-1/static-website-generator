@@ -24,7 +24,6 @@ export class Note extends Cartridge {
   render() {
     return html`
       <div class="${Cartridge.css.class} note">
-        (WIP: WebComponent)
         <slot></slot>
       </div>
     `;

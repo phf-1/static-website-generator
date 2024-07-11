@@ -17,7 +17,7 @@ export class Failed extends Keyword {
   ];
 
   render() {
-    return html`<span class="${Keyword.css.class} failed">(WIP: WebComponent)</span>`;
+    return html`<span class="${Keyword.css.class} failed"></span>`;
   }
 }
 

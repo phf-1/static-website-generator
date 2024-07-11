@@ -24,7 +24,6 @@ export class Algorithm extends Cartridge {
   render() {
     return html`
       <div class="${Cartridge.css.class} algorithm">
-        (WIP: WebComponent)
         <slot></slot>
       </div>
     `;

@@ -16,7 +16,7 @@ export class H5 extends LitElement {
   render() {
     return html`
       <section>
-        <h5>(WebComponent) ${this.name}</h5>
+        <h5>${this.name}</h5>
         <slot></slot>
       </section>
     `;

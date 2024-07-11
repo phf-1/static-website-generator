@@ -32,7 +32,6 @@ export class Blockmath extends Cartridge {
 		const content = this._mathml === "" ?  html`<slot></slot>` : html`${this._mathml}`;
 		return html`
 <div class="${Cartridge.css.class} math">
-  (WIP: WebComponent)
   ${content}
 </div>
 `;

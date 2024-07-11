@@ -24,7 +24,6 @@ export class Context extends Cartridge {
   render() {
     return html`
       <div class="${Cartridge.css.class} context">
-        (WIP: WebComponent)
         <slot></slot>
       </div>
     `;

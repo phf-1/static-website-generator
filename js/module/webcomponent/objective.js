@@ -24,7 +24,6 @@ export class Objective extends Cartridge {
   render() {
     return html`
       <div class="${Cartridge.css.class} objective">
-        (WIP: WebComponent)
         <slot></slot>
       </div>
     `;

@@ -24,7 +24,6 @@ export class Definition extends Cartridge {
   render() {
     return html`
       <div class="${Cartridge.css.class} definition">
-        (WIP: WebComponent)
         <slot></slot>
       </div>
     `;

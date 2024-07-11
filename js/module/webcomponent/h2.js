@@ -16,7 +16,7 @@ export class H2 extends LitElement {
   render() {
     return html`
       <section>
-        <h2>(WebComponent) ${this.name}</h2>
+        <h2>${this.name}</h2>
         <slot></slot>
       </section>
     `;

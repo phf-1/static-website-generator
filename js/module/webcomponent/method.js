@@ -24,7 +24,6 @@ export class Method extends Cartridge {
   render() {
     return html`
       <div class="${Cartridge.css.class} method">
-        (WIP: WebComponent)
         <slot></slot>
       </div>
     `;

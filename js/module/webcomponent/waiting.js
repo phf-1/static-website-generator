@@ -17,7 +17,7 @@ export class Waiting extends Keyword {
   ];
 
   render() {
-    return html`<span class="${Keyword.css.class} waiting">(WIP: WebComponent)</span>`;
+    return html`<span class="${Keyword.css.class} waiting"></span>`;
   }
 }
 

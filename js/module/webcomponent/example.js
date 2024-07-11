@@ -24,7 +24,6 @@ export class Example extends Cartridge {
   render() {
     return html`
       <div class="${Cartridge.css.class} example">
-        (WIP: WebComponent)
         <slot></slot>
       </div>
     `;

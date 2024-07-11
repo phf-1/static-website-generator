@@ -17,7 +17,7 @@ export class Todo extends Keyword {
   ];
 
   render() {
-    return html`<span class="${Keyword.css.class} todo">(WIP: WebComponent)</span>`;
+    return html`<span class="${Keyword.css.class} todo"></span>`;
   }
 }
 

@@ -27,7 +27,6 @@ export class Abstract extends Cartridge {
   render() {
     return html`
       <div class="${Cartridge.css.class} abstract">
-        (WIP: WebComponent)
         <slot></slot>
       </div>
     `;

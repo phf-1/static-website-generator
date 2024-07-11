@@ -17,7 +17,7 @@ export class Done extends Keyword {
   ];
 
   render() {
-    return html`<span class="${Keyword.css.class} done">(WIP: WebComponent)</span>`;
+    return html`<span class="${Keyword.css.class} done"></span>`;
   }
 }
 

@@ -14,6 +14,7 @@ import { Example } from "./webcomponent/example";
 import { H3 } from "./webcomponent/h3";
 import { Blockmath } from "./webcomponent/blockmath";
 import { Math } from "./webcomponent/math";
+import { Blockcode } from "./webcomponent/blockcode";
 import { Method } from "./webcomponent/method";
 import { Note } from "./webcomponent/note";
 import { Objective } from "./webcomponent/objective";
@@ -40,6 +41,7 @@ const WebComponent = class {
 		customElements.define('x-h3', H3);
 		customElements.define('x-algorithm', Algorithm);
 		customElements.define('x-blockquote', Blockquote);
+		customElements.define('x-blockcode', Blockcode);
 		customElements.define('x-context', Context);
 		customElements.define('x-definition', Definition);
 		customElements.define('x-example', Example);
@@ -50,7 +52,7 @@ const WebComponent = class {
 		customElements.define('x-done', Done);
 		customElements.define('x-waiting', Waiting);
 		customElements.define('x-doing', Doing);
-		customElements.define('x-todo', Todo);				
+		customElements.define('x-todo', Todo);
 		customElements.define('x-objective', Objective);
 		customElements.define('x-result', Result);
 	}

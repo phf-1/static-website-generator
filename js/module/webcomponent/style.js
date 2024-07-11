@@ -1,4 +1,3 @@
-// shared-styles.js
 import { css } from 'lit';
 
 export const sharedStyles = css`
@@ -103,5 +102,23 @@ h6 {
 	font-weight: normal;
 	color: var(--heading);
 
+}
+
+code,
+pre {
+	font-family: "Mono";
+	font-size: 0.9em;
+	border-radius: var(--radius);
+}
+
+code {
+	background-color: var(--code);
+	border-radius: var(--radius);
+	padding: 0 0.2rem;
+}
+
+pre {
+	margin-bottom: var(--p-margin-bottom);
+	overflow-x: auto;
 }
 `;

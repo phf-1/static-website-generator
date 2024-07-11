@@ -39,24 +39,25 @@ const id_build = (function () {
 
 
 /*
- * Build a table of content from a list of headings.
+ * Build a table of content from a list of sections.
  *
  * Heading ≡ h1 | … | h6
  * toc_build : List Heading → Toc
  */
-const toc_build = function (headings) {
+const toc_build = function (sections) {
 	const toc = document.createElement("nav");
 	toc.id = toc_id;
-	const add_heading_to_toc = function (heading) {
+	const add_heading_to_toc = function (section) {
+		const heading = section.shadowRoot.firstElementChild.firstElementChild;
 		const toc_heading = heading.cloneNode();
-		heading.id = heading.id === "" ? id_build() : heading.id;
+		section.id = section.id === "" ? id_build() : section.id;
 		const a = document.createElement("a");
-		a.href = "#" + heading.id;
+		a.href = "#" + section.id;
 		a.innerHTML = heading.innerHTML;
 		toc_heading.appendChild(a);
 		toc.appendChild(toc_heading);
 	};
-	headings.forEach(add_heading_to_toc);
+	sections.forEach(add_heading_to_toc);
 	return toc;
 };
 
@@ -67,8 +68,7 @@ const toc_build = function (headings) {
  * element_toc : Node → Toc
  */
 const element_toc = function (element) {
-	const headings = Array.from(element.getElementsByTagName('*')).filter(is_heading);
-	return toc_build(headings);
+	return toc_build(Array.from(element.querySelectorAll('x-h2,x-h3,x-h4,x-h5,x-h6')));
 };
 
 

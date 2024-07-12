@@ -66,6 +66,24 @@ ${MANIFEST_FILE}: ${MANIFEST}
 	cp $< $@
 
 
+# format
+## Context
+## Objective
+## Rule
+.PHONY: format
+format: ## Format all code.
+	npx prettier . --write
+
+
+# check
+## Context
+## Objective
+## Rule
+.PHONY: check
+check: ## Check all code.
+	npx prettier . --check
+
+
 # css
 ## Context
 CSS_DIR := css
@@ -121,7 +139,7 @@ JS_BUILD_DIR := ${BUILD_DIR}/${JS_DIR}
 JS_OBJ := ${JS_BUILD_DIR}/main/main.min.js
 ## Rule
 .PHONY: js
-js: ${JS_OBJ} ## Intall the minified javascript under ${BUILD_DIR}.
+js: ${JS_OBJ} ## Install the minified javascript under ${BUILD_DIR}.
 ${JS_OBJ}: ${JS_MAIN_FILES}
 	npx esbuild ${JS_DIR}/main.js --bundle --minify --sourcemap  --outfile=${JS_BUILD_DIR}/main.min.js
 

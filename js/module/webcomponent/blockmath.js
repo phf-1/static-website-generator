@@ -41,7 +41,7 @@ export class Blockmath extends Cartridge {
 	}
 
 	firstUpdated(changedProperties) {
-		const latex = this.shadowRoot.querySelector("slot").assignedNodes()[0].wholeText;
+		const latex = String.raw`${this.shadowRoot.querySelector("slot").assignedNodes()[0].wholeText}`;
 		this._mathml = unsafeHTML(katex.renderToString(latex, { output: "mathml" }))
 	}
 }

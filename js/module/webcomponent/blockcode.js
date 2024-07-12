@@ -2,11 +2,15 @@ import { html, css, LitElement } from 'lit';
 import {unsafeHTML} from 'lit/directives/unsafe-html.js';
 import hljs from 'highlight.js/lib/core';
 import scheme from 'highlight.js/lib/languages/scheme';
+import c from 'highlight.js/lib/languages/c';
+import python from 'highlight.js/lib/languages/python';
 import lean from 'highlightjs-lean';
 import { sharedStyles } from './style.js';
 
 
 hljs.registerLanguage('scheme', scheme);
+hljs.registerLanguage('python', python);
+hljs.registerLanguage('c', c);
 hljs.registerLanguage('lean', lean);
 
 
@@ -26,7 +30,7 @@ pre {
 }
 code {
 	font-family: "Mono";
-	font-size: 0.9rem;
+	font-size: 0.8rem;
 	border-radius: 2px;
 }
 `

@@ -84,6 +84,16 @@ check: ## Check all code.
 	npx prettier . --check
 
 
+# analysis
+## Context
+JS_DIR := js
+## Objective
+## Rule
+.PHONY: analysis
+analysis: ## Analyse all code.
+	npx eslint --fix ${JS_DIR}
+
+
 # css
 ## Context
 CSS_DIR := css
@@ -132,7 +142,6 @@ ${BUILD_DIR}/${FONT_DIR}/%: ${FONT_DIR}/%
 
 # js
 ## Context
-JS_DIR := js
 JS_MAIN_FILES := $(shell echo js/module/* js/main.js)
 JS_BUILD_DIR := ${BUILD_DIR}/${JS_DIR}
 ## Objective

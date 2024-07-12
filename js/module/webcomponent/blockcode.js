@@ -12,7 +12,7 @@ hljs.registerLanguage("python", python);
 hljs.registerLanguage("c", c);
 hljs.registerLanguage("lean", lean);
 
-export class Blockcode extends LitElement {
+class Blockcode extends LitElement {
   static properties = {
     _hihlighted: { state: true },
   };
@@ -129,3 +129,5 @@ export class Blockcode extends LitElement {
     this._hihlighted = hljs.highlightAuto(code);
   }
 }
+
+customElements.define("x-blockcode", Blockcode);

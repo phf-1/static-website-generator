@@ -1,7 +1,7 @@
 import { html, css } from "lit";
 import { Cartridge } from "./cartridge";
 
-export class Definition extends Cartridge {
+class Definition extends Cartridge {
   static styles = [
     Cartridge.styles,
     css`
@@ -27,3 +27,5 @@ export class Definition extends Cartridge {
     `;
   }
 }
+
+customElements.define("x-definition", Definition);

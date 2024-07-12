@@ -2,7 +2,7 @@ import { html, css } from "lit";
 import { sharedStyles } from "./style";
 import { Heading } from "./heading";
 
-export class H2 extends Heading {
+class H2 extends Heading {
   static styles = [
     sharedStyles,
     css`
@@ -36,3 +36,5 @@ export class H2 extends Heading {
     `;
   }
 }
+
+customElements.define("x-h2", H2);

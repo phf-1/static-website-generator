@@ -1,7 +1,7 @@
 import { html, css } from "lit";
 import { Cartridge } from "./cartridge";
 
-export class Algorithm extends Cartridge {
+class Algorithm extends Cartridge {
   static styles = [
     Cartridge.styles,
     css`
@@ -27,3 +27,5 @@ export class Algorithm extends Cartridge {
     `;
   }
 }
+
+customElements.define("x-algorithm", Algorithm);

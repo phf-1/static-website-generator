@@ -45,3 +45,5 @@ export class Blockmath extends Cartridge {
     );
   }
 }
+
+customElements.define("x-blockmath", Blockmath);

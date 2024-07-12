@@ -1,7 +1,7 @@
 import { html, css } from "lit";
 import { Cartridge } from "./cartridge";
 
-export class Blockquote extends Cartridge {
+class Blockquote extends Cartridge {
   static properties = {
     author: {},
     url: {},
@@ -49,3 +49,5 @@ export class Blockquote extends Cartridge {
     `;
   }
 }
+
+customElements.define("x-blockquote", Blockquote);

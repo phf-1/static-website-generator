@@ -1,7 +1,7 @@
 import { html, css } from "lit";
 import { Keyword } from "./keyword";
 
-export class Done extends Keyword {
+class Done extends Keyword {
   static styles = [
     Keyword.styles,
     css`
@@ -19,3 +19,5 @@ export class Done extends Keyword {
     return html`<span class="${Keyword.css.class} done"></span>`;
   }
 }
+
+customElements.define("x-done", Done);

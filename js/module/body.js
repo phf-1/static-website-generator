@@ -5,23 +5,17 @@
  */
 
 const Body = class {
-  constructor(bg_img_id) {
-    this.bg_img_id = bg_img_id;
+  // Public
+  constructor(body) {
+    this.#body = body;
   }
 
-  // When enough content is available, show the body of the document.
-  start() {
-    // The background image.
-    const img = document.getElementById(this.bg_img_id);
-
-    // Makes the body visible.
-    const show_body = function () {
-      document.body.style.visibility = "visible";
-    };
-
-    // When the bacground image is available, make the body visible.
-    img.complete ? show_body() : img.addEventListener("load", show_body);
+  show() {
+    this.#body.style.visibility = "visible";
   }
+
+  // Private
+  #body;
 };
 
 export { Body };

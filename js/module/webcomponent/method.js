@@ -1,7 +1,7 @@
 import { html, css } from "lit";
 import { Cartridge } from "./cartridge";
 
-export class Method extends Cartridge {
+class Method extends Cartridge {
   static styles = [
     Cartridge.styles,
     css`
@@ -31,3 +31,5 @@ export class Method extends Cartridge {
     `;
   }
 }
+
+customElements.define("x-method", Method);

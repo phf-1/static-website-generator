@@ -1,7 +1,7 @@
 import { html, css } from "lit";
 import { Keyword } from "./keyword";
 
-export class Waiting extends Keyword {
+class Waiting extends Keyword {
   static styles = [
     Keyword.styles,
     css`
@@ -19,3 +19,5 @@ export class Waiting extends Keyword {
     return html`<span class="${Keyword.css.class} waiting"></span>`;
   }
 }
+
+customElements.define("x-waiting", Waiting);

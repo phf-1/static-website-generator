@@ -7,21 +7,6 @@
 const toc_id = "table-of-content";
 
 /*
- * Toggle the display value of an element between none and block.
- *
- * el : Node
- */
-const toggle_toc = function (el) {
-  return function () {
-    if (el.checkVisibility()) {
-      el.style.display = "none";
-    } else {
-      el.style.display = "block";
-    }
-  };
-};
-
-/*
  * Return a new id for each invocation.
  *
  * id_build() : Int
@@ -104,22 +89,28 @@ const element_toc = function (element) {
 };
 
 const Toc = class {
-  constructor() {}
+  // Public
 
-  /*
-   * Builds a table of content from a given element and adds it to a parent
-   * element. Adds the meaning "toggle the table of content" to a button when
-   * clicked.
-   *
-   * content : Node
-   * parent : Node
-   * button : Button
-   */
-  start(element, parent, button) {
-    const toc = element_toc(element);
-    parent.appendChild(toc);
-    button.onclick = toggle_toc(toc);
+  constructor(content) {
+    this.#content = content;
+    this.#toc = element_toc(this.#content);
   }
+
+  toggle() {
+    if (this.#toc.checkVisibility()) {
+      this.#toc.style.display = "none";
+    } else {
+      this.#toc.style.display = "block";
+    }
+  }
+
+  node() {
+    return this.#toc;
+  }
+
+  // Private
+  #content;
+  #toc;
 };
 
 export { Toc };

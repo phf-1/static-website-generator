@@ -1,7 +1,7 @@
 import { html, css } from "lit";
 import { Cartridge } from "./cartridge";
 
-export class Context extends Cartridge {
+class Context extends Cartridge {
   static styles = [
     Cartridge.styles,
     css`
@@ -31,3 +31,5 @@ export class Context extends Cartridge {
     `;
   }
 }
+
+customElements.define("x-context", Context);

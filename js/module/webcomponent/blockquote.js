@@ -1,49 +1,51 @@
-import { html, css, LitElement } from 'lit';
-import { Cartridge } from './cartridge';
+import { html, css, LitElement } from "lit";
+import { Cartridge } from "./cartridge";
 
 export class Blockquote extends Cartridge {
+  static properties = {
+    author: {},
+    url: {},
+    source: {},
+  };
 
-    static properties = {
-        author: {},
-        url: {},
-        source: {}
-    }
+  static styles = [
+    Cartridge.styles,
+    css`
+      .blockquote {
+        color: var(--x-blockquote-color, black);
+        background-color: var(--x-blockquote-bg-color, white);
+        border-color: var(--x-blockquote-border-color, black);
+      }
 
-    static styles = [
-        Cartridge.styles,
-        css`
-.blockquote {
-    color: var(--x-blockquote-color, black);
-    background-color: var(--x-blockquote-bg-color, white);
-    border-color: var(--x-blockquote-border-color, black);
-}
+      .blockquote::before {
+        content: "Quote";
+        color: var(--x-blockquote-annotation-color, black);
+      }
 
-.blockquote::before {
-    content: "Quote";
-    color: var(--x-blockquote-annotation-color, black);
-}
+      footer {
+        text-align: right;
+        font-size: 0.875rem;
+        color: var(--x-blockquote-color, black);
+      }
+    `,
+  ];
 
-footer {
-    text-align: right;
-    font-size: 0.875rem;
-    color: var(--x-blockquote-color, black);
-}
-`
-    ];
+  constructor() {
+    super();
+    this.author = "AUTHOR";
+    this.url = "https://example.com";
+    this.source = "SOURCE";
+  }
 
-    constructor() {
-        super();
-        this.author = "AUTHOR";
-        this.url = "https://example.com";
-        this.source = "SOURCE";
-    }
-
-    render() {
-        return html`
+  render() {
+    return html`
       <blockquote class="${Cartridge.css.class} blockquote">
         <slot></slot>
-        <footer>— ${this.author}, <cite><a href="${this.url}">${this.source}</a></cite></footer>
+        <footer>
+          — ${this.author},
+          <cite><a href="${this.url}">${this.source}</a></cite>
+        </footer>
       </blockquote>
     `;
-    }
+  }
 }

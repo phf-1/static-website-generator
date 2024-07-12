@@ -1,23 +1,22 @@
-import { html, css, LitElement } from 'lit';
-import { Cartridge } from './cartridge';
+import { html, css, LitElement } from "lit";
+import { Cartridge } from "./cartridge";
 
 export class Definition extends Cartridge {
-
   static styles = [
     Cartridge.styles,
     css`
-.definition {
-    color: var(--x-definition-color, black);
-    margin: var(--x-definition-margin, 2rem) auto;
-    background-color: var(--x-definition-bg-color, white);
-    border-color: var(--x-definition-border-color, black);
-}
+      .definition {
+        color: var(--x-definition-color, black);
+        margin: var(--x-definition-margin, 2rem) auto;
+        background-color: var(--x-definition-bg-color, white);
+        border-color: var(--x-definition-border-color, black);
+      }
 
-.definition::before {
-    content: "Definition";
-    color: var(--x-definition-annotation-color, black);
-}
-`
+      .definition::before {
+        content: "Definition";
+        color: var(--x-definition-annotation-color, black);
+      }
+    `,
   ];
 
   render() {
@@ -28,5 +27,3 @@ export class Definition extends Cartridge {
     `;
   }
 }
-
-

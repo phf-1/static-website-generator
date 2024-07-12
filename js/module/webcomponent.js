@@ -4,7 +4,6 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-
 import { Abstract } from "./webcomponent/abstract";
 import { Algorithm } from "./webcomponent/algorithm";
 import { Blockcode } from "./webcomponent/blockcode";
@@ -30,43 +29,39 @@ import { Result } from "./webcomponent/result";
 import { Todo } from "./webcomponent/todo";
 import { Waiting } from "./webcomponent/waiting";
 
-
 const WebComponent = class {
-	constructor() {
+  constructor() {}
 
-	}
-
-	/*
-	 * Define all Web Components.
-	 *
-	 */
-	start(content) {
-		customElements.define('x-abstract', Abstract);
-		customElements.define('x-algorithm', Algorithm);
-		customElements.define('x-blockcode', Blockcode);
-		customElements.define('x-blockmath', Blockmath);
-		customElements.define('x-blockquote', Blockquote);
-		customElements.define('x-context', Context);
-		customElements.define('x-definition', Definition);
-		customElements.define('x-doing', Doing);
-		customElements.define('x-done', Done);
-		customElements.define('x-example', Example);
-		customElements.define('x-failed', Failed);
-		customElements.define('x-h1', H1);		
-		customElements.define('x-h2', H2);
-		customElements.define('x-h3', H3);
-		customElements.define('x-h4', H4);
-		customElements.define('x-h5', H5);
-		customElements.define('x-h6', H6);		
-		customElements.define('x-math', Math);
-		customElements.define('x-method', Method);
-		customElements.define('x-note', Note);
-		customElements.define('x-objective', Objective);
-		customElements.define('x-result', Result);
-		customElements.define('x-todo', Todo);
-		customElements.define('x-waiting', Waiting);
-	}
-}
-
+  /*
+   * Define all Web Components.
+   *
+   */
+  start(content) {
+    customElements.define("x-abstract", Abstract);
+    customElements.define("x-algorithm", Algorithm);
+    customElements.define("x-blockcode", Blockcode);
+    customElements.define("x-blockmath", Blockmath);
+    customElements.define("x-blockquote", Blockquote);
+    customElements.define("x-context", Context);
+    customElements.define("x-definition", Definition);
+    customElements.define("x-doing", Doing);
+    customElements.define("x-done", Done);
+    customElements.define("x-example", Example);
+    customElements.define("x-failed", Failed);
+    customElements.define("x-h1", H1);
+    customElements.define("x-h2", H2);
+    customElements.define("x-h3", H3);
+    customElements.define("x-h4", H4);
+    customElements.define("x-h5", H5);
+    customElements.define("x-h6", H6);
+    customElements.define("x-math", Math);
+    customElements.define("x-method", Method);
+    customElements.define("x-note", Note);
+    customElements.define("x-objective", Objective);
+    customElements.define("x-result", Result);
+    customElements.define("x-todo", Todo);
+    customElements.define("x-waiting", Waiting);
+  }
+};
 
 export { WebComponent };

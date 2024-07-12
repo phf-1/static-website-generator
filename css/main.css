@@ -185,9 +185,7 @@ main {
 }
 
 #container {
-  visibility: hidden;
-  position: absolute;
-  top: 0;
+  position: relative;
   display: flex;
   justify-content: center;
 
@@ -202,10 +200,9 @@ main {
 }
 
 #bg-image {
+  position: relative;
   display: block;
   overflow-y: clip;
-  width: 100%;
-  max-width: 1600px;
   aspect-ratio: 16 / 9;
   top: 0;
   left: 0;
@@ -213,6 +210,9 @@ main {
   padding: 0;
   z-index: -1;
   text-align: center;
+  border: 1px solid var(--annotation);
+  border-top: none;
+  border-radius: 0;
 
   #bg-image-img {
     position: relative;

@@ -1,6 +1,8 @@
+import glob
 import os
 import sys
 from pathlib import Path
+from PIL import Image
 import shutil
 
 # article_dir, template_file ⊢ page_dir
@@ -12,7 +14,18 @@ def main(article_dir, template_file, page_dir):
     page_dir.mkdir(parents=True)
 
     # page_dir/data = article_dir/data
-    shutil.copytree(article_dir / "data", page_dir / "data")
+    article_dir_data = article_dir / 'data'
+    page_dir_data = page_dir / "data"
+    shutil.copytree(article_dir_data, page_dir_data)
+
+    # resize the background image.
+    bg_img_path = Path(glob.glob(str(article_dir_data / 'bg.*'))[0])
+    with Image.open(bg_img_path) as img:
+        width, height = img.size
+        new_width = 1500
+        new_height = int((new_width / width) * height)
+        resized_img = img.resize((new_width, new_height), Image.LANCZOS)
+        resized_img.save(str(page_dir_data / 'bg.webp'))
 
     # index_value = template_value
     with open(template_file) as f:

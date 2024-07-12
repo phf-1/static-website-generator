@@ -5,17 +5,17 @@
  */
 
 const Container = class {
-  // Public
-  constructor(container) {
-    this.#container = container;
-  }
+    // Public
+    constructor(container) {
+        this.#container = container;
+    }
 
-  position(rect) {
-    this.#container.style.top = String(-rect.height * 0.61) + "px";
-  }
+    position(rect) {
+        this.#container.style.top = String(-rect.height * 0.61) + "px";
+    }
 
-  // Private
-  #container;
+    // Private
+    #container;
 };
 
 export { Container };

@@ -5,17 +5,17 @@
  */
 
 const Body = class {
-  // Public
-  constructor(body) {
-    this.#body = body;
-  }
+    // Public
+    constructor(body) {
+        this.#body = body;
+    }
 
-  show() {
-    this.#body.style.visibility = "visible";
-  }
+    show() {
+        this.#body.style.visibility = "visible";
+    }
 
-  // Private
-  #body;
+    // Private
+    #body;
 };
 
 export { Body };

@@ -40,67 +40,67 @@ const toggle_toc_btn_id = "toggle_toc_btn";
 const bg_pic_id = "bg-image";
 
 const Website = class {
-  // Public
-  constructor() {
-    document.addEventListener("DOMContentLoaded", () =>
-      this.#on_dom_content_loaded(),
-    );
-  }
-
-  // Private
-  #body;
-  #backgroundimage;
-  #container;
-  #toc;
-
-  #on_dom_content_loaded() {
-    // Connect the body and the background image.
-    this.#body = new Body(document.body);
-    this.#backgroundimage = new Backgroundimage(
-      document.getElementById(bg_pic_id),
-    );
-    this.#body_backgroundimage();
-    this.#backgroundimage.addEventListener("updated", () =>
-      this.#body_backgroundimage(),
-    );
-
-    // Connect the container and the background image.
-    this.#container = new Container(document.getElementById(container_id));
-    this.#container_backgroundimage();
-    this.#backgroundimage.addEventListener("updated", () =>
-      this.#container_backgroundimage(),
-    );
-
-    // Build the toc from the content.
-    this.#toc = new Toc(document.getElementById(content_id));
-    const container_el = document.getElementById(container_id);
-
-    // Connect the toc and the container.
-    container_el.appendChild(this.#toc.node());
-
-    // Connect the nav button and the toc.
-    document.getElementById(toggle_toc_btn_id).onclick = () =>
-      this.#toc.toggle();
-
-    // Experimental.
-    this.theorem = new Theorem();
-    const content = document.getElementById(content_id);
-    this.theorem.start(content);
-  }
-
-  // Body and background image relation.
-  #body_backgroundimage() {
-    if (this.#backgroundimage.loaded()) {
-      this.#body.show();
+    // Public
+    constructor() {
+        document.addEventListener("DOMContentLoaded", () =>
+            this.#on_dom_content_loaded(),
+        );
     }
-  }
 
-  // Container and background image relation.
-  #container_backgroundimage() {
-    if (this.#backgroundimage.loaded()) {
-      this.#container.position(this.#backgroundimage.rect());
+    // Private
+    #body;
+    #backgroundimage;
+    #container;
+    #toc;
+
+    #on_dom_content_loaded() {
+        // Connect the body and the background image.
+        this.#body = new Body(document.body);
+        this.#backgroundimage = new Backgroundimage(
+            document.getElementById(bg_pic_id),
+        );
+        this.#body_backgroundimage();
+        this.#backgroundimage.addEventListener("updated", () =>
+            this.#body_backgroundimage(),
+        );
+
+        // Connect the container and the background image.
+        this.#container = new Container(document.getElementById(container_id));
+        this.#container_backgroundimage();
+        this.#backgroundimage.addEventListener("updated", () =>
+            this.#container_backgroundimage(),
+        );
+
+        // Build the toc from the content.
+        this.#toc = new Toc(document.getElementById(content_id));
+        const container_el = document.getElementById(container_id);
+
+        // Connect the toc and the container.
+        container_el.appendChild(this.#toc.node());
+
+        // Connect the nav button and the toc.
+        document.getElementById(toggle_toc_btn_id).onclick = () =>
+            this.#toc.toggle();
+
+        // Experimental.
+        this.theorem = new Theorem();
+        const content = document.getElementById(content_id);
+        this.theorem.start(content);
     }
-  }
+
+    // Body and background image relation.
+    #body_backgroundimage() {
+        if (this.#backgroundimage.loaded()) {
+            this.#body.show();
+        }
+    }
+
+    // Container and background image relation.
+    #container_backgroundimage() {
+        if (this.#backgroundimage.loaded()) {
+            this.#container.position(this.#backgroundimage.rect());
+        }
+    }
 };
 
 export { Website };

@@ -3,26 +3,26 @@ import { sharedStyles } from "./style";
 import { Utils } from "./utils";
 
 class Heading extends LitElement {
-  static properties = {
-    name: {},
-    state: {},
-  };
+    static properties = {
+        name: {},
+        state: {},
+    };
 
-  constructor() {
-    super();
-    this.name = "Section name";
-    this.state = null;
-  }
+    constructor() {
+        super();
+        this.name = "Section name";
+        this.state = null;
+    }
 
-  static styles = [sharedStyles];
+    static styles = [sharedStyles];
 
-  keyword() {
-    return Utils.keyword(this.state);
-  }
+    keyword() {
+        return Utils.keyword(this.state);
+    }
 
-  render() {
-    return html``;
-  }
+    render() {
+        return html``;
+    }
 }
 
 export { Heading };

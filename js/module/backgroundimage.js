@@ -5,40 +5,40 @@
  */
 
 const Backgroundimage = class extends EventTarget {
-  // Public
-  constructor(picture) {
-    super();
-    this.#picture = picture;
-    this.#image = document.getElementById("bg-image-img");
-    this.#loaded = this.#image.complete || this.#image.naturalWidth !== 0;
-    this.#image.addEventListener("load", () => {
-      this.#loaded = true;
-      this.#emitUpdatedEvent({ loaded: this.#loaded });
-    });
-    this.#observer = new ResizeObserver((entries) => {
-      const rect = entries[0].contentRect;
-      this.#emitUpdatedEvent({ rect });
-    });
-    this.#observer.observe(this.#picture);
-  }
+    // Public
+    constructor(picture) {
+        super();
+        this.#picture = picture;
+        this.#image = document.getElementById("bg-image-img");
+        this.#loaded = this.#image.complete || this.#image.naturalWidth !== 0;
+        this.#image.addEventListener("load", () => {
+            this.#loaded = true;
+            this.#emitUpdatedEvent({ loaded: this.#loaded });
+        });
+        this.#observer = new ResizeObserver((entries) => {
+            const rect = entries[0].contentRect;
+            this.#emitUpdatedEvent({ rect });
+        });
+        this.#observer.observe(this.#picture);
+    }
 
-  loaded() {
-    return this.#loaded;
-  }
+    loaded() {
+        return this.#loaded;
+    }
 
-  rect() {
-    return this.#picture.getBoundingClientRect();
-  }
+    rect() {
+        return this.#picture.getBoundingClientRect();
+    }
 
-  // Private
-  #picture;
-  #image;
-  #observer;
-  #loaded;
+    // Private
+    #picture;
+    #image;
+    #observer;
+    #loaded;
 
-  #emitUpdatedEvent(details = {}) {
-    this.dispatchEvent(new CustomEvent("updated", details));
-  }
+    #emitUpdatedEvent(details = {}) {
+        this.dispatchEvent(new CustomEvent("updated", details));
+    }
 };
 
 export { Backgroundimage };

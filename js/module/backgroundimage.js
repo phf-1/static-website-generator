@@ -9,8 +9,9 @@ const Backgroundimage = class extends EventTarget {
   constructor(picture) {
     super();
     this.#picture = picture;
-    this.#loaded = picture.complete || picture.naturalWidth !== 0;
-    picture.addEventListener("load", () => {
+    this.#image = document.getElementById("bg-image-img");
+    this.#loaded = this.#image.complete || this.#image.naturalWidth !== 0;
+    this.#image.addEventListener("load", () => {
       this.#loaded = true;
       this.#emitUpdatedEvent({ loaded: this.#loaded });
     });
@@ -30,7 +31,6 @@ const Backgroundimage = class extends EventTarget {
   }
 
   // Private
-  #ratio;
   #picture;
   #image;
   #observer;

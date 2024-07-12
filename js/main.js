@@ -6,4 +6,4 @@
 
 import { Website } from "./module/website";
 
-new Website(document);
+new Website();

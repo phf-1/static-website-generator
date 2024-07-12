@@ -41,15 +41,13 @@ const bg_pic_id = "bg-image";
 
 const Website = class {
   // Public
-  constructor(document) {
-    this.#document = document;
-    this.#document.addEventListener("DOMContentLoaded", () =>
+  constructor() {
+    document.addEventListener("DOMContentLoaded", () =>
       this.#on_dom_content_loaded(),
     );
   }
 
   // Private
-  #document;
   #body;
   #backgroundimage;
   #container;
@@ -57,9 +55,9 @@ const Website = class {
 
   #on_dom_content_loaded() {
     // Connect the body and the background image.
-    this.#body = new Body(this.#document.body);
+    this.#body = new Body(document.body);
     this.#backgroundimage = new Backgroundimage(
-      this.#document.getElementById(bg_pic_id),
+      document.getElementById(bg_pic_id),
     );
     this.#body_backgroundimage();
     this.#backgroundimage.addEventListener("updated", () =>

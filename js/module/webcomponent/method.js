@@ -1,4 +1,4 @@
-import { html, css, LitElement } from "lit";
+import { html, css } from "lit";
 import { Cartridge } from "./cartridge";
 
 export class Method extends Cartridge {

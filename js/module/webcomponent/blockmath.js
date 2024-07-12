@@ -1,4 +1,4 @@
-import { html, css, LitElement } from "lit";
+import { html, css } from "lit";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import katex from "katex";
 import { Cartridge } from "./cartridge";
@@ -38,7 +38,7 @@ export class Blockmath extends Cartridge {
     `;
   }
 
-  firstUpdated(changedProperties) {
+  firstUpdated() {
     const latex = String.raw`${this.shadowRoot.querySelector("slot").assignedNodes()[0].wholeText}`;
     this._mathml = unsafeHTML(
       katex.renderToString(latex, { output: "mathml" }),

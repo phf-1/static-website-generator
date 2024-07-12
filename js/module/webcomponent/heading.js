@@ -1,4 +1,4 @@
-import { html, css, LitElement } from "lit";
+import { html, LitElement } from "lit";
 import { sharedStyles } from "./style";
 import { Utils } from "./utils";
 

@@ -36,7 +36,7 @@ const WebComponent = class {
    * Define all Web Components.
    *
    */
-  start(content) {
+  start() {
     customElements.define("x-abstract", Abstract);
     customElements.define("x-algorithm", Algorithm);
     customElements.define("x-blockcode", Blockcode);

@@ -22,7 +22,7 @@ const container = new Container(bg_pic_id);
 const body = new Body(bg_pic_img_id);
 const web_component = new WebComponent();
 
-const on_dom_content_loaded = function (event) {
+const on_dom_content_loaded = function () {
   const container_el = document.getElementById(container_id);
   container.start(container_el);
   const content = document.getElementById(content_id);

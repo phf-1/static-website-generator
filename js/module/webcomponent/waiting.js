@@ -1,4 +1,4 @@
-import { html, css, LitElement } from "lit";
+import { html, css } from "lit";
 import { Keyword } from "./keyword";
 
 export class Waiting extends Keyword {

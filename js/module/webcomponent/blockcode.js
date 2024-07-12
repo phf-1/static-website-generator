@@ -121,7 +121,7 @@ export class Blockcode extends LitElement {
     return html`<pre><code data-highlighted="yes" class="hljs ${res.language}">${res.content}</code></pre>`;
   }
 
-  firstUpdated(changedProperties) {
+  firstUpdated() {
     const code = this.shadowRoot
       .querySelector("slot")
       .assignedNodes()[0]

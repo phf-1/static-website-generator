@@ -4,8 +4,6 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-import { is_heading } from "./dom";
-
 const toc_id = "table-of-content";
 
 /*
@@ -51,7 +49,7 @@ const highlight_toc_heading = function (section, heading) {
   const threshold = 0; // : ∈ [0.0, 1.0]
 
   // The callback executed whenever the threshold is crossed.
-  const callback = function (entries, observer) {
+  const callback = function (entries) {
     const entry = entries[0];
     if (entry.isIntersecting) {
       heading.classList.add(highlight);

@@ -39,6 +39,38 @@ const id_build = (function () {
 
 
 /*
+ * When section is visible, highlight the heading. Remove the highlight when the
+ * section is no longer visible.
+ *
+ * section, heading : Node
+ */
+const highlight_toc_heading = function (section, heading) {
+	// The CSS class added/removed to the heading depending on section's visibility.
+	const highlight = "highlight"
+
+	// If the section is visible according to this threshold, then add highlight to
+	// the heading classes or remove it.
+	const threshold = 0 // : ∈ [0.0, 1.0]
+
+	// The callback executed whenever the threshold is crossed.
+	const callback = function (entries, observer) {
+		const entry = entries[0];
+		if (entry.isIntersecting) {	heading.classList.add(highlight); }
+		else { heading.classList.remove(highlight);	}
+	}
+
+	// when an intersection occurs, execute the callback.
+	let options = {
+		root: null, // viewport
+		rootMargin: "0px",
+		threshold: threshold,
+	};
+	const observer = new IntersectionObserver(callback, options);
+	observer.observe(section); // callback is called now.
+}
+
+
+/*
  * Build a table of content from a list of sections.
  *
  * Heading ≡ h1 | … | h6
@@ -51,6 +83,7 @@ const toc_build = function (sections) {
 		const heading = section.shadowRoot.firstElementChild.firstElementChild;
 		const toc_heading = heading.cloneNode();
 		section.id = section.id === "" ? id_build() : section.id;
+		highlight_toc_heading(section,toc_heading);
 		const a = document.createElement("a");
 		a.href = "#" + section.id;
 		a.innerHTML = heading.innerHTML;

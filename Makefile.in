@@ -89,8 +89,8 @@ check: ## Check all code.
 JS_DIR := js
 ## Objective
 ## Rule
-.PHONY: analysis
-analysis: ## Analyse all code.
+.PHONY: analyse
+analyse: ## Analyse all code using static analysis tools.
 	npx eslint --fix ${JS_DIR}
 
 

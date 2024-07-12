@@ -516,6 +516,16 @@ aside p {
   margin: 0;
 }
 
+x-example *:last-child,
+x-objective *:last-child,
+x-result *:last-child,
+x-method *:last-child,
+x-context *:last-child,
+x-definition *:last-child,
+x-abstract *:last-child {
+  margin-bottom: 0;
+}
+
 /***************/
 /* Experiment. */
 /***************/
@@ -544,16 +554,6 @@ aside p {
     background-color: green;
     display: none;
   }
-}
-
-x-example *:last-child,
-x-objective *:last-child,
-x-result *:last-child,
-x-method *:last-child,
-x-context *:last-child,
-x-definition *:last-child,
-x-abstract *:last-child {
-  margin-bottom: 0;
 }
 
 /*************************/

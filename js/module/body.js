@@ -6,23 +6,22 @@
 
 
 const Body = class {
-	constructor(id) {
-		this.id = id
+	constructor(bg_img_id) {
+		this.bg_img_id = bg_img_id;
 	}
 
+	// When enough content is available, show the body of the document.
 	start() {
-		const img = document.getElementById(this.id)
+		// The background image.
+		const img = document.getElementById(this.bg_img_id);
 
+		// Makes the body visible.
 		const show_body = function () {
-			const body = document.getElementsByTagName('body')[0]
-			body.style.visibility = "visible";
+			document.body.style.visibility = "visible";
 		}
 
-		if (img.complete) {
-			show_body()
-		} else {
-			img.addEventListener('load', show_body)
-		}
+		// When the bacground image is available, make the body visible.
+		img.complete ? show_body() : img.addEventListener('load', show_body)
 	}
 };
 

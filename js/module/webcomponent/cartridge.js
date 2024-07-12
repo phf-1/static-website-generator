@@ -23,7 +23,7 @@ export class Cartridge extends LitElement {
   content: "Cartridge";
   position: absolute;
   top: calc(-1*(1em + 1px + 0.75em));
-  right: 0;
+  left: 0;
   font-size: 0.75em;
   color: var(--x-cartridge-annotation-color, black);
 }

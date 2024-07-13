@@ -57,6 +57,7 @@
   --button-over: #fffff0;
   --p-margin-bottom: calc(var(--line-height) * 1em);
   --sep-margin: 4rem;
+  --img-shadow: 2px 2px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
 
   /************************/
   /* Web component style. */
@@ -190,12 +191,17 @@ main {
   justify-content: center;
 
   #content {
-    position: relative;
-    width: 70ch;
-    border: 1px solid var(--annotation);
-    padding: 0 1.5rem 1rem 1.5rem;
-    margin-bottom: 33vh;
-    background-color: var(--main-bg);
+	position: relative;
+	width: 70ch;
+	border: 1px solid var(--annotation);
+	padding: 0 1.5rem 1rem 1.5rem;
+	margin-bottom: 33vh;
+	background-color: var(--main-bg);
+	box-shadow: var(--img-shadow);
+
+	img {
+		box-shadow: var(--img-shadow);
+	}
   }
 }
 
@@ -213,14 +219,15 @@ main {
   border: 1px solid var(--annotation);
   border-top: none;
   border-radius: 0;
+  box-shadow: var(--img-shadow);
 
   #bg-image-img {
-    position: relative;
-    border: none;
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    border-radius: 0;
+	position: relative;
+	border: none;
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	border-radius: 0;
   }
 }
 
@@ -290,7 +297,7 @@ main {
   background-color: var(--main-bg);
 
   h1 {
-    display: none;
+	display: none;
   }
 
   h2,
@@ -298,33 +305,33 @@ main {
   h4,
   h5,
   h6 {
-    font-family: "Sans";
-    font-size: 0.9rem;
-    & a {
-      padding: 0.1em;
-      margin-bottom: 0.4em;
-      font-weight: normal;
-      color: var(--link);
-    }
-    &.highlight {
-      background-color: var(--algorithm-bg);
-    }
+	font-family: "Sans";
+	font-size: 0.9rem;
+	& a {
+	  padding: 0.1em;
+	  margin-bottom: 0.4em;
+	  font-weight: normal;
+	  color: var(--link);
+	}
+	&.highlight {
+	  background-color: var(--algorithm-bg);
+	}
   }
 
   h2 {
-    margin-left: 0em;
+	margin-left: 0em;
   }
   h3 {
-    margin-left: 1em;
+	margin-left: 1em;
   }
   h4 {
-    margin-left: 2em;
+	margin-left: 2em;
   }
   h5 {
-    margin-left: 3em;
+	margin-left: 3em;
   }
   h6 {
-    margin-left: 4rem;
+	margin-left: 4rem;
   }
 }
 
@@ -447,12 +454,12 @@ thead th {
   column-gap: var(--p-margin-bottom);
 
   .column {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: var(--p-margin-bottom);
-    border: 1px solid var(--annotation);
-    border-radius: 2px;
-    padding: 1em;
+	display: flex;
+	flex-direction: column;
+	margin-bottom: var(--p-margin-bottom);
+	border: 1px solid var(--annotation);
+	border-radius: 2px;
+	padding: 1em;
   }
 }
 
@@ -467,18 +474,18 @@ figure {
 
   img,
   iframe {
-    max-width: 100%;
+	max-width: 100%;
   }
 
   iframe {
-    aspect-ratio: 16 / 9;
-    height: 100%;
-    width: 100%;
+	aspect-ratio: 16 / 9;
+	height: 100%;
+	width: 100%;
   }
 
   figcaption {
-    margin-top: 1rem;
-    text-align: center;
+	margin-top: 1rem;
+	text-align: center;
   }
 }
 
@@ -535,24 +542,24 @@ x-abstract *:last-child {
   background-color: blue;
 
   .actions {
-    display: flex;
-    justify-content: end;
+	display: flex;
+	justify-content: end;
   }
 
   .button {
-    background-color: aqua;
-    position: relative;
-    padding: 0;
-    margin: 0;
+	background-color: aqua;
+	position: relative;
+	padding: 0;
+	margin: 0;
   }
 
   .assertion {
-    background-color: red;
+	background-color: red;
   }
 
   .proof {
-    background-color: green;
-    display: none;
+	background-color: green;
+	display: none;
   }
 }
 
@@ -562,47 +569,47 @@ x-abstract *:last-child {
 
 @media (max-width: 1000px) {
   body {
-    margin-top: 1rem;
+	margin-top: 1rem;
   }
 
   #bg-image {
-    display: none;
+	display: none;
   }
 
   #container {
-    position: static;
-    width: 100%;
+	position: static;
+	width: 100%;
   }
 
   #container #content {
-    max-width: 70ch;
-    flex: 1;
+	max-width: 70ch;
+	flex: 1;
   }
 }
 
 @media (max-width: 800px) {
   body {
-    margin: 0;
-    font-size: 16px;
+	margin: 0;
+	font-size: 16px;
   }
 
   main {
-    padding: 0.25rem;
+	padding: 0.25rem;
   }
 
   .topbar {
-    margin-bottom: 2rem;
+	margin-bottom: 2rem;
   }
 
   #table-of-content {
-    display: none;
+	display: none;
   }
 
   .cartridge.abstract {
-    max-width: 80%;
+	max-width: 80%;
   }
 
   aside {
-    display: none;
+	display: none;
   }
 }

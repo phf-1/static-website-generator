@@ -48,58 +48,44 @@ const Website = class {
     }
 
     // Private
-    #body;
-    #backgroundimage;
-    #container;
-    #toc;
-
     #on_dom_content_loaded() {
+        // Build the body and background image processes.
+        const body = new Body(document.body);
+        const image = new Backgroundimage(document.getElementById(bg_pic_id));
+
         // Connect the body and the background image.
-        this.#body = new Body(document.body);
-        this.#backgroundimage = new Backgroundimage(
-            document.getElementById(bg_pic_id),
-        );
-        this.#body_backgroundimage();
-        this.#backgroundimage.addEventListener("updated", () =>
-            this.#body_backgroundimage(),
-        );
+        const body_image = () => {
+            if (image.loaded()) {
+                body.show();
+            }
+        };
+        body_image();
+        image.addEventListener("updated", body_image);
 
-        // Connect the container and the background image.
-        this.#container = new Container(document.getElementById(container_id));
-        this.#container_backgroundimage();
-        this.#backgroundimage.addEventListener("updated", () =>
-            this.#container_backgroundimage(),
-        );
-
-        // Build the toc from the content.
-        this.#toc = new Toc(document.getElementById(content_id));
+        // Build the container process.
         const container_el = document.getElementById(container_id);
+        const container = new Container(container_el);
 
-        // Connect the toc and the container.
-        container_el.appendChild(this.#toc.node());
+        // Connect the body and the background image.
+        const container_image = () => {
+            if (image.loaded()) {
+                container.position(image.rect());
+            }
+        };
+        container_image();
+        image.addEventListener("updated", container_image);
 
-        // Connect the nav button and the toc.
-        document.getElementById(toggle_toc_btn_id).onclick = () =>
-            this.#toc.toggle();
+        // Build the toc process.
+        const toc = new Toc(document.getElementById(content_id));
+
+        // Connect the TOC and the document.
+        container_el.appendChild(toc.node());
+        document.getElementById(toggle_toc_btn_id).onclick = () => toc.toggle();
 
         // Experimental.
         this.theorem = new Theorem();
         const content = document.getElementById(content_id);
         this.theorem.start(content);
-    }
-
-    // Body and background image relation.
-    #body_backgroundimage() {
-        if (this.#backgroundimage.loaded()) {
-            this.#body.show();
-        }
-    }
-
-    // Container and background image relation.
-    #container_backgroundimage() {
-        if (this.#backgroundimage.loaded()) {
-            this.#container.position(this.#backgroundimage.rect());
-        }
     }
 };
 

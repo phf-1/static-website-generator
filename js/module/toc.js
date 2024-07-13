@@ -92,8 +92,7 @@ const Toc = class {
     // Public
 
     constructor(content) {
-        this.#content = content;
-        this.#toc = element_toc(this.#content);
+        this.#toc = element_toc(content);
     }
 
     toggle() {
@@ -109,7 +108,6 @@ const Toc = class {
     }
 
     // Private
-    #content;
     #toc;
 };
 

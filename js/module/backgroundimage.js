@@ -8,18 +8,23 @@ const Backgroundimage = class extends EventTarget {
     // Public
     constructor(picture) {
         super();
-        this.#picture = picture;
-        this.#image = document.getElementById("bg-image-img");
-        this.#loaded = this.#image.complete || this.#image.naturalWidth !== 0;
-        this.#image.addEventListener("load", () => {
+
+        // Backgroundimage emits the event "updated" when its image has loaded.
+        const image = document.getElementById("bg-image-img");
+        this.#loaded = image.complete || image.naturalWidth !== 0;
+        image.addEventListener("load", () => {
             this.#loaded = true;
             this.#emitUpdatedEvent({ loaded: this.#loaded });
         });
-        this.#observer = new ResizeObserver((entries) => {
+
+        // Backgroundimage emits the event "updated" when size has changed.
+        this.#rect = picture.getBoundingClientRect();
+        const observer = new ResizeObserver((entries) => {
             const rect = entries[0].contentRect;
+            this.#rect = rect;
             this.#emitUpdatedEvent({ rect });
         });
-        this.#observer.observe(this.#picture);
+        observer.observe(picture);
     }
 
     loaded() {
@@ -27,15 +32,12 @@ const Backgroundimage = class extends EventTarget {
     }
 
     rect() {
-        return this.#picture.getBoundingClientRect();
+        return this.#rect;
     }
 
     // Private
-    #picture;
-    #image;
-    #observer;
+    #rect;
     #loaded;
-
     #emitUpdatedEvent(details = {}) {
         this.dispatchEvent(new CustomEvent("updated", details));
     }

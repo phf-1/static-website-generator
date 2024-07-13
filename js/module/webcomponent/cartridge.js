@@ -1,5 +1,5 @@
 import { html, css, LitElement } from "lit";
-import { sharedStyles } from "./style.js";
+import { sharedStyles } from "./style";
 
 export class Cartridge extends LitElement {
     static css = { class: "cartridge" };

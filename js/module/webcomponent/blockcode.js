@@ -5,7 +5,7 @@ import scheme from "highlight.js/lib/languages/scheme";
 import c from "highlight.js/lib/languages/c";
 import python from "highlight.js/lib/languages/python";
 import lean from "highlightjs-lean";
-import { sharedStyles } from "./style.js";
+import { sharedStyles } from "./style";
 
 hljs.registerLanguage("scheme", scheme);
 hljs.registerLanguage("python", python);

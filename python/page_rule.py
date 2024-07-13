@@ -5,7 +5,7 @@ from pathlib import Path
 from PIL import Image
 import shutil
 
-# article_dir, template_file ⊢ page_dir
+# article_dir, template_file, page_dir ⊢ page_dir
 def main(article_dir, template_file, page_dir):
 
     # page_dir points to an empty directory.
@@ -18,7 +18,7 @@ def main(article_dir, template_file, page_dir):
     page_dir_data = page_dir / "data"
     shutil.copytree(article_dir_data, page_dir_data)
 
-    # resize the background image.
+    # page_dir/data/bg.webp = resize(article_dir/data/bg.*)
     bg_img_path = Path(glob.glob(str(article_dir_data / 'bg.*'))[0])
     with Image.open(bg_img_path) as img:
         width, height = img.size

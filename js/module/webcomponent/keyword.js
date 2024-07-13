@@ -1,5 +1,5 @@
 import { html, css, LitElement } from "lit";
-import { sharedStyles } from "./style.js";
+import { sharedStyles } from "./style";
 
 export class Keyword extends LitElement {
     static css = { class: "keyword" };

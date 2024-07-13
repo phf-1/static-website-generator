@@ -55,9 +55,7 @@ const Website = class {
 
         // Connect the body and the background image.
         const body_image = () => {
-            if (image.loaded()) {
-                body.show();
-            }
+            image.loaded() && body.show();
         };
         body_image();
         image.addEventListener("updated", body_image);
@@ -68,9 +66,7 @@ const Website = class {
 
         // Connect the body and the background image.
         const container_image = () => {
-            if (image.loaded()) {
-                container.position(image.rect());
-            }
+            image.loaded() && container.position(image.rect());
         };
         container_image();
         image.addEventListener("updated", container_image);

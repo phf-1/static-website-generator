@@ -19,10 +19,6 @@ class Example extends Cartridge {
         `,
     ];
 
-    constructor() {
-        super();
-    }
-
     render() {
         return html`
             <div class="${Cartridge.css.class} example">

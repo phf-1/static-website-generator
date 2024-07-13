@@ -64,7 +64,7 @@ const Website = class {
         const container_el = document.getElementById(container_id);
         const container = new Container(container_el);
 
-        // Connect the body and the background image.
+        // Connect the container and the background image.
         const container_image = () => {
             image.loaded() && container.position(image.rect());
         };

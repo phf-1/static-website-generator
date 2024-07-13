@@ -19,10 +19,6 @@ class Method extends Cartridge {
         `,
     ];
 
-    constructor() {
-        super();
-    }
-
     render() {
         return html`
             <div class="${Cartridge.css.class} method">

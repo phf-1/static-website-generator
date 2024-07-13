@@ -90,7 +90,6 @@ const element_toc = function (element) {
 
 const Toc = class {
     // Public
-
     constructor(content) {
         this.#toc = element_toc(content);
     }

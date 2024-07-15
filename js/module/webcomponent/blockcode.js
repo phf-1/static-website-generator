@@ -99,7 +99,7 @@ class Blockcode extends LitElement {
             }
             code {
                 font-family: "Mono";
-                font-size: 0.8rem;
+                font-size: 0.75rem;
                 border-radius: 2px;
             }
         `,

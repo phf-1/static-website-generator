@@ -9,7 +9,6 @@ export const sharedStyles = css`
 }
 
 pre {
-  max-width: 90vw;
   overflow-x: auto;
 }
 

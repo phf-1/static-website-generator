@@ -10,7 +10,7 @@ def main(article_dir, template_file, page_dir):
 
     # page_dir points to an empty directory.
     if page_dir.exists():
-        shutil.rmtree(page_dir)    
+        shutil.rmtree(page_dir)
     page_dir.mkdir(parents=True)
 
     # page_dir/data = article_dir/data
@@ -26,11 +26,12 @@ def main(article_dir, template_file, page_dir):
         new_height = int((new_width / width) * height)
         resized_img = img.resize((new_width, new_height), Image.LANCZOS)
         resized_img.save(str(page_dir_data / 'bg.webp'))
+        resized_img.save(str(page_dir_data / 'bg.jpg'))
 
     # index_value = template_value
     with open(template_file) as f:
         index_value = f.read()
-    
+
     # index_value/__LANG__ = article_dir/lang
     with open(article_dir / "lang") as f:
         index_value = index_value.replace("__LANG__", f.read().strip())
@@ -56,6 +57,6 @@ def main(article_dir, template_file, page_dir):
 if __name__ == "__main__":
     article_dir = sys.argv[1]
     template_file = sys.argv[2]
-    page_dir = sys.argv[3]    
+    page_dir = sys.argv[3]
     main(Path(article_dir), Path(template_file), Path(page_dir))
     sys.exit(0)

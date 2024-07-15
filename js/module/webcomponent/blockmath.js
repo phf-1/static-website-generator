@@ -16,6 +16,7 @@ export class Blockmath extends Cartridge {
                 margin: var(--x-blockmath-margin, 2rem) auto;
                 background-color: var(--x-blockmath-bg-color, white);
                 border-color: var(--x-blockmath-border-color, black);
+                font-size: 1.2em;
             }
 
             .blockmath::before {

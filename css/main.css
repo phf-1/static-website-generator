@@ -170,6 +170,7 @@
   margin: 0;
   padding: 0;
   scroll-margin-top: 4.5rem;
+  overflow-x: auto;
 }
 
 html {
@@ -179,7 +180,7 @@ html {
   font-size: 18px;
   line-height: var(--line-height);
   text-rendering: optimizeLegibility;
-  text-align: justify;
+  text-align: start;
   font-feature-settings: "kern" 1;
   font-kerning: normal;
 }
@@ -583,7 +584,7 @@ x-abstract *:last-child {
 /* Responsive behaviour. */
 /*************************/
 
-@media (max-width: 1000px) {
+@media (max-width: 900px) {
   body {
     margin-top: 1rem;
   }

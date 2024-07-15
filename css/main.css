@@ -59,7 +59,7 @@
     --sep-margin: 4rem;
     --img-shadow: 2px 2px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
     --border: 1px solid var(--annotation);
-    
+
     /************************/
     /* Web component style. */
     /************************/
@@ -196,7 +196,7 @@ main {
     margin: auto;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
 }
 
 #container {
@@ -206,6 +206,7 @@ main {
     #content {
         position: relative;
         max-width: 70ch;
+        margin: auto;
         border: var(--border);
         padding: 0 1.5rem 1rem 1.5rem;
         margin-bottom: 33vh;
@@ -301,7 +302,7 @@ main {
 
 #table-of-content {
     position: absolute;
-    right: 0;    
+    right: 0;
     top: 0;
     margin-top: 1rem;
     display: none;
@@ -313,7 +314,7 @@ main {
     flex-shrink: 0;
     border: var(--border);
     border-radius: var(--radius);
-    
+
 
     h1 {
         display: none;
@@ -403,13 +404,13 @@ code {
     background-color: var(--code);
     border-radius: var(--radius);
     padding: 0 0.2rem;
-    font-size: 0.75rem;    
+    font-size: 0.75rem;
 }
 
 pre {
     margin-bottom: var(--p-margin-bottom);
     overflow-x: auto;
-    font-size: 0.75rem;    
+    font-size: 0.75rem;
 }
 
 em,

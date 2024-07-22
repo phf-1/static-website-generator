@@ -1,3 +1,9 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+
 import { html, LitElement } from "lit";
 import { sharedStyles } from "./style";
 import { Utils } from "./utils";
@@ -6,22 +12,41 @@ class Heading extends LitElement {
     static properties = {
         name: {},
         state: {},
+        id: { type: String, reflect: true },
     };
 
     constructor() {
         super();
-        this.name = "Section name";
-        this.state = null;
+        if (!this.id) {
+            this.id = "";
+        }
+        if (!this.name) {
+            this.name = "NAME";
+        }
+        if (!this.state) {
+            this.state = null;
+        }
     }
 
     static styles = [sharedStyles];
 
-    keyword() {
-        return Utils.keyword(this.state);
+    render() {
+        return html`<section>
+            <h1 id="${this.id}">${this.keyword()}${this.name}</h1>
+        </section> `;
     }
 
-    render() {
-        return html``;
+    firstUpdated() {
+        this._heading = this.renderRoot.firstElementChild.firstElementChild;
+    }
+
+    heading() {
+        return this._heading;
+    }
+
+    // Private
+    keyword() {
+        return Utils.keyword(this.state);
     }
 }
 

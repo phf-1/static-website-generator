@@ -6,4 +6,5 @@
 
 import { Website } from "./module/website";
 
-new Website();
+const website = new Website();
+document.addEventListener("DOMContentLoaded", () => website.start());

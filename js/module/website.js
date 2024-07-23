@@ -43,51 +43,51 @@ const toggle_toc_btn_id = "toggle_toc_btn";
 const bg_pic_id = "bg-image";
 
 const Website = class {
-	// Public
-	constructor() {
-		document.addEventListener("DOMContentLoaded", () =>
-			this.#on_dom_content_loaded(),
-		);
-	}
+    // Public
+    constructor() {}
 
-	// Private
-	#on_dom_content_loaded() {
-		// Build the body and background image processes.
-		const body = new Body(document.body);
-		const image = new Backgroundimage(document.getElementById(bg_pic_id));
+    start() {
+        // Build the body and background image processes.
+        const body = new Body(document.body);
+        const image = new Backgroundimage(document.getElementById(bg_pic_id));
 
-		// Connect the body and the background image.
-		const body_image = () => {
-			image.loaded() && body.show();
-		};
-		body_image();
-		image.addEventListener("updated", body_image);
+        // Connect the body and the background image.
+        const body_image = () => {
+            image.loaded() && body.show();
+        };
+        body_image();
+        image.addEventListener("updated", body_image);
 
-		// Build the container process.
-		const container_el = document.getElementById(container_id);
-		const container = new Container(container_el);
+        // Build the container process.
+        const container_el = document.getElementById(container_id);
+        const container = new Container(container_el);
 
-		// Connect the container and the background image.
-		const container_image = () => {
-			image.loaded() && container.position(image.rect());
-		};
-		container_image();
-		image.addEventListener("updated", container_image);
+        // Connect the container and the background image.
+        const container_image = () => {
+            image.loaded() && container.position(image.rect());
+        };
+        container_image();
+        image.addEventListener("updated", container_image);
 
-		// Build the toc process.
-		const content = document.getElementById(content_id);
-		const x_toc = document.getElementsByTagName("x-toc")[0];
-		x_toc.init(content);
+        // Build the toc process.
+        const content = document.getElementById(content_id);
+        const x_toc = document.getElementsByTagName("x-toc")[0];
+        setTimeout(() => {
+            x_toc.init(content);
+        }, 500);
 
-		// Connect the TOC and the document.
-		const toc_btn = document.getElementById(toggle_toc_btn_id);
-		toc_btn.addEventListener("click", (event) => { x_toc.toggle(); });
-		toc_btn.addEventListener("touchstart", (event) => { x_toc.toggle(); });
+        // Connect the TOC and the document.
+        const toc_btn = document.getElementById(toggle_toc_btn_id);
+        const toc_btn_event = "click";
+        const toc_btn_handler = function () {
+            x_toc.toggle();
+        };
+        toc_btn.addEventListener(toc_btn_event, toc_btn_handler);
 
-		// Experimental.
-		this.theorem = new Theorem();
-		this.theorem.start(content);
-	}
+        // Experimental.
+        this.theorem = new Theorem();
+        this.theorem.start(content);
+    }
 };
 
 export { Website };

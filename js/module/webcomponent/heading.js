@@ -36,12 +36,8 @@ class Heading extends LitElement {
         </section> `;
     }
 
-    firstUpdated() {
-        this._heading = this.renderRoot.firstElementChild.firstElementChild;
-    }
-
     heading() {
-        return this._heading;
+        return this.renderRoot.firstElementChild.firstElementChild;
     }
 
     // Private

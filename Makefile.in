@@ -224,8 +224,8 @@ all: ${CNAME_FILE} ${MANIFEST_FILE} ${CSS_OBJ} ${FAVICON_OBJ} ${FONT_OBJ} ${JS_O
 ## Rule
 .PHONY: server
 server: all ## Start a web server serving files from the current directory.
-	cd ${BUILD_DIR}
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
+	cd ${BUILD_DIR}
 	python3 -m http.server
 
 

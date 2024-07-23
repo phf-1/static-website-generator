@@ -16,6 +16,15 @@ class TocHeading extends LitElement {
     static styles = [
         sharedStyles,
         css`
+            :host ::slotted(*) {
+                padding: 0 0.1rem !important;
+            }
+
+            :host ::slotted(*:hover) {
+                background-color: var(--x-toc-heading-hover-bg, red) !important;
+                color: white;
+            }
+
             :host([highlight]) ::slotted(*) {
                 background-color: var(--x-toc-heading-highlight-bg, orange);
             }

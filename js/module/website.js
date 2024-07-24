@@ -43,51 +43,76 @@ const toggle_toc_btn_id = "toggle_toc_btn";
 const bg_pic_id = "bg-image";
 
 const Website = class {
-	// Public
-	constructor() {}
+    constructor() {}
 
-	start() {
-		// Build the body and background image processes.
-		const body = new Body(document.body);
-		const image = new Backgroundimage(document.getElementById(bg_pic_id));
+    // Public
+    //
+    // The web page is viewed as a network of actors.
+    // The network is built in order, e.g. :
+    //   1. body is built
+    //   2. background_image is built
+    //   3. website ─ background_image ─ body
+    //   4. container is built
+    //   5. website ─ background_image ┬ body
+    //                                 └ container
+    //   6. content is built
+    //   7. toc is built
+    //   9. website ┬ background_image ┬ body
+    //              │                  └ container
+    //              └ content ─ toc
+    start() {
+        // body
+        const body = new Body(document.body);
 
-		// Connect the body and the background image.
-		const body_image = () => {
-			image.loaded() && body.show();
-		};
-		body_image();
-		image.addEventListener("updated", body_image);
+        // background_image
+        const bgimage = new Backgroundimage(document.getElementById(bg_pic_id));
 
-		// Build the container process.
-		const container_el = document.getElementById(container_id);
-		const container = new Container(container_el);
+        // background_image — body
+        //
+        // If the background image is loaded, then: show the body.
+        const body_image = () => {
+            bgimage.loaded() && body.show();
+        };
+        body_image();
+        bgimage.addEventListener("updated", body_image);
 
-		// Connect the container and the background image.
-		const container_image = () => {
-			image.loaded() && container.position(image.rect());
-		};
-		container_image();
-		image.addEventListener("updated", container_image);
+        // container
+        const container = new Container(document.getElementById(container_id));
 
-		// Build the toc process.
-		const content = document.getElementById(content_id);
-		const x_toc = document.getElementsByTagName("x-toc")[0];
-		setTimeout(() => {
-			x_toc.init(content);
-		}, 500);
+        // background_image — container.
+        //
+        // If the background image is loaded, then: position the container w.r.t. the image.
+        const container_image = () => {
+            bgimage.loaded() && container.position(bgimage.rect());
+        };
+        container_image();
+        bgimage.addEventListener("updated", container_image);
 
-		// Connect the TOC and the document.
-		const toc_btn = document.getElementById(toggle_toc_btn_id);
-		const toc_btn_event = "click";
-		const toc_btn_handler = function () {
-			x_toc.toggle();
-		};
-		toc_btn.addEventListener(toc_btn_event, toc_btn_handler);
+        // content
+        const content = document.getElementById(content_id);
 
-		// Experimental.
-		this.theorem = new Theorem();
-		this.theorem.start(content);
-	}
+        // toc
+        const x_toc = document.getElementsByTagName("x-toc")[0];
+
+        // content — toc
+        //
+        // Because of different behaviours on iOS and other systems, we must give
+        // time to the shadowDOM to reach a « stable » state before building the TOC
+        // from it. Lifecycles hooks like firstUpdated do not work uniformly.
+        setTimeout(() => { x_toc.init(content); }, 500);
+
+        // toc_btn
+        const toc_btn = document.getElementById(toggle_toc_btn_id);
+
+        // toc_btn — toc
+        //
+        // If the TOC button is clicked, then: toggle the TOC.
+        toc_btn.addEventListener("click", () => { x_toc.toggle(); });
+
+        // Experimental.
+        this.theorem = new Theorem();
+        this.theorem.start(content);
+    }
 };
 
 export { Website };

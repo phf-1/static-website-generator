@@ -40,6 +40,7 @@ import { Backgroundimage } from "./backgroundimage";
 const container_id = "container";
 const content_id = "content";
 const toggle_toc_btn_id = "toggle_toc_btn";
+const toggle_qa_btn_id = "toggle_qa";
 const bg_pic_id = "bg-image";
 
 const Website = class {
@@ -99,7 +100,9 @@ const Website = class {
         // Because of different behaviours on iOS and other systems, we must give
         // time to the shadowDOM to reach a « stable » state before building the TOC
         // from it. Lifecycles hooks like firstUpdated do not work uniformly.
-        setTimeout(() => { x_toc.init(content); }, 500);
+        setTimeout(() => {
+            x_toc.init(content);
+        }, 500);
 
         // toc_btn
         const toc_btn = document.getElementById(toggle_toc_btn_id);
@@ -107,7 +110,36 @@ const Website = class {
         // toc_btn — toc
         //
         // If the TOC button is clicked, then: toggle the TOC.
-        toc_btn.addEventListener("click", () => { x_toc.toggle(); });
+        toc_btn.addEventListener("click", () => {
+            x_toc.toggle();
+        });
+
+        // toggle_qa_btn
+        const toggle_qa_btn = document.getElementById(toggle_qa_btn_id);
+
+        // toggle_qa_btn — { qa }
+        //
+        // If the toggle QA button is clicked, then: all answers of QA are toggled.
+        const qa_list = Array.from(document.getElementsByTagName("x-qa"));
+        if (qa_list.length == 0) {
+            toggle_qa_btn.style.display = "none";
+        } else {
+            const toggle_all_qa = function () {
+                const all_qa_are_visible = qa_list.every((qa) =>
+                    qa.is_visible(),
+                );
+                if (all_qa_are_visible) {
+                    qa_list.map((qa) => qa.hide());
+                    toggle_qa_btn.innerHTML = "SHOW";
+                } else {
+                    qa_list.map((qa) => qa.show());
+                    toggle_qa_btn.innerHTML = "HIDE";
+                }
+            };
+            toggle_qa_btn.addEventListener("click", () => {
+                toggle_all_qa();
+            });
+        }
 
         // Experimental.
         this.theorem = new Theorem();

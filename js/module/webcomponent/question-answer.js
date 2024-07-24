@@ -35,6 +35,8 @@ class QuestionAnswer extends LitElement {
         this._hidden = true;
     }
 
+    // Public
+
     render() {
         const show_btn = html`<button class="button" @click="${this._show}">
             SHOW
@@ -53,9 +55,29 @@ class QuestionAnswer extends LitElement {
         `;
     }
 
+    is_hidden() {
+        return this._hidden;
+    }
+
+    is_visible() {
+        return !this._hidden;
+    }
+
+    show() {
+        this._show();
+    }
+
+    hide() {
+        this._hide();
+    }
+
+    // Calllbacks
+
     firstUpdated() {
         this._hidden ? this._hide() : this._show();
     }
+
+    // Private
 
     _answers() {
         return this.shadowRoot

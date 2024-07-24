@@ -5,6 +5,9 @@ from pathlib import Path
 def loc(uuid):
     return f"<loc>https://phfrohring.com/page/{uuid}/</loc>"
 
+def uuid_props(uuid):
+    return [loc(uuid)]
+
 def url(props):
     props_str = "\n".join(props)
     return f'<url>\n{props_str}\n</url>'
@@ -17,7 +20,7 @@ def sitemap(urlset):
     return f'<?xml version="1.0" encoding="UTF-8"?>\n{urlset}'
 
 def main(root_path, uuids):
-    props_list = [[loc(uuid)] for uuid in uuids]
+    props_list = [uuid_props(uuid) for uuid in uuids]
     urls = [url(props) for props in props_list]
     urlset_ = urlset(urls)
     sitemap_ = sitemap(urlset_)

@@ -9,41 +9,41 @@ import { sharedStyles } from "../style";
 import { Utils } from "../../utils";
 
 class Heading extends LitElement {
-	static properties = {
-		name: {},
-		state: {},
-		id: { type: String, reflect: true },
-	};
+    static properties = {
+        name: {},
+        state: {},
+        id: { type: String, reflect: true },
+    };
 
-	constructor() {
-		super();
-		if (!this.id) {
-			this.id = "";
-		}
-		if (!this.name) {
-			this.name = "NAME";
-		}
-		if (!this.state) {
-			this.state = null;
-		}
-	}
+    constructor() {
+        super();
+        if (!this.id) {
+            this.id = "";
+        }
+        if (!this.name) {
+            this.name = "NAME";
+        }
+        if (!this.state) {
+            this.state = null;
+        }
+    }
 
-	static styles = [sharedStyles];
+    static styles = [sharedStyles];
 
-	render() {
-		return html`<section>
-			<h1 id="${this.id}">${this.keyword()}${this.name}</h1>
-		</section> `;
-	}
+    render() {
+        return html`<section>
+            <h1 id="${this.id}">${this.keyword()}${this.name}</h1>
+        </section> `;
+    }
 
-	heading() {
-		return this.renderRoot.firstElementChild.firstElementChild;
-	}
+    heading() {
+        return this.renderRoot.firstElementChild.firstElementChild;
+    }
 
-	// Private
-	keyword() {
-		return Utils.keyword(this.state);
-	}
+    // Private
+    keyword() {
+        return Utils.keyword(this.state);
+    }
 }
 
 export { Heading };

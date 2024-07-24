@@ -16,7 +16,7 @@ class QuestionAnswer extends LitElement {
         sharedStyles,
         css`
             .question-answer {
-                margin: var(--x-qa-margin, 4rem) 0;
+                margin: var(--x-qa-margin, 4rem 0);
             }
             .question-answer .actions {
                 display: flex;

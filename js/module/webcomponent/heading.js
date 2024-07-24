@@ -6,7 +6,7 @@
 
 import { html, LitElement } from "lit";
 import { sharedStyles } from "./style";
-import { Utils } from "./utils";
+import { Utils } from "../utils";
 
 class Heading extends LitElement {
     static properties = {

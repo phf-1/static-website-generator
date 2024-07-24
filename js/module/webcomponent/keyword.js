@@ -15,13 +15,13 @@ export class Keyword extends LitElement {
         css`
             .keyword {
                 font-family: "Mono";
-                padding: 0 0.2em;
-                margin-right: 0.5em;
+                padding: var(--x-keyword-padding, 0 0.2em);
+                margin: var(--x-keyword-margin, 0 0.5em 0 0);
                 color: var(--x-keyword-color, white);
-                border-radius: 2px;
+                border-radius: var(--x-keyword-border-radius, 2px);
                 font-weight: bold;
                 text-transform: uppercase;
-                font-size: 0.75em;
+                font-size: var(--x-keyword-font-size, 0.75em);
                 background-color: var(--x-keyword-bg-color, black);
             }
 

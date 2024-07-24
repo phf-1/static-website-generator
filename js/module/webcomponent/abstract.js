@@ -12,11 +12,11 @@ class Abstract extends Cartridge {
         Cartridge.styles,
         css`
             .abstract {
-                font-size: 0.9em;
+                font-size: var(--x-abstract-font-size, 0.9em);
                 background-color: var(--x-abstract-bg-color, white);
                 border-color: var(--x-abstract-border-color, black);
-                max-width: 70%;
-                margin: 15vh auto;
+                max-width: var(--x-abstract-max-width, 70%);
+                margin: var(--x-abstract-margin, 15vh auto);
             }
 
             .abstract::before {

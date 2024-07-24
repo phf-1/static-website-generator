@@ -13,12 +13,16 @@ export class Cartridge extends LitElement {
     static styles = [
         sharedStyles,
         css`
+            :host {
+                --padding: var(--x-cartridge-padding, 1em);
+            }
+
             .cartridge {
                 position: relative;
                 width: 100%;
-                margin: var(--x-cartridge-margin, 2rem) auto;
-                padding: 1rem;
-                border-radius: 2px;
+                margin: var(--x-cartridge-margin, 2rem auto);
+                padding: var(--padding);
+                border-radius: var(--x-cartridge-border-radius, 2px);
                 border-top: 1px solid var(--x-cartridge-border-color, black);
                 border-bottom: 1px solid var(--x-cartridge-border-color, black);
                 background-color: var(--x-cartridge-bg-color, white);
@@ -27,7 +31,7 @@ export class Cartridge extends LitElement {
             .cartridge::before {
                 content: "Cartridge";
                 position: absolute;
-                top: calc(-1 * (1em + 1px + 0.75em));
+                top: calc(-1 * (var(--padding) + 1px + 0.75em));
                 left: 0;
                 font-size: 0.75em;
                 color: var(--x-cartridge-annotation-color, black);

@@ -14,7 +14,7 @@ class H1 extends Heading {
         css`
             h1 {
                 display: block;
-                margin: var(--x-h1-margin, 10vh) auto;
+                margin: var(--x-h1-margin, 10vh auto);
                 border-bottom: none;
 
                 text-align: center;

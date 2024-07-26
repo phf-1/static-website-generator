@@ -178,7 +178,10 @@ ARTICLE_FILE := ${ARTICLE_DIR}/article.html
 PAGE_CTX := ${TEMPLATE} ${ARTICLE_FILES}
 PAGES := ${BUILD_DIR}/page
 PAGE_DIR := ${PAGES}/${UUID}
-PAGE_RULE := python/page_rule.py
+PYTHON_SRC := python
+PYTHON_RULE := ${PYTHON_SRC}/rule
+PYTHON_LIB := ${PYTHON_SRC}/lib
+PAGE_RULE := ${PYTHON_RULE}/page.py
 ## Objective
 PAGE_FILE := ${PAGE_DIR}/index.html
 ## Rule
@@ -186,7 +189,7 @@ PAGE_FILE := ${PAGE_DIR}/index.html
 page: ${PAGE_FILE}  ## Install the page with UUID ${UUID} under ${BUILD_DIR}.
 ${PAGE_FILE}: ${PAGE_CTX}
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
-	python3 ${PAGE_RULE} ${ARTICLE_DIR} ${TEMPLATE} ${PAGE_DIR}
+	PYTHONPATH=${PYTHON_SRC} python3 ${PAGE_RULE} ${ARTICLE_DIR} ${TEMPLATE} ${PAGE_DIR}
 
 
 # index
@@ -201,15 +204,15 @@ INDEX_FILE := ${INDEX_DIR}/index.html
 index: ${INDEX_FILE}
 ${INDEX_FILE}: ${ARTICLES_FILES}
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
-	python3 ${PAGE_RULE} ${ARTICLES_DIR}/${INDEX_UUID} ${TEMPLATE} ${PAGES}/${INDEX_UUID}
+	PYTHONPATH=${PYTHON_SRC} python3 ${PAGE_RULE} ${ARTICLES_DIR}/${INDEX_UUID} ${TEMPLATE} ${PAGES}/${INDEX_UUID}
 
 
 # pages
 ## Context
 LANDING_UUID=00000000-0000-0000-0000-000000000000
 ARTICLES_DIRS := $(shell echo ${ARTICLES_DIR}/*)
-BUILD_INDEX=python/index_rule.py
-BUILD_SITEMAP=python/sitemap_rule.py
+BUILD_INDEX=${PYTHON_RULE}/index.py
+BUILD_SITEMAP=${PYTHON_RULE}/sitemap.py
 ## Objective
 UUIDS := $(ARTICLES_DIRS:${ARTICLES_DIR}/%=%)
 ## Rule
@@ -223,8 +226,8 @@ all: ${CNAME_FILE} ${MANIFEST_FILE} ${CSS_OBJ} ${FAVICON_OBJ} ${FONT_OBJ} ${JS_O
 	ln -sndf page/${LANDING_UUID}/data ${BUILD_DIR}/data
 	ln -sndf page/${LANDING_UUID}/index.html ${BUILD_DIR}/index.html
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
-	python3 ${BUILD_INDEX} ${INDEX_FILE} ${ARTICLES_DIR} "${UUIDS}"
-	python3 ${BUILD_SITEMAP} ${BUILD_DIR} "${UUIDS}"
+	PYTHONPATH=${PYTHON_SRC} python3 ${BUILD_INDEX} ${INDEX_FILE} ${ARTICLES_DIR} "${UUIDS}"
+	PYTHONPATH=${PYTHON_SRC} python3 ${BUILD_SITEMAP} ${BUILD_DIR} "${UUIDS}"
 	if [[ "${ONCHANGE}" == "true" ]]; then
 		inotifywait -q -e create,modify,move,delete -r "$$PWD" ${ARTICLES_DIR}
 		${MAKE} all ONCHANGE=true
@@ -239,7 +242,7 @@ all: ${CNAME_FILE} ${MANIFEST_FILE} ${CSS_OBJ} ${FAVICON_OBJ} ${FONT_OBJ} ${JS_O
 server: all ## Start a web server serving files from the current directory.
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
 	cd ${BUILD_DIR}
-	python3 -m http.server
+	PYTHONPATH=${PYTHON_SRC} python3 -m http.server
 
 
 # new
@@ -262,7 +265,7 @@ new: ## Add a new page.
 ACTOR_EXAMPLE_UUID := 101e3f53-f9e2-465a-a0e3-d0685b8e4f21
 ACTOR_EXAMPLE := ${ARTICLES_DIR}/${ACTOR_EXAMPLE_UUID}
 NEW_ACTOR_UUID := $(shell cat /proc/sys/kernel/random/uuid)
-ACTOR_RULE := python/actor_rule.py
+ACTOR_RULE := ${PYTHON_RULE}/actor.py
 
 ## Objective
 NEW_ACTOR := ${ARTICLES_DIR}/${NEW_ACTOR_UUID}
@@ -271,20 +274,18 @@ NEW_ACTOR := ${ARTICLES_DIR}/${NEW_ACTOR_UUID}
 .PHONY: new-actor
 new-actor: ## Add a new actor page.
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
-	python3 ${ACTOR_RULE} ${ACTOR_EXAMPLE} ${NEW_ACTOR}
+	PYTHONPATH=${PYTHON_SRC} python3 ${ACTOR_RULE} ${ACTOR_EXAMPLE} ${NEW_ACTOR}
 
 
 # list
 ## Context
+LIST_RULE := ${PYTHON_RULE}/list.py
 ## Objective
 ## Rule
 .PHONY: list
 list: ## List articles.
-	PATHS=(${ARTICLES_DIRS})
-	for path in $${PATHS[@]}; do
-		desc=$$(cat $$path/description)
-		echo "$$path/article.html  |  $$desc"
-	done
+	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
+	PYTHONPATH=${PYTHON_SRC} python3 ${LIST_RULE} "${ARTICLES_DIRS}"
 
 
 # delete

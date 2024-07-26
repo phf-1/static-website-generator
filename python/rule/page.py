@@ -1,32 +1,35 @@
+from pathlib import Path
 import glob
 import os
-import sys
-from pathlib import Path
-from PIL import Image
 import shutil
+import sys
+
+from PIL import Image
+
+from lib.article import Article
+
 
 # article_dir, template_file, page_dir ⊢ page_dir
 def main(article_dir, template_file, page_dir):
-
+    article = Article.path_to_article(article_dir)
+    
     # page_dir points to an empty directory.
     if page_dir.exists():
         shutil.rmtree(page_dir)
     page_dir.mkdir(parents=True)
 
     # page_dir/data = article_dir/data
-    article_dir_data = article_dir / 'data'
-    page_dir_data = page_dir / "data"
-    shutil.copytree(article_dir_data, page_dir_data)
+    shutil.copytree(article_dir / 'data', page_dir / "data")
 
-    # page_dir/data/bg.webp = resize(article_dir/data/bg.*)
-    bg_img_path = Path(glob.glob(str(article_dir_data / 'bg.*'))[0])
+    # page_dir/bg.webp = resize(article_dir/bg.*)
+    bg_img_path = Path(glob.glob(str(article_dir / 'bg.*'))[0])
     with Image.open(bg_img_path) as img:
         width, height = img.size
         new_width = 1500
         new_height = int((new_width / width) * height)
         resized_img = img.resize((new_width, new_height), Image.LANCZOS)
-        resized_img.save(str(page_dir_data / 'bg.webp'))
-        resized_img.save(str(page_dir_data / 'bg.jpg'))
+        resized_img.save(str(page_dir / 'bg.webp'))
+        resized_img.save(str(page_dir / 'bg.jpg'))
 
     # index_value = template_value
     with open(template_file) as f:

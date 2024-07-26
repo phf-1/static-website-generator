@@ -15,9 +15,6 @@ class QuestionAnswer extends LitElement {
     static styles = [
         sharedStyles,
         css`
-            .question-answer {
-                margin: var(--x-qa-margin, 4rem 0);
-            }
             .question-answer .actions {
                 display: flex;
                 justify-content: right;

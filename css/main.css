@@ -14,6 +14,8 @@
   /* https://m2.material.io/design/color/the-color-system.html#tools-for-picking-colors */
   --c-pink-50: #fce4ec;
   --c-pink-900: #880e4f;
+  --c-gray-50: #FAFAFA;
+  --c-gray-900: #212121;
   --c-red-50: #ffebee;
   --c-red-900: #b71c1c;
   --c-orange-50: #fff3e0;
@@ -103,9 +105,9 @@
   --x-question-color: var(--main-text);
   --x-question-bg-color: var(--quote-bg);
   --x-question-annotation-color: var(--annotation);
-  --x-answer-border-color: var(--quote-border);
+	--x-answer-bg-color: var(--c-gray-50);
+  --x-answer-border-color: var(--c-gray-900);
   --x-answer-color: var(--main-text);
-  --x-answer-bg-color: var(--quote-bg);
   --x-answer-annotation-color: var(--annotation);
   --x-note-border-color: var(--note-border);
   --x-note-color: var(--main-text);

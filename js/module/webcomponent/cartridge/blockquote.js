@@ -29,6 +29,7 @@ class Blockquote extends Cartridge {
             }
 
             footer {
+                margin-top: 1rem;
                 text-align: right;
                 font-size: var(--x-blockquote-footer-font-size, 0.875rem);
                 color: var(--x-blockquote-color, black);

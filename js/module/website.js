@@ -43,8 +43,7 @@ const toggle_toc_btn_id = "toggle_toc_btn";
 const toggle_qa_btn_id = "toggle_qa";
 const bg_pic_id = "bg-image";
 
-const Website = class {
-    constructor() {}
+const Website = class extends EventTarget {
 
     // Public
     //
@@ -99,7 +98,7 @@ const Website = class {
         //
         // Because of different behaviours on iOS and other systems, we must give
         // time to the shadowDOM to reach a « stable » state before building the TOC
-        // from it. Lifecycles hooks like firstUpdated do not work uniformly.
+        // from it. Lifecycles hooks like firstUpdated do not work uniformly accross OSes.
         setTimeout(() => {
             x_toc.init(content);
         }, 500);

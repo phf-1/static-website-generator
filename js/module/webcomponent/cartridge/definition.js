@@ -6,8 +6,13 @@
 
 import { html, css } from "lit";
 import { Cartridge } from "./cartridge";
+import { Utils } from "../../utils";
 
 class Definition extends Cartridge {
+		static properties = {
+				term: {},
+		}
+
     static styles = [
         Cartridge.styles,
         css`
@@ -22,12 +27,21 @@ class Definition extends Cartridge {
                 content: "Definition";
                 color: var(--x-definition-annotation-color, black);
             }
+
+            #term {
+              margin-bottom: var(--x-definition-term-margin-bottom, 1rem);
+            }
         `,
     ];
 
+
+		// Public
+
     render() {
+				this.id || Utils.raise("An id must be defined.")
         return html`
             <div class="${Cartridge.css.class} definition">
+                <p id="term"><strong>${this.term}</strong></p>
                 <slot></slot>
             </div>
         `;

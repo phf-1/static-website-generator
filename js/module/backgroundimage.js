@@ -5,12 +5,11 @@
  */
 
 const Backgroundimage = class extends EventTarget {
-    // Public
     constructor(picture) {
         super();
 
         // Backgroundimage emits the event "updated" when its image has loaded.
-        const image = document.getElementById("bg-image-img");
+        const image = picture.getElementsByTagName("img")[0];
         this.#loaded = image.complete || image.naturalWidth !== 0;
         image.addEventListener("load", () => {
             this.#loaded = true;
@@ -27,6 +26,9 @@ const Backgroundimage = class extends EventTarget {
         observer.observe(picture);
     }
 
+
+    // Public
+
     loaded() {
         return this.#loaded;
     }
@@ -35,11 +37,13 @@ const Backgroundimage = class extends EventTarget {
         return this.#rect;
     }
 
+
     // Private
+
     #rect;
     #loaded;
-    #emitUpdatedEvent(details = {}) {
-        this.dispatchEvent(new CustomEvent("updated", details));
+    #emitUpdatedEvent(context = {}) {
+        this.dispatchEvent(new CustomEvent("updated", context));
     }
 };
 

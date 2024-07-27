@@ -25,6 +25,10 @@ class Utils {
                 throw new Error(`Unexpected value.`);
         }
     }
+
+		static raise(msg) {
+				throw new Error(msg);
+		}
 }
 
 export { Utils };

@@ -5,11 +5,11 @@
  */
 
 const Container = class {
-    // Public
     constructor(container) {
         this.#container = container;
     }
 
+    // Public
     position(rect) {
         this.#container.style.top = String(-rect.height * 0.61) + "px";
     }

@@ -5,11 +5,11 @@
  */
 
 const Body = class {
-    // Public
     constructor(body) {
         this.#body = body;
     }
 
+    // Public
     show() {
         this.#body.style.visibility = "visible";
     }

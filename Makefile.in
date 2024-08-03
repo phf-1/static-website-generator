@@ -278,13 +278,12 @@ new-article: ## Create a new article.
 
 # list
 ## Context
-LIST_RULE := ${PYTHON_RULE}/list.py
 ## Objective
 ## Rule
 .PHONY: list
 list: ## List articles.
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
-	PYTHONPATH=${PYTHON_SRC} python3 ${LIST_RULE} "${ARTICLES_DIRS}"
+	PYTHONPATH=${PYTHON_SRC} python3 ${PYTHON_ACTOR} ${ARTICLES_DIR} list
 
 
 # delete

@@ -21,6 +21,10 @@ class Clone(Message):
 class Index(Message):
     path: Path
 
+@dataclass
+class List(Message):
+    pass
+
 class Actor:
     def __init__(self, articles:Path) -> None:
         self._articles = articles
@@ -33,14 +37,17 @@ class Actor:
             case ["index", str(path)]:
                 message = Index(self, Path(path))
 
+            case ["list"]:
+                message = List(self)
+
             case _:
                 raise AssertionError(f"Unexpected args. {args}")
-            
+
         return self.__behaviour(message)
 
     def __behaviour(self, msg:Message):
         match msg:
-            case Clone(address=address, article=article, target=target):
+            case Clone(address=self, article=article, target=target):
                 article.exists() or error(f"article does not exist. article = {article}")
                 not(target.exists()) or error(f"target does not exist. target = {target}")
                 shutil.copytree(article, target)
@@ -48,10 +55,16 @@ class Actor:
                 target_article.replace_ids()
                 return target_article.directory()
 
-            case Index(address=address, path=path):
+            case Index(address=self, path=path):
                 uuids = glob(str(self._articles / '*'))
                 print(uuids)
-                
+
+            case List(address=self):
+                articles = [Article.path_to_article(Path(path)) for path in glob(str(self._articles / '*'))]
+                line = lambda art: f"{art.article_path()} | {art.desc()}"
+                lines = map(line, sorted(articles, key=lambda x: x.desc()))
+                return "\n".join(lines)
+
     def __str__(self):
         return f"Actor(articles={self._articles})"
 

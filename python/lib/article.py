@@ -21,7 +21,8 @@ class Article:
         article_css = path / "article.css"
         imgs = glob.glob(str(path / "bg.*"))
         background_img = imgs[0] if len(imgs) == 1 else None
-        data_paths = [Path(p).resolve() for p in glob.glob(str(path / "data" / "*"), recursive=True)]
+        data_dir = path / "data"
+        data_paths = [Path(p).resolve() for p in glob.glob(str(data_dir / "*"), recursive=True)]
         directory = path
         with open(path / "description") as f:
             desc = f.read().strip()
@@ -38,6 +39,7 @@ class Article:
             lang=lang,
             path=path,
             uuid=uuid,
+            data_dir=data_dir
         )
 
 
@@ -51,6 +53,7 @@ class Article:
                  lang=None,
                  path=None,
                  uuid=None,
+                 data_dir=None
                  ):
         self._article_path = article_path
         self._article_css = article_css
@@ -61,6 +64,7 @@ class Article:
         self._lang = lang
         self._path = path
         self._uuid = uuid
+        self._data_dir = data_dir
 
 
     # Public
@@ -82,6 +86,9 @@ class Article:
 
     def directory(self):
         return self._directory
+
+    def data_directory(self):
+        return self._data_dir
 
     def lang(self):
         return self._lang

@@ -190,7 +190,7 @@ PAGE_FILE := ${PAGE_DIR}/index.html
 page: ${PAGE_FILE}  ## Install the page with UUID ${UUID} under ${BUILD_DIR}.
 ${PAGE_FILE}: ${PAGE_CTX}
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
-	PYTHONPATH=${PYTHON_SRC} python3 ${PAGE_RULE} ${ARTICLE_DIR} ${TEMPLATE} ${PAGE_DIR}
+	PYTHONPATH=${PYTHON_SRC} python3 ${PYTHON_ACTOR} ${ARTICLES_DIR} page ${UUID} ${TEMPLATE} ${PAGES}
 
 
 # index

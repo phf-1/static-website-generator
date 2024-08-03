@@ -5,6 +5,7 @@ import shutil
 from glob import glob
 from PIL import Image
 from lib.article import Article
+from concurrent.futures import ProcessPoolExecutor
 
 def error(msg):
     raise AssertionError(msg)
@@ -25,12 +26,22 @@ class Page(Message):
     pages: Path
 
 @dataclass
+class Pages(Message):
+    template: Path
+    pages: Path
+
+@dataclass
 class Index(Message):
     path: Path
 
 @dataclass
 class List(Message):
     pass
+
+def make_page(args):
+    articles, uuid, template, pages = args
+    actor = Actor(articles)
+    return actor.page(uuid, template, pages)
 
 class Actor:
     def __init__(self, articles:Path) -> None:
@@ -44,6 +55,9 @@ class Actor:
             case ["page", str(uuid), str(template), str(pages)]:
                 message = Page(self, uuid, Path(template), Path(pages))
 
+            case ["pages", str(template), str(pages)]:
+                message = Pages(self, Path(template), Path(pages))
+
             case ["index", str(path)]:
                 message = Index(self, Path(path))
 
@@ -53,6 +67,10 @@ class Actor:
             case _:
                 raise AssertionError(f"Unexpected args. {args}")
 
+        return self.__behaviour(message)
+
+    def page(self, uuid, template, pages):
+        message = Page(self, uuid, template, pages)
         return self.__behaviour(message)
 
     def __behaviour(self, msg:Message):
@@ -66,7 +84,7 @@ class Actor:
                 return target_article.directory()
 
             case Index(address=self, path=path):
-                uuids = glob(str(self._articles / '*'))
+                uuids = self.__uuids()
                 print(uuids)
 
             case List(address=self):
@@ -121,6 +139,15 @@ class Actor:
                     index.write(index_value)
 
                 return page_dir
+
+            case Pages(address=self, template=template, pages=pages):
+                args = ((self._articles, uuid, template, pages) for uuid in self.__uuids())
+                with ProcessPoolExecutor() as executor:
+                    results = list(executor.map(make_page, args))
+                return "\n".join([str(res) for res in results])
+
+    def __uuids(self):
+        return [Path(path).parts[-1] for path in glob(str(self._articles / '*'))]
 
     def __str__(self):
         return f"Actor(articles={self._articles})"

@@ -217,17 +217,13 @@ UUIDS := $(ARTICLES_DIRS:${ARTICLES_DIR}/%=%)
 ## Rule
 .PHONY: all
 all: ${CNAME_FILE} ${MANIFEST_FILE} ${CSS_OBJ} ${FAVICON_OBJ} ${FONT_OBJ} ${JS_OBJ} ${INDEX_FILE} ${ROBOTS_FILE} ## Build the website under ${BUILD_DIR}. If given ONCHANGE=true, then: rebuild on change
-	ARR=(${UUIDS})
-	for uuid in "$${ARR[@]}"; do
-		${MAKE} page UUID=$$uuid &
-	done
-	wait
+	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
+	PYTHONPATH=${PYTHON_SRC} python3 ${PYTHON_ACTOR} ${ARTICLES_DIR} pages ${TEMPLATE} ${PAGES}
+	PYTHONPATH=${PYTHON_SRC} python3 ${BUILD_INDEX} ${INDEX_FILE} ${ARTICLES_DIR} "${UUIDS}"
+	PYTHONPATH=${PYTHON_SRC} python3 ${BUILD_SITEMAP} ${BUILD_DIR} "${UUIDS}"
 	ln -sndf page/${LANDING_UUID}/bg.webp ${BUILD_DIR}/bg.webp
 	ln -sndf page/${LANDING_UUID}/data ${BUILD_DIR}/data
 	ln -sndf page/${LANDING_UUID}/index.html ${BUILD_DIR}/index.html
-	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
-	PYTHONPATH=${PYTHON_SRC} python3 ${BUILD_INDEX} ${INDEX_FILE} ${ARTICLES_DIR} "${UUIDS}"
-	PYTHONPATH=${PYTHON_SRC} python3 ${BUILD_SITEMAP} ${BUILD_DIR} "${UUIDS}"
 	if [[ "${ONCHANGE}" == "true" ]]; then
 		inotifywait -q -e create,modify,move,delete -r "$$PWD" ${ARTICLES_DIR}
 		${MAKE} all ONCHANGE=true

@@ -153,7 +153,11 @@ class Blockcode extends LitElement {
 
     firstUpdated() {
         const code = remove_indentation(
-            this.shadowRoot.querySelector("slot").assignedNodes()[0].wholeText,
+            this.shadowRoot
+                .querySelector("slot")
+                .assignedNodes()[0]
+                .wholeText
+								.trimEnd()
         );
         this._hihlighted = hljs.highlightAuto(code);
     }

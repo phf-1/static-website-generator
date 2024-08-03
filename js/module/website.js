@@ -8,6 +8,7 @@ import "./webcomponent/cartridge/abstract";
 import "./webcomponent/cartridge/algorithm";
 import "./webcomponent/cartridge/answer";
 import "./webcomponent/cartridge/blockcode";
+// import "./webcomponent/cartridge/blockdiagram";
 import "./webcomponent/cartridge/blockmath";
 import "./webcomponent/cartridge/blockquote";
 import "./webcomponent/cartridge/context";
@@ -44,7 +45,6 @@ const toggle_qa_btn_id = "toggle_qa";
 const bg_pic_id = "bg-image";
 
 const Website = class extends EventTarget {
-
     // Public
     //
     // The web page is viewed as a network of actors.

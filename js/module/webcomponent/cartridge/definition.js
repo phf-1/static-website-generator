@@ -9,9 +9,9 @@ import { Cartridge } from "./cartridge";
 import { Utils } from "../../utils";
 
 class Definition extends Cartridge {
-		static properties = {
-				term: {},
-		}
+    static properties = {
+        term: {},
+    };
 
     static styles = [
         Cartridge.styles,
@@ -29,16 +29,15 @@ class Definition extends Cartridge {
             }
 
             #term {
-              margin-bottom: var(--x-definition-term-margin-bottom, 1rem);
+                margin-bottom: var(--x-definition-term-margin-bottom, 1rem);
             }
         `,
     ];
 
-
-		// Public
+    // Public
 
     render() {
-				this.id || Utils.raise("An id must be defined.")
+        this.id || Utils.raise("An id must be defined.");
         return html`
             <div class="${Cartridge.css.class} definition">
                 <p id="term"><strong>${this.term}</strong></p>

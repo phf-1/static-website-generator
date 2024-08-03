@@ -26,9 +26,9 @@ class Utils {
         }
     }
 
-		static raise(msg) {
-				throw new Error(msg);
-		}
+    static raise(msg) {
+        throw new Error(msg);
+    }
 }
 
 export { Utils };

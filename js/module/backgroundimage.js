@@ -26,7 +26,6 @@ const Backgroundimage = class extends EventTarget {
         observer.observe(picture);
     }
 
-
     // Public
 
     loaded() {
@@ -36,7 +35,6 @@ const Backgroundimage = class extends EventTarget {
     rect() {
         return this.#rect;
     }
-
 
     // Private
 

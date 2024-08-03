@@ -179,6 +179,7 @@ PAGE_CTX := ${TEMPLATE} ${ARTICLE_FILES}
 PAGES := ${BUILD_DIR}/page
 PAGE_DIR := ${PAGES}/${UUID}
 PYTHON_SRC := python
+PYTHON_ACTOR = ${PYTHON_SRC}/main.py
 PYTHON_RULE := ${PYTHON_SRC}/rule
 PYTHON_LIB := ${PYTHON_SRC}/lib
 PAGE_RULE := ${PYTHON_RULE}/page.py
@@ -246,36 +247,33 @@ server: all ## Start a web server serving files from the current directory.
 	PYTHONPATH=${PYTHON_SRC} python3 -m http.server
 
 
-# new
-## Context
-LANDING_ARTICLE := ${ARTICLES_DIR}/${LANDING_UUID}
-NEW_UUID := $(shell cat /proc/sys/kernel/random/uuid)
-
-## Objective
-NEW_ARTICLE := ${ARTICLES_DIR}/${NEW_UUID}
-
-## Rule
-.PHONY: new
-new: ## Add a new page.
-	cp -r ${LANDING_ARTICLE} ${NEW_ARTICLE}
-	echo ${NEW_ARTICLE}
-
-
 # new-actor
 ## Context
 ACTOR_EXAMPLE_UUID := 101e3f53-f9e2-465a-a0e3-d0685b8e4f21
 ACTOR_EXAMPLE := ${ARTICLES_DIR}/${ACTOR_EXAMPLE_UUID}
 NEW_ACTOR_UUID := $(shell cat /proc/sys/kernel/random/uuid)
-ACTOR_RULE := ${PYTHON_RULE}/actor.py
-
+CLONE_RULE := ${PYTHON_RULE}/clone.py
 ## Objective
 NEW_ACTOR := ${ARTICLES_DIR}/${NEW_ACTOR_UUID}
-
 ## Rule
 .PHONY: new-actor
 new-actor: ## Add a new actor page.
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
-	PYTHONPATH=${PYTHON_SRC} python3 ${ACTOR_RULE} ${ACTOR_EXAMPLE} ${NEW_ACTOR}
+	PYTHONPATH=${PYTHON_SRC} python3 ${PYTHON_ACTOR} ${ARTICLES_DIR} clone ${ACTOR_EXAMPLE} ${NEW_ACTOR}
+
+
+# new-article
+## Context
+ARTICLE_EXAMPLE_UUID := 0572b568-982c-4372-9e6c-e0b3c78e6baf
+ARTICLE_EXAMPLE := ${ARTICLES_DIR}/${ARTICLE_EXAMPLE_UUID}
+NEW_ARTICLE_UUID := $(shell cat /proc/sys/kernel/random/uuid)
+## Objective
+NEW_ARTICLE := ${ARTICLES_DIR}/${NEW_ARTICLE_UUID}
+## Rule
+.PHONY: new-article
+new-article: ## Create a new article.
+	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
+	PYTHONPATH=${PYTHON_SRC} python3 ${PYTHON_ACTOR} ${ARTICLES_DIR} clone ${ARTICLE_EXAMPLE} ${NEW_ARTICLE}
 
 
 # list

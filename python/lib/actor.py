@@ -31,6 +31,12 @@ class Pages(Message):
     pages: Path
 
 @dataclass
+class All(Message):
+    uuid: str
+    template: Path
+    pages: Path
+
+@dataclass
 class Index(Message):
     path: Path
 
@@ -58,8 +64,8 @@ class Actor:
             case ["pages", str(template), str(pages)]:
                 message = Pages(self, Path(template), Path(pages))
 
-            case ["index", str(path)]:
-                message = Index(self, Path(path))
+            case ["all", str(uuid), str(template), str(pages)]:
+                message = All(self, uuid, Path(template), Path(pages))
 
             case ["list"]:
                 message = List(self)
@@ -67,13 +73,17 @@ class Actor:
             case _:
                 raise AssertionError(f"Unexpected args. {args}")
 
-        return self.__behaviour(message)
+        return self.behaviour(message)
 
-    def page(self, uuid, template, pages):
+    def page(self, uuid:str, template:Path, pages:Path):
         message = Page(self, uuid, template, pages)
-        return self.__behaviour(message)
+        return self.behaviour(message)
 
-    def __behaviour(self, msg:Message):
+    def pages(self, template:Path, pages:Path):
+        message = Pages(self, template, pages)
+        return self.behaviour(message)
+
+    def behaviour(self, msg:Message):
         match msg:
             case Clone(address=self, article=article, target=target):
                 article.exists() or error(f"article does not exist. article = {article}")
@@ -146,8 +156,31 @@ class Actor:
                     results = list(executor.map(make_page, args))
                 return "\n".join([str(res) for res in results])
 
+            case All(address=self, uuid=uuid, template=template, pages=pages):
+                report = self.pages(template, pages)
+                uuid_desc = [(art.uuid(), art.desc()) for art in self.__articles()]
+                uuid_desc.sort(key=lambda pair: pair[1])
+                def build_li(uuid, desc):
+                    return f'<li><a href="/page/{uuid}/">{desc}</a></li>'
+                items = "\n".join([build_li(uuid,desc) for (uuid,desc) in uuid_desc])
+                index = Article.path_to_article(self._articles / uuid)
+                index_page = pages / uuid / "index.html"
+                with open(index_page, "r+") as index_article:
+                    index_str = index_article.read()
+                    index_article.seek(0)
+                    index_str = index_str.replace("__INDEX__",items)
+                    index_article.write(index_str)
+                report += f"\nindex_page = {index_page}"
+                return report
+
+    def __paths(self):
+        return [Path(path) for path in glob(str(self._articles / '*'))]
+
     def __uuids(self):
-        return [Path(path).parts[-1] for path in glob(str(self._articles / '*'))]
+        return [path.parts[-1] for path in self.__paths()]
+
+    def __articles(self):
+        return [Article.path_to_article(path) for path in self.__paths()]
 
     def __str__(self):
         return f"Actor(articles={self._articles})"

@@ -181,8 +181,6 @@ PAGE_DIR := ${PAGES}/${UUID}
 PYTHON_SRC := python
 PYTHON_ACTOR = ${PYTHON_SRC}/main.py
 PYTHON_RULE := ${PYTHON_SRC}/rule
-PYTHON_LIB := ${PYTHON_SRC}/lib
-PAGE_RULE := ${PYTHON_RULE}/page.py
 ## Objective
 PAGE_FILE := ${PAGE_DIR}/index.html
 ## Rule
@@ -205,7 +203,7 @@ INDEX_FILE := ${INDEX_DIR}/index.html
 index: ${INDEX_FILE}
 ${INDEX_FILE}: ${ARTICLES_FILES}
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
-	PYTHONPATH=${PYTHON_SRC} python3 ${PAGE_RULE} ${ARTICLES_DIR}/${INDEX_UUID} ${TEMPLATE} ${PAGES}/${INDEX_UUID}
+	PYTHONPATH=${PYTHON_SRC} python3 ${PYTHON_ACTOR} ${ARTICLES_DIR} page ${INDEX_UUID} ${TEMPLATE} ${PAGES}
 
 
 # pages

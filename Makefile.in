@@ -210,15 +210,13 @@ ${INDEX_FILE}: ${ARTICLES_FILES}
 ## Context
 LANDING_UUID=00000000-0000-0000-0000-000000000000
 ARTICLES_DIRS := $(shell echo ${ARTICLES_DIR}/*)
-BUILD_SITEMAP=${PYTHON_RULE}/sitemap.py
 ## Objective
 UUIDS := $(ARTICLES_DIRS:${ARTICLES_DIR}/%=%)
 ## Rule
 .PHONY: all
 all: ${CNAME_FILE} ${MANIFEST_FILE} ${CSS_OBJ} ${FAVICON_OBJ} ${FONT_OBJ} ${JS_OBJ} ${INDEX_FILE} ${ROBOTS_FILE} ## Build the website under ${BUILD_DIR}. If given ONCHANGE=true, then: rebuild on change
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
-	PYTHONPATH=${PYTHON_SRC} python3 ${PYTHON_ACTOR} ${ARTICLES_DIR} all ${INDEX_UUID} ${TEMPLATE} ${PAGES}
-	PYTHONPATH=${PYTHON_SRC} python3 ${BUILD_SITEMAP} ${BUILD_DIR} "${UUIDS}"
+	PYTHONPATH=${PYTHON_SRC} python3 ${PYTHON_ACTOR} ${ARTICLES_DIR} all ${INDEX_UUID} ${TEMPLATE} ${BUILD_DIR}
 	ln -sndf page/${LANDING_UUID}/bg.webp ${BUILD_DIR}/bg.webp
 	ln -sndf page/${LANDING_UUID}/data ${BUILD_DIR}/data
 	ln -sndf page/${LANDING_UUID}/index.html ${BUILD_DIR}/index.html

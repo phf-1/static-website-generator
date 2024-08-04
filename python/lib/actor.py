@@ -34,7 +34,11 @@ class Pages(Message):
 class All(Message):
     uuid: str
     template: Path
-    pages: Path
+    root: Path
+
+@dataclass
+class Sitemap(Message):
+    root: Path
 
 @dataclass
 class Index(Message):
@@ -64,8 +68,11 @@ class Actor:
             case ["pages", str(template), str(pages)]:
                 message = Pages(self, Path(template), Path(pages))
 
-            case ["all", str(uuid), str(template), str(pages)]:
-                message = All(self, uuid, Path(template), Path(pages))
+            case ["sitemap", str(root)]:
+                message = Sitemap(self, Path(root))
+
+            case ["all", str(uuid), str(template), str(root)]:
+                message = All(self, uuid, Path(template), Path(root))
 
             case ["list"]:
                 message = List(self)
@@ -73,17 +80,21 @@ class Actor:
             case _:
                 raise AssertionError(f"Unexpected args. {args}")
 
-        return self.behaviour(message)
+        return self.receive(message)
 
     def page(self, uuid:str, template:Path, pages:Path):
         message = Page(self, uuid, template, pages)
-        return self.behaviour(message)
+        return self.receive(message)
 
     def pages(self, template:Path, pages:Path):
         message = Pages(self, template, pages)
-        return self.behaviour(message)
+        return self.receive(message)
 
-    def behaviour(self, msg:Message):
+    def sitemap(self, root:Path):
+        message = Sitemap(self, root)
+        return self.receive(message)
+
+    def receive(self, msg:Message):
         match msg:
             case Clone(address=self, article=article, target=target):
                 article.exists() or error(f"article does not exist. article = {article}")
@@ -156,8 +167,9 @@ class Actor:
                     results = list(executor.map(make_page, args))
                 return "\n".join([str(res) for res in results])
 
-            case All(address=self, uuid=uuid, template=template, pages=pages):
-                report = self.pages(template, pages)
+            case All(address=self, uuid=uuid, template=template, root=root):
+                pages = root / "page"
+                report = "\n".join([f"page = {page}" for page in self.pages(template, pages).split()])
                 uuid_desc = [(art.uuid(), art.desc()) for art in self.__articles()]
                 uuid_desc.sort(key=lambda pair: pair[1])
                 def build_li(uuid, desc):
@@ -170,8 +182,36 @@ class Actor:
                     index_article.seek(0)
                     index_str = index_str.replace("__INDEX__",items)
                     index_article.write(index_str)
-                report += f"\nindex_page = {index_page}"
+                report += f"\nindex = {index_page}"                
+                report += f"\nsitemap = {self.sitemap(root)}"
                 return report
+
+            case Sitemap(address=self, root=root):
+                def loc(uuid):
+                    return f"<loc>https://phfrohring.com/page/{uuid}/</loc>"
+                
+                def uuid_props(uuid):
+                    return [loc(uuid)]
+                
+                def url(props):
+                    props_str = "\n".join(props)
+                    return f'<url>\n{props_str}\n</url>'
+                
+                def urlset(urls):
+                    urls_str = "\n".join(urls)
+                    return f'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{urls_str}\n</urlset>'
+                
+                def sitemap(urlset):
+                    return f'<?xml version="1.0" encoding="UTF-8"?>\n{urlset}'
+
+                props_list = [uuid_props(uuid) for uuid in self.__uuids()]
+                urls = [url(props) for props in props_list]
+                urlset_ = urlset(urls)
+                sitemap_ = sitemap(urlset_)
+                sitemap_path = root / "sitemap.xml"
+                with open(sitemap_path, "w") as f:
+                    f.write(sitemap_)                
+                return sitemap_path
 
     def __paths(self):
         return [Path(path) for path in glob(str(self._articles / '*'))]

@@ -3,6 +3,8 @@ import glob
 import uuid
 import re
 
+uuid4regex = re.compile(r'id="([0-9a-f]{12}4[0-9a-f]{3}[89ab][0-9a-f]{15}\Z)"', re.I)
+
 def replace_with_uuid(match):
         return f'id="{uuid.uuid4()}"'
 
@@ -106,6 +108,11 @@ class Article:
             updated_content = re.sub(r'id="[^"]*"', replace_with_uuid, content)
             file.write(updated_content)
         return self
+
+    def uuids(self):
+        with open(self._article_path, 'r') as file:
+            content = file.read()
+            return re.findall(uuid4regex, content)
 
     # Private
 

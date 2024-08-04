@@ -1,53 +1,27 @@
-from dataclasses import dataclass, field
-from pathlib import Path
-from typing import Optional, Any
-import shutil
-from glob import glob
-from PIL import Image
-from lib.article import Article
 from concurrent.futures import ProcessPoolExecutor
+from glob import glob
+from pathlib import Path
+from functools import reduce
+import shutil
+import uuid
+
+from PIL import Image
+
+from lib.article import Article
+from lib.message import Message
+from lib.message.all import All
+from lib.message.index import Index
+from lib.message.clone import Clone
+from lib.message.list import List
+from lib.message.page import Page
+from lib.message.pages import Pages
+from lib.message.sitemap import Sitemap
+from lib.message.duplicated_uuids import DuplicatedUUIDs
 
 def error(msg):
     raise AssertionError(msg)
 
-@dataclass
-class Message:
-    address: Any
-
-@dataclass
-class Clone(Message):
-    article: Path
-    target: Path
-
-@dataclass
-class Page(Message):
-    uuid: str
-    template: Path
-    pages: Path
-
-@dataclass
-class Pages(Message):
-    template: Path
-    pages: Path
-
-@dataclass
-class All(Message):
-    uuid: str
-    template: Path
-    root: Path
-
-@dataclass
-class Sitemap(Message):
-    root: Path
-
-@dataclass
-class Index(Message):
-    path: Path
-
-@dataclass
-class List(Message):
-    pass
-
+# Used to parallelize pages creations.
 def make_page(args):
     articles, uuid, template, pages = args
     actor = Actor(articles)
@@ -64,6 +38,9 @@ class Actor:
 
             case ["page", str(uuid), str(template), str(pages)]:
                 message = Page(self, uuid, Path(template), Path(pages))
+
+            case ["duplicated_uuids"]:
+                message = DuplicatedUUIDs(self)
 
             case ["pages", str(template), str(pages)]:
                 message = Pages(self, Path(template), Path(pages))
@@ -84,6 +61,10 @@ class Actor:
 
     def page(self, uuid:str, template:Path, pages:Path):
         message = Page(self, uuid, template, pages)
+        return self.receive(message)
+
+    def duplicated_uuids(self):
+        message = DuplicatedUUIDs(self)
         return self.receive(message)
 
     def pages(self, template:Path, pages:Path):
@@ -168,8 +149,9 @@ class Actor:
                 return "\n".join([str(res) for res in results])
 
             case All(address=self, uuid=uuid, template=template, root=root):
+                report = self.duplicated_uuids()
                 pages = root / "page"
-                report = "\n".join([f"page = {page}" for page in self.pages(template, pages).split()])
+                report += "\n".join([f"page = {page}" for page in self.pages(template, pages).split()])
                 uuid_desc = [(art.uuid(), art.desc()) for art in self.__articles()]
                 uuid_desc.sort(key=lambda pair: pair[1])
                 def build_li(uuid, desc):
@@ -182,25 +164,25 @@ class Actor:
                     index_article.seek(0)
                     index_str = index_str.replace("__INDEX__",items)
                     index_article.write(index_str)
-                report += f"\nindex = {index_page}"                
+                report += f"\nindex = {index_page}"
                 report += f"\nsitemap = {self.sitemap(root)}"
                 return report
 
             case Sitemap(address=self, root=root):
                 def loc(uuid):
                     return f"<loc>https://phfrohring.com/page/{uuid}/</loc>"
-                
+
                 def uuid_props(uuid):
                     return [loc(uuid)]
-                
+
                 def url(props):
                     props_str = "\n".join(props)
                     return f'<url>\n{props_str}\n</url>'
-                
+
                 def urlset(urls):
                     urls_str = "\n".join(urls)
                     return f'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{urls_str}\n</urlset>'
-                
+
                 def sitemap(urlset):
                     return f'<?xml version="1.0" encoding="UTF-8"?>\n{urlset}'
 
@@ -210,8 +192,15 @@ class Actor:
                 sitemap_ = sitemap(urlset_)
                 sitemap_path = root / "sitemap.xml"
                 with open(sitemap_path, "w") as f:
-                    f.write(sitemap_)                
+                    f.write(sitemap_)
                 return sitemap_path
+
+            case DuplicatedUUIDs(address=self):
+                uuids = reduce(lambda acc, article: acc + article.uuids(), self.__articles(), [])
+                seen = set()
+                duplicates = [id for id in uuids if id in seen or seen.add(id)]
+                msg = "No duplicated uuids found in articles." if len(duplicates) == 0 else "Duplicated uuids found in articles:" + "  \n".join(set(duplicates))
+                return msg + "\n"
 
     def __paths(self):
         return [Path(path) for path in glob(str(self._articles / '*'))]

@@ -254,7 +254,7 @@ new-actor: ## Add a new actor page.
 
 # new-article
 ## Context
-ARTICLE_EXAMPLE_UUID := 0572b568-982c-4372-9e6c-e0b3c78e6baf
+ARTICLE_EXAMPLE_UUID := 55194423-8458-4fcd-932e-f04098d09056
 ARTICLE_EXAMPLE := ${ARTICLES_DIR}/${ARTICLE_EXAMPLE_UUID}
 NEW_ARTICLE_UUID := $(shell cat /proc/sys/kernel/random/uuid)
 ## Objective
@@ -264,6 +264,16 @@ NEW_ARTICLE := ${ARTICLES_DIR}/${NEW_ARTICLE_UUID}
 new-article: ## Create a new article.
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
 	PYTHONPATH=${PYTHON_SRC} python3 ${PYTHON_ACTOR} ${ARTICLES_DIR} clone ${ARTICLE_EXAMPLE} ${NEW_ARTICLE}
+
+
+# duplicated_ids
+## Context
+## Objective
+## Rule
+.PHONY: duplicated_ids
+duplicated_ids: ## List duplicated ids
+	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
+	PYTHONPATH=${PYTHON_SRC} python3 ${PYTHON_ACTOR} ${ARTICLES_DIR} duplicated_uuids
 
 
 # list

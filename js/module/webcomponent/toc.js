@@ -68,6 +68,8 @@ class Toc extends LitElement {
                 margin-left: 4rem;
             }
 
+            i { display: none; }
+
             nav::before {
                 content: "Contents";
                 color: var(--x-toc-before, red);

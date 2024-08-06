@@ -1,5 +1,5 @@
 from pathlib import Path
-import glob
+from glob import glob
 import uuid
 import re
 
@@ -15,94 +15,87 @@ def replace_ids_in_file(path:Path) -> None:
         updated_content = re.sub(r'id="[^"]*"', replace_with_uuid, content)
         file.write(updated_content)
 
-
 class Article:
-    @classmethod
-    def path_to_article(cls, path):
-        article_path = path / "article.html"
-        article_css = path / "article.css"
-        imgs = glob.glob(str(path / "bg.*"))
-        background_img = imgs[0] if len(imgs) == 1 else None
-        data_dir = path / "data"
-        data_paths = [Path(p).resolve() for p in glob.glob(str(data_dir / "*"), recursive=True)]
-        directory = path
-        with open(path / "description") as f:
-            desc = f.read().strip()
-        with open(path / "lang") as f:
-            lang = f.read().strip()
-        uuid = path.parts[-1]
-        return cls(
-            article_path=article_path,
-            article_css=article_css if article_css.exists() else None,
-            background_img=background_img,
-            data_paths=data_paths,
-            desc=desc,
-            directory=path,
-            lang=lang,
-            path=path,
-            uuid=uuid,
-            data_dir=data_dir
-        )
-
-
-    def __init__(self,
-                 article_path=None,
-                 article_css=None,
-                 background_img=None,
-                 data_paths=None,
-                 desc=None,
-                 directory=None,
-                 lang=None,
-                 path=None,
-                 uuid=None,
-                 data_dir=None
-                 ):
-        self._article_path = article_path
-        self._article_css = article_css
-        self._background_img = background_img
-        self._data_paths = data_paths
-        self._desc = desc
-        self._directory = directory
-        self._lang = lang
-        self._path = path
-        self._uuid = uuid
-        self._data_dir = data_dir
-
+    def __init__(self, root:Path):
+        self._root = root
+        self._article_html = root / "article.html"
+        self._article_css = root / "article.css"
+        imgs = glob(str(root / "bg.*"))
+        self._bg_img_file = Path(imgs[0]) if len(imgs) == 1 else None
+        self._data_dir = root / "data"
+        self._description = root / "description"
+        self._lang = root / "lang"
+        self._uuid = root.parts[-1]
+        self._files = [
+            self._root,
+            self._article_html,
+            self._bg_img_file,
+            self._data_dir,
+            self._description,
+            self._lang,
+        ]
+        self._article_css.is_file() and self._files.append(self._article_css)
+        self._files += [Path(p).resolve() for p in glob(str(self._data_dir / "**"), recursive=True)]
 
     # Public
 
-    def article_path(self):
-        return self._article_path
+    def root(self):
+        return self._root
 
-    def article_css(self):
+    def article_html_file(self):
+        return self._article_html
+
+    def article_html(self):
+        if self._article_html.is_file():
+            with open(self._article_html) as f:
+                return f.read()
+        else:
+            raise AssertionError(f"{self._article_html} is not a file.")
+
+    def article_css_file(self):
         return self._article_css
 
-    def background_img(self):
-        return self._background_img
+    def article_css(self):
+        if self._article_css.is_file():
+            with open(self._article_css) as f:
+                return f.read()
+        else:
+            raise AssertionError(f"{self._article_css} is not a file.")
 
-    def data_paths(self):
-        return self._data_paths
+    def background_img_file(self):
+        return self._bg_img_file
 
-    def desc(self):
-        return self._desc
+    def description(self):
+        if self._description.is_file():
+            with open(self._description) as f:
+                return f.read().strip()
+        else:
+            raise AssertionError(f"{self._description} is not a file.")
 
-    def directory(self):
-        return self._directory
+    def description_file(self):
+        return self._description
 
-    def data_directory(self):
+    def data_dir(self):
         return self._data_dir
 
     def lang(self):
+        if self._lang.is_file():
+            with open(self._lang) as f:
+                return f.read().strip()
+        else:
+            raise AssertionError(f"{self._lang} is not a file.")
+
+    def lang_file(self):
         return self._lang
 
-    def path(self):
-        return self._path
+    def root_dir(self):
+        return self._root
 
     def uuid(self):
         return self._uuid
 
     def replace_ids(self):
-        with open(self._article_path, 'r+') as file:
+        with open(self._article_html, 'r+') as file:
             content = file.read()
             file.seek(0)
             updated_content = re.sub(r'id="[^"]*"', replace_with_uuid, content)
@@ -110,21 +103,29 @@ class Article:
         return self
 
     def uuids(self):
-        with open(self._article_path, 'r') as file:
+        with open(self._article_html, 'r') as file:
             content = file.read()
             return re.findall(uuid4regex, content)
+
+    def exists(self):
+        return all([p.exists() for p in self._files])
+
+    def mtime(self):
+        if self.exists():
+            return max([p.stat().st_mtime for p in self._files])
+        else:
+            raise AssertionError("Not in the file system.")
 
     # Private
 
     def __str__(self):
         return f"""Article(
-    article_path = {self._article_path}
+    article_html = {self._article_html}
     article_css = {self._article_css}
-    background_img = {self._background_img}
-    data_paths = {[str(p) for p in self._data_paths]}
-    desc = {self._desc}
-    directory = {self._directory}
+    background_img = {self._bg_img_file}
+    data_dir = {[str(p) for p in self._data_dir]}
+    description = {self._description}
     lang = {self._lang}
-    path = {self._path}
+    root = {self._root}
     uuid = {self._uuid}
 )"""

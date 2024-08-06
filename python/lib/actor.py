@@ -8,12 +8,13 @@ import uuid
 from PIL import Image
 
 from lib.article import Article
+from lib.page import Page
 from lib.message import Message
 from lib.message.all import All
 from lib.message.index import Index
 from lib.message.clone import Clone
 from lib.message.list import List
-from lib.message.page import Page
+from lib.message.page import Page as PageMessage
 from lib.message.pages import Pages
 from lib.message.sitemap import Sitemap
 from lib.message.duplicated_uuids import DuplicatedUUIDs
@@ -37,7 +38,7 @@ class Actor:
                 message = Clone(self, Path(article), Path(target))
 
             case ["page", str(uuid), str(template), str(pages)]:
-                message = Page(self, uuid, Path(template), Path(pages))
+                message = PageMessage(self, uuid, Path(template), Path(pages))
 
             case ["duplicated_uuids"]:
                 message = DuplicatedUUIDs(self)
@@ -60,7 +61,7 @@ class Actor:
         return self.receive(message)
 
     def page(self, uuid:str, template:Path, pages:Path):
-        message = Page(self, uuid, template, pages)
+        message = PageMessage(self, uuid, template, pages)
         return self.receive(message)
 
     def duplicated_uuids(self):
@@ -81,33 +82,36 @@ class Actor:
                 article.exists() or error(f"article does not exist. article = {article}")
                 not(target.exists()) or error(f"target does not exist. target = {target}")
                 shutil.copytree(article, target)
-                target_article = Article.path_to_article(target)
+                target_article = Article(target)
                 target_article.replace_ids()
-                return target_article.directory()
+                return target_article.root_dir()
 
             case Index(address=self, path=path):
                 uuids = self.__uuids()
                 print(uuids)
 
             case List(address=self):
-                articles = [Article.path_to_article(Path(path)) for path in glob(str(self._articles / '*'))]
-                line = lambda art: f"{art.article_path()} | {art.desc()}"
-                lines = map(line, sorted(articles, key=lambda x: x.desc()))
+                articles = [Article(Path(path)) for path in glob(str(self._articles / '*'))]
+                line = lambda art: f"{art.article_html_file()} | {art.description()}"
+                lines = map(line, sorted(articles, key=lambda x: x.description()))
                 return "\n".join(lines)
 
-            case Page(address=self, uuid=uuid, template=template, pages=pages):
-                article = Article.path_to_article(self._articles / uuid)
+            case PageMessage(address=self, uuid=uuid, template=template, pages=pages):
+                article = Article(self._articles / uuid)
                 page_dir = pages / uuid
+                page = Page(page_dir)
+                if (page.exists() and page.mtime()) > article.mtime():
+                    return page_dir
 
                 # page_dir points to an empty directory.
                 page_dir.exists() and shutil.rmtree(page_dir)
                 page_dir.mkdir(parents=True)
 
                 # page_dir/data = article_dir/data
-                shutil.copytree(article.data_directory(), page_dir / "data")
+                shutil.copytree(article.data_dir(), page_dir / "data")
 
                 # page_dir/bg.webp = resize(article_dir/bg.*)
-                bg_img_path = article.background_img()
+                bg_img_path = article.background_img_file()
                 with Image.open(bg_img_path) as img:
                     width, height = img.size
                     new_width = 1500
@@ -124,17 +128,16 @@ class Actor:
                 index_value = index_value.replace("__LANG__", article.lang())
 
                 # index_value/__DESCRIPTION__ = article_dir/description
-                index_value = index_value.replace("__DESCRIPTION__", article.desc())
+                index_value = index_value.replace("__DESCRIPTION__", article.description())
 
                 # index_value/__CSS__ = article_dir/article.css
-                article_css = article.article_css()
-                if isinstance(article_css,Path) and article_css.exists():
-                    with open(article_css) as f:
-                        index_value = index_value.replace("__CSS__", f.read().strip())
+                try:
+                    index_value = index_value.replace("__CSS__", article.article_css())
+                except AssertionError as e:
+                    print(e)
 
                 # index_value/__ARTICLE__ = article_dir/article.html
-                with open(article.article_path()) as f:
-                    index_value = index_value.replace("__ARTICLE__", f.read())
+                index_value = index_value.replace("__ARTICLE__", article.article_html())
 
                 # page_dir/index.html = index_value
                 with open(page_dir / "index.html", "w") as index:
@@ -152,12 +155,12 @@ class Actor:
                 report = self.duplicated_uuids()
                 pages = root / "page"
                 report += "\n".join([f"page = {page}" for page in self.pages(template, pages).split()])
-                uuid_desc = [(art.uuid(), art.desc()) for art in self.__articles()]
+                uuid_desc = [(art.uuid(), art.description()) for art in self.__articles()]
                 uuid_desc.sort(key=lambda pair: pair[1])
                 def build_li(uuid, desc):
                     return f'<li><a href="/page/{uuid}/">{desc}</a></li>'
                 items = "\n".join([build_li(uuid,desc) for (uuid,desc) in uuid_desc])
-                index = Article.path_to_article(self._articles / uuid)
+                index = Article(self._articles / uuid)
                 index_page = pages / uuid / "index.html"
                 with open(index_page, "r+") as index_article:
                     index_str = index_article.read()
@@ -209,7 +212,7 @@ class Actor:
         return [path.parts[-1] for path in self.__paths()]
 
     def __articles(self):
-        return [Article.path_to_article(path) for path in self.__paths()]
+        return [Article(path) for path in self.__paths()]
 
     def __str__(self):
         return f"Actor(articles={self._articles})"

@@ -22,7 +22,7 @@ class Answer extends Cartridge {
             }
 
             .answer.hidden {
-                visibility: hidden;
+                display: none;
             }
 
             .answer::before {

@@ -19,6 +19,7 @@ class QuestionAnswer extends LitElement {
                 display: flex;
                 justify-content: right;
                 gap: 1rem;
+                margin-top: var(--qa-margin-top, 4rem);
             }
             .question-answer .content {
                 display: flex;
@@ -36,18 +37,18 @@ class QuestionAnswer extends LitElement {
 
     render() {
         const show_btn = html`<button class="button" @click="${this._show}">
-            SHOW
+            SHOW ANSWER
         </button>`;
         const hide_btn = html`<button class="button" @click="${this._hide}">
-            HIDE
+            HIDE ANSWER
         </button>`;
         const action = this._hidden ? show_btn : hide_btn;
         return html`
             <div class="question-answer">
+                <div class="actions">${action}</div>
                 <div class="content">
                     <slot></slot>
                 </div>
-                <div class="actions">${action}</div>
             </div>
         `;
     }

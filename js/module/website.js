@@ -9,6 +9,7 @@ import "./webcomponent/cartridge/algorithm";
 import "./webcomponent/cartridge/answer";
 import "./webcomponent/cartridge/blockcode";
 // import "./webcomponent/cartridge/blockdiagram";
+// import "./webcomponent/cartridge/p5";
 import "./webcomponent/cartridge/blockmath";
 import "./webcomponent/cartridge/blockquote";
 import "./webcomponent/cartridge/context";
@@ -129,10 +130,10 @@ const Website = class extends EventTarget {
                 );
                 if (all_qa_are_visible) {
                     qa_list.map((qa) => qa.hide());
-                    toggle_qa_btn.innerHTML = "SHOW";
+                    toggle_qa_btn.innerHTML = "SHOW ANSWERS";
                 } else {
                     qa_list.map((qa) => qa.show());
-                    toggle_qa_btn.innerHTML = "HIDE";
+                    toggle_qa_btn.innerHTML = "HIDE ANSWERS";
                 }
             };
             toggle_qa_btn.addEventListener("click", () => {

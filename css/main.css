@@ -30,7 +30,7 @@
   --c-text: #111111;
   --font-size: 18px;
   --title-font-size: 2rem;
-  --section-font-size: 1.1rem;
+  --section-font-size: 1.2rem;
   --heading: var(--c-red-900);
   --mark: #ffccbc;
   --algorithm-bg: var(--c-blue-50);
@@ -593,7 +593,7 @@ x-abstract *:last-child {
 
   .actions {
     display: flex;
-    justify-content: end;
+    justify-content: left;
   }
 
   .button {
@@ -649,6 +649,9 @@ x-abstract *:last-child {
 }
 
 @media (max-width: 800px) {
+		:root {
+				--x-abstract-max-width: 100%;
+		}
   body {
     margin: 0;
     font-size: 16px;
@@ -660,10 +663,6 @@ x-abstract *:last-child {
 
   #topbar {
     margin-bottom: 2rem;
-  }
-
-  .cartridge.abstract {
-    max-width: 80%;
   }
 
   aside {

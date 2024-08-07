@@ -4,4 +4,5 @@ from lib.message import Message
 
 @dataclass
 class Index(Message):
-    path: Path
+    pages: Path # Where website pages are stored.
+    uuid: str # UUID of the index article.

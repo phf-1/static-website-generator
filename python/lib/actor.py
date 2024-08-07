@@ -2,6 +2,8 @@ from concurrent.futures import ProcessPoolExecutor
 from glob import glob
 from pathlib import Path
 from functools import reduce
+from itertools import groupby
+from datetime import datetime, timezone, date
 import shutil
 import uuid
 
@@ -76,6 +78,10 @@ class Actor:
         message = Sitemap(self, root)
         return self.receive(message)
 
+    def index(self, pages:Path, uuid:str):
+        message = Index(self, pages, uuid)
+        return self.receive(message)
+
     def receive(self, msg:Message):
         match msg:
             case Clone(address=self, article=article, target=target):
@@ -86,9 +92,35 @@ class Actor:
                 target_article.replace_ids()
                 return target_article.root_dir()
 
-            case Index(address=self, path=path):
-                uuids = self.__uuids()
-                print(uuids)
+            case Index(address=self, pages=pages, uuid=uuid):
+                def build_li(uuid, desc):
+                    return f'<li><a href="/page/{uuid}/">{desc}</a></li>'
+                articles = self.__articles()
+                def key(article):
+                    timestamp = article.mtime()
+                    a_datetime = datetime.fromtimestamp(timestamp, tz=timezone.utc)
+                    return date(a_datetime.year, a_datetime.month, 1)
+                articles = sorted(articles, key=key, reverse=True)
+                groups = groupby(articles, key)
+                sections = ""
+                for k,g in groups:
+                    date_str = k.strftime("%Y-%m")
+                    sections += f'<x-h2 name="{date_str}" id="{date_str}">'
+                    sections += '<ul>'
+                    uuid_desc = [(art.uuid(), art.description()) for art in g]
+                    uuid_desc.sort(key=lambda pair: pair[1])
+                    sections += "\n".join([build_li(uuid,desc) for (uuid,desc) in uuid_desc])
+                    sections += '</ul>'
+                    sections += '</x-h2>'
+
+                index_page = pages / uuid / "index.html"
+                with open(index_page, "r+") as index_article:
+                    index_str = index_article.read()
+                    index_article.seek(0)
+                    index_str = index_str.replace("__INDEX__",sections)
+                    index_article.write(index_str)
+
+                return index_page
 
             case List(address=self):
                 articles = [Article(Path(path)) for path in glob(str(self._articles / '*'))]
@@ -155,19 +187,7 @@ class Actor:
                 report = self.duplicated_uuids()
                 pages = root / "page"
                 report += "\n".join([f"page = {page}" for page in self.pages(template, pages).split()])
-                uuid_desc = [(art.uuid(), art.description()) for art in self.__articles()]
-                uuid_desc.sort(key=lambda pair: pair[1])
-                def build_li(uuid, desc):
-                    return f'<li><a href="/page/{uuid}/">{desc}</a></li>'
-                items = "\n".join([build_li(uuid,desc) for (uuid,desc) in uuid_desc])
-                index = Article(self._articles / uuid)
-                index_page = pages / uuid / "index.html"
-                with open(index_page, "r+") as index_article:
-                    index_str = index_article.read()
-                    index_article.seek(0)
-                    index_str = index_str.replace("__INDEX__",items)
-                    index_article.write(index_str)
-                report += f"\nindex = {index_page}"
+                report += f"\nindex = {self.index(pages, uuid)}"
                 report += f"\nsitemap = {self.sitemap(root)}"
                 return report
 

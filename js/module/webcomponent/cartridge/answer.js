@@ -21,8 +21,14 @@ class Answer extends Cartridge {
                 border-color: var(--x-answer-border-color, black);
             }
 
-            .answer.hidden {
-                display: none;
+            :host(.hidden), :host(.hidden) * {
+                /*
+                 * display: none; does not work because of a bug.
+                 * bug: https://bugs.webkit.org/show_bug.cgi?id=188259
+                 */
+                visibility: hidden;
+                width: 0;
+                height: 0;
             }
 
             .answer::before {
@@ -38,7 +44,16 @@ class Answer extends Cartridge {
     }
 
     render() {
-        const hidden = this._hidden ? "hidden" : "";
+				let hidden = ""
+				if (this._hidden) {
+						hidden = "hidden"
+						this.shadowRoot.host.classList.add("hidden")
+				}
+				else {
+						hidden = ""
+						this.shadowRoot.host.classList.remove("hidden")
+				}
+
         return html`
             <div class="${Cartridge.css.class} answer ${hidden}">
                 <slot></slot>

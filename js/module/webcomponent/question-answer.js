@@ -15,16 +15,27 @@ class QuestionAnswer extends LitElement {
     static styles = [
         sharedStyles,
         css`
+            .question-answer {
+              margin-top: var(--qa-margin-top, 4rem);
+            }
+
             .question-answer .actions {
                 display: flex;
                 justify-content: right;
                 gap: 1rem;
-                margin-top: var(--qa-margin-top, 4rem);
             }
             .question-answer .content {
                 display: flex;
                 flex-direction: column;
             }
+
+@media (max-width: 800px) {
+		.button {
+				padding: var(--qa-button-size, 0.70rem);
+				font-size: var(--qa-button-size, 0.70rem);
+		}
+}
+
         `,
     ];
 
@@ -45,10 +56,10 @@ class QuestionAnswer extends LitElement {
         const action = this._hidden ? show_btn : hide_btn;
         return html`
             <div class="question-answer">
-                <div class="actions">${action}</div>
                 <div class="content">
                     <slot></slot>
                 </div>
+                <div class="actions">${action}</div>
             </div>
         `;
     }

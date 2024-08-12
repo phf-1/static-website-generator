@@ -286,6 +286,24 @@ list: ## List articles.
 	PYTHONPATH=${PYTHON_SRC} python3 ${PYTHON_ACTOR} ${ARTICLES_DIR} list
 
 
+# doing
+## Context
+## Objective
+## Rule
+.PHONY: doing
+doing: ## doing articles.
+	rg -i '<x-doing>|state="doing"' ${ARTICLES_DIR}
+
+
+# todo
+## Context
+## Objective
+## Rule
+.PHONY: todo
+todo: ## todo articles.
+	rg -i '<x-todo>|state="todo"' ${ARTICLES_DIR}
+
+
 # delete
 ## Context
 ## Objective

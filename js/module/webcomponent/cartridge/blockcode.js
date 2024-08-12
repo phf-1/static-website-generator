@@ -8,12 +8,22 @@ import { html, css, LitElement } from "lit";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import hljs from "highlight.js/lib/core";
 import scheme from "highlight.js/lib/languages/scheme";
+import elixir from "highlight.js/lib/languages/elixir";
+import erlang from "highlight.js/lib/languages/erlang";
+import xml from "highlight.js/lib/languages/xml";
+import javascript from "highlight.js/lib/languages/javascript";
+import plaintext from "highlight.js/lib/languages/plaintext";
 import c from "highlight.js/lib/languages/c";
 import python from "highlight.js/lib/languages/python";
 import lean from "highlightjs-lean";
 import { sharedStyles } from "../style";
 
 hljs.registerLanguage("scheme", scheme);
+hljs.registerLanguage("elixir", elixir);
+hljs.registerLanguage("erlang", erlang);
+hljs.registerLanguage("xml", xml);
+hljs.registerLanguage("javascript", javascript);
+hljs.registerLanguage("plaintext", plaintext);
 hljs.registerLanguage("python", python);
 hljs.registerLanguage("c", c);
 hljs.registerLanguage("lean", lean);
@@ -45,6 +55,7 @@ const remove_indentation = function (str) {
 class Blockcode extends LitElement {
     static properties = {
         _hihlighted: { state: true },
+    lang: {}
     };
 
     // TODO: find a better way.
@@ -157,9 +168,9 @@ class Blockcode extends LitElement {
                 .querySelector("slot")
                 .assignedNodes()[0]
                 .wholeText
-								.trimEnd()
+                .trimEnd()
         );
-        this._hihlighted = hljs.highlightAuto(code);
+        this._hihlighted = hljs.highlight(code, { language: this.lang || "plaintext", ignoreIllegals: true });
     }
 }
 

@@ -179,8 +179,21 @@ PAGE_CTX := ${TEMPLATE} ${ARTICLE_FILES}
 PAGES := ${BUILD_DIR}/page
 PAGE_DIR := ${PAGES}/${UUID}
 PYTHON_SRC := python
-PYTHON_ACTOR = ${PYTHON_SRC}/main.py
-PYTHON_RULE := ${PYTHON_SRC}/rule
+
+# see: https://docs.python.org/3/howto/logging.html#when-to-use-logging
+LOGLEVEL := ERROR
+
+# see: ${PYTHON_SRC}/lib/actor.py
+EXECUTION := PARALLEL
+
+ENV := PYTHONPATH=${PYTHON_SRC} EXECUTION=${EXECUTION} LOGLEVEL=${LOGLEVEL}
+
+PYTHON := python3
+
+MAIN = ${PYTHON_SRC}/main.py
+
+ACTOR := ${ENV} ${PYTHON} ${MAIN}
+
 ## Objective
 PAGE_FILE := ${PAGE_DIR}/index.html
 ## Rule
@@ -188,7 +201,7 @@ PAGE_FILE := ${PAGE_DIR}/index.html
 page: ${PAGE_FILE}  ## Install the page with UUID ${UUID} under ${BUILD_DIR}.
 ${PAGE_FILE}: ${PAGE_CTX}
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
-	PYTHONPATH=${PYTHON_SRC} python3 ${PYTHON_ACTOR} ${ARTICLES_DIR} page ${UUID} ${TEMPLATE} ${PAGES}
+	${ACTOR} ${ARTICLES_DIR} page ${UUID} ${TEMPLATE} ${PAGES}
 
 
 # index
@@ -203,7 +216,7 @@ INDEX_FILE := ${INDEX_DIR}/index.html
 index: ${INDEX_FILE}
 ${INDEX_FILE}: ${ARTICLES_FILES}
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
-	PYTHONPATH=${PYTHON_SRC} python3 ${PYTHON_ACTOR} ${ARTICLES_DIR} page ${INDEX_UUID} ${TEMPLATE} ${PAGES}
+	${ACTOR} ${ARTICLES_DIR} page ${INDEX_UUID} ${TEMPLATE} ${PAGES}
 
 
 # all
@@ -216,7 +229,7 @@ UUIDS := $(ARTICLES_DIRS:${ARTICLES_DIR}/%=%)
 .PHONY: all
 all: ${CNAME_FILE} ${MANIFEST_FILE} ${CSS_OBJ} ${FAVICON_OBJ} ${FONT_OBJ} ${JS_OBJ} ${INDEX_FILE} ${ROBOTS_FILE} ## Build the website under ${BUILD_DIR}. If given ONCHANGE=true, then: rebuild on change
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
-	PYTHONPATH=${PYTHON_SRC} python3 ${PYTHON_ACTOR} ${ARTICLES_DIR} all ${INDEX_UUID} ${TEMPLATE} ${BUILD_DIR}
+	${ACTOR} ${ARTICLES_DIR} all ${INDEX_UUID} ${TEMPLATE} ${BUILD_DIR}
 	ln -sndf page/${LANDING_UUID}/bg.webp ${BUILD_DIR}/bg.webp
 	ln -sndf page/${LANDING_UUID}/data ${BUILD_DIR}/data
 	ln -sndf page/${LANDING_UUID}/index.html ${BUILD_DIR}/index.html
@@ -234,7 +247,7 @@ all: ${CNAME_FILE} ${MANIFEST_FILE} ${CSS_OBJ} ${FAVICON_OBJ} ${FONT_OBJ} ${JS_O
 server: all ## Start a web server serving files from the current directory.
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
 	cd ${BUILD_DIR}
-	PYTHONPATH=${PYTHON_SRC} python3 -m http.server
+	PYTHONPATH=${PYTHON_SRC} ${PYTHON} -m http.server
 
 
 # new-actor
@@ -242,14 +255,13 @@ server: all ## Start a web server serving files from the current directory.
 ACTOR_EXAMPLE_UUID := 101e3f53-f9e2-465a-a0e3-d0685b8e4f21
 ACTOR_EXAMPLE := ${ARTICLES_DIR}/${ACTOR_EXAMPLE_UUID}
 NEW_ACTOR_UUID := $(shell cat /proc/sys/kernel/random/uuid)
-CLONE_RULE := ${PYTHON_RULE}/clone.py
 ## Objective
 NEW_ACTOR := ${ARTICLES_DIR}/${NEW_ACTOR_UUID}
 ## Rule
 .PHONY: new-actor
 new-actor: ## Add a new actor page.
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
-	PYTHONPATH=${PYTHON_SRC} python3 ${PYTHON_ACTOR} ${ARTICLES_DIR} clone ${ACTOR_EXAMPLE} ${NEW_ACTOR}
+	${ACTOR} ${ARTICLES_DIR} clone ${ACTOR_EXAMPLE} ${NEW_ACTOR}
 
 
 # new-article
@@ -263,7 +275,7 @@ NEW_ARTICLE := ${ARTICLES_DIR}/${NEW_ARTICLE_UUID}
 .PHONY: new-article
 new-article: ## Create a new article.
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
-	PYTHONPATH=${PYTHON_SRC} python3 ${PYTHON_ACTOR} ${ARTICLES_DIR} clone ${ARTICLE_EXAMPLE} ${NEW_ARTICLE}
+	${ACTOR} ${ARTICLES_DIR} clone ${ARTICLE_EXAMPLE} ${NEW_ARTICLE}
 
 
 # duplicated_ids
@@ -273,7 +285,7 @@ new-article: ## Create a new article.
 .PHONY: duplicated_ids
 duplicated_ids: ## List duplicated ids
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
-	PYTHONPATH=${PYTHON_SRC} python3 ${PYTHON_ACTOR} ${ARTICLES_DIR} duplicated_uuids
+	${ACTOR} ${ARTICLES_DIR} duplicated_uuids
 
 
 # list
@@ -283,7 +295,7 @@ duplicated_ids: ## List duplicated ids
 .PHONY: list
 list: ## List articles.
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
-	PYTHONPATH=${PYTHON_SRC} python3 ${PYTHON_ACTOR} ${ARTICLES_DIR} list
+	${ACTOR} ${ARTICLES_DIR} list
 
 
 # doing

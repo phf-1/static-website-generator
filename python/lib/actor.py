@@ -6,6 +6,8 @@ from itertools import groupby
 from datetime import datetime, timezone, date
 import shutil
 import uuid
+import logging
+
 
 from PIL import Image
 
@@ -21,18 +23,25 @@ from lib.message.pages import Pages
 from lib.message.sitemap import Sitemap
 from lib.message.duplicated_uuids import DuplicatedUUIDs
 
+logger = logging.getLogger(__name__)
+
+PARALLEL  = "PARALLEL"
+SEQUENTIAL = "SEQUENTIAL"
+
 def error(msg):
     raise AssertionError(msg)
 
 # Used to parallelize pages creations.
-def make_page(args):
+def make_page(args, execution=PARALLEL):
     articles, uuid, template, pages = args
-    actor = Actor(articles)
+    actor = Actor(articles, execution=execution)
     return actor.page(uuid, template, pages)
 
 class Actor:
-    def __init__(self, articles:Path) -> None:
+    def __init__(self, articles:Path, execution=PARALLEL) -> None:
         self._articles = articles
+        self._execution = execution
+        logger.info(f'{self}')
 
     def argv(self, args):
         match(args):
@@ -83,6 +92,8 @@ class Actor:
         return self.receive(message)
 
     def receive(self, msg:Message):
+        logger.info(f'{self} ← {msg}')
+
         match msg:
             case Clone(address=self, article=article, target=target):
                 article.exists() or error(f"article does not exist. article = {article}")
@@ -163,10 +174,7 @@ class Actor:
                 index_value = index_value.replace("__DESCRIPTION__", article.description())
 
                 # index_value/__CSS__ = article_dir/article.css
-                try:
-                    index_value = index_value.replace("__CSS__", article.article_css())
-                except AssertionError as e:
-                    print(e)
+                index_value = index_value.replace("__CSS__", article.article_css())
 
                 # index_value/__ARTICLE__ = article_dir/article.html
                 index_value = index_value.replace("__ARTICLE__", article.article_html())
@@ -179,8 +187,14 @@ class Actor:
 
             case Pages(address=self, template=template, pages=pages):
                 args = ((self._articles, uuid, template, pages) for uuid in self.__uuids())
-                with ProcessPoolExecutor() as executor:
-                    results = list(executor.map(make_page, args))
+
+                if self._execution == PARALLEL:
+                    with ProcessPoolExecutor() as executor:
+                        results = list(executor.map(make_page, args))
+
+                elif self._execution == SEQUENTIAL:
+                    results = [make_page(arg, execution=self._execution) for arg in args]
+
                 return "\n".join([str(res) for res in results])
 
             case All(address=self, uuid=uuid, template=template, root=root):
@@ -235,5 +249,5 @@ class Actor:
         return [Article(path) for path in self.__paths()]
 
     def __str__(self):
-        return f"Actor(articles={self._articles})"
+        return f"Actor articles={self._articles}"
 

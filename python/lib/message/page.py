@@ -7,3 +7,6 @@ class Page(Message):
     uuid: str
     template: Path
     pages: Path
+
+    def __str__(self):
+        return f'Page uuid={self.uuid} template={self.template} pages={self.pages}'

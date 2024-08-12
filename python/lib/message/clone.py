@@ -6,3 +6,6 @@ from lib.message import Message
 class Clone(Message):
     article: Path
     target: Path
+
+    def __str__(self):
+        return f'Clone article={self.article} target={self.target}'

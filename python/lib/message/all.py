@@ -7,3 +7,6 @@ class All(Message):
     uuid: str
     template: Path
     root: Path
+
+    def __str__(self):
+        return f'All uuid={self.uuid} template={self.template} root={self.root}'

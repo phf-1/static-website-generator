@@ -5,3 +5,7 @@ from lib.message import Message
 @dataclass
 class Sitemap(Message):
     root: Path
+
+    def __str__(self):
+        return f'Sitemap root={self.root}'
+

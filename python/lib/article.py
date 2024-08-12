@@ -1,8 +1,13 @@
-from pathlib import Path
 from glob import glob
-import uuid
+from pathlib import Path
+import logging
 import re
+import uuid
 
+from lib.message import Message
+from lib.message.replace_ids import ReplaceIds
+
+logger = logging.getLogger(__name__)
 uuid4regex = re.compile(r'id="([0-9a-f]{12}4[0-9a-f]{3}[89ab][0-9a-f]{15}\Z)"', re.I)
 
 def replace_with_uuid(match):
@@ -36,6 +41,7 @@ class Article:
         ]
         self._article_css.is_file() and self._files.append(self._article_css)
         self._files += [Path(p).resolve() for p in glob(str(self._data_dir / "**"), recursive=True)]
+        logger.info(f'{self}')
 
     # Public
 
@@ -60,7 +66,8 @@ class Article:
             with open(self._article_css) as f:
                 return f.read()
         else:
-            raise AssertionError(f"{self._article_css} is not a file.")
+            logger.info(f"{self._article_css} is not a file.")
+            return ""
 
     def background_img_file(self):
         return self._bg_img_file
@@ -95,12 +102,8 @@ class Article:
         return self._uuid
 
     def replace_ids(self):
-        with open(self._article_html, 'r+') as file:
-            content = file.read()
-            file.seek(0)
-            updated_content = re.sub(r'id="[^"]*"', replace_with_uuid, content)
-            file.write(updated_content)
-        return self
+        message = ReplaceIds(self)
+        return self.receive(message)
 
     def uuids(self):
         with open(self._article_html, 'r') as file:
@@ -116,16 +119,22 @@ class Article:
         else:
             raise AssertionError("Not in the file system.")
 
+    def receive(self, msg:Message):
+        logger.info(f'{self} ← {msg}')
+
+        match msg:
+            case ReplaceIds(address=self):
+                with open(self._article_html, 'r+') as file:
+                    content = file.read()
+                    file.seek(0)
+                    updated_content = re.sub(r'id="[^"]*"', replace_with_uuid, content)
+                    file.write(updated_content)
+                return self
+
+            case _:
+                raise AssertionError(f'Unexpected msg. msg = {msg}')
+
     # Private
 
     def __str__(self):
-        return f"""Article(
-    article_html = {self._article_html}
-    article_css = {self._article_css}
-    background_img = {self._bg_img_file}
-    data_dir = {[str(p) for p in self._data_dir]}
-    description = {self._description}
-    lang = {self._lang}
-    root = {self._root}
-    uuid = {self._uuid}
-)"""
+        return f"Article root={self._root}"

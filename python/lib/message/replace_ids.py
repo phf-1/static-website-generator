@@ -3,10 +3,8 @@ from pathlib import Path
 from lib.message import Message
 
 @dataclass
-class Pages(Message):
-    template: Path
-    pages: Path
+class ReplaceIds(Message):
 
     def __str__(self):
-        return f'Pages pages={self.pages} template={self.template}'
+        return f'ReplaceIds'
 

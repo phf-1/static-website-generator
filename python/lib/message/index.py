@@ -6,3 +6,7 @@ from lib.message import Message
 class Index(Message):
     pages: Path # Where website pages are stored.
     uuid: str # UUID of the index article.
+
+    def __str__(self):
+        return f'Index pages={self.pages} uuid={self.uuid}'
+

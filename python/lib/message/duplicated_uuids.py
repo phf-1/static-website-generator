@@ -4,4 +4,7 @@ from lib.message import Message
 
 @dataclass
 class DuplicatedUUIDs(Message):
-    pass
+
+    def __str__(self):
+        return f'DuplicatedUUIDs'
+

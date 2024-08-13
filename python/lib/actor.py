@@ -1,27 +1,28 @@
+from bs4 import BeautifulSoup
 from concurrent.futures import ProcessPoolExecutor
-from glob import glob
-from pathlib import Path
-from functools import reduce
-from itertools import groupby
 from datetime import datetime, timezone, date
+from functools import reduce
+from glob import glob
+from itertools import groupby
+from pathlib import Path
+import logging
 import shutil
 import uuid
-import logging
-
 
 from PIL import Image
 
 from lib.article import Article
-from lib.page import Page
 from lib.message import Message
 from lib.message.all import All
-from lib.message.index import Index
 from lib.message.clone import Clone
+from lib.message.duplicated_uuids import DuplicatedUUIDs
+from lib.message.index import Index
+from lib.message.links import Links
 from lib.message.list import List
 from lib.message.page import Page as PageMessage
 from lib.message.pages import Pages
 from lib.message.sitemap import Sitemap
-from lib.message.duplicated_uuids import DuplicatedUUIDs
+from lib.page import Page
 
 logger = logging.getLogger(__name__)
 
@@ -44,12 +45,16 @@ class Actor:
         logger.info(f'{self}')
 
     def argv(self, args):
+        logger.info(f'{self} ← argv({args})')
         match(args):
             case ["clone", str(article), str(target)]:
                 message = Clone(self, Path(article), Path(target))
 
             case ["page", str(uuid), str(template), str(pages)]:
                 message = PageMessage(self, uuid, Path(template), Path(pages))
+
+            case ["links", str(path)]:
+                message = Links(self, Path(path))
 
             case ["duplicated_uuids"]:
                 message = DuplicatedUUIDs(self)
@@ -73,6 +78,10 @@ class Actor:
 
     def page(self, uuid:str, template:Path, pages:Path):
         message = PageMessage(self, uuid, template, pages)
+        return self.receive(message)
+
+    def links(self, path:Path):
+        message = Links(self, path)
         return self.receive(message)
 
     def duplicated_uuids(self):
@@ -133,6 +142,12 @@ class Actor:
 
                 return index_page
 
+            case Links(address=self, path=path):
+                path.exists() or error(f'path does not exist. path={path}')
+                with open(path) as f:
+                    html_content = f.read()
+                return f"{self.__links(html_content)}"
+
             case List(address=self):
                 articles = [Article(Path(path)) for path in glob(str(self._articles / '*'))]
                 line = lambda art: f"{art.article_html_file()} | {art.description()}"
@@ -176,8 +191,12 @@ class Actor:
                 # index_value/__CSS__ = article_dir/article.css
                 index_value = index_value.replace("__CSS__", article.article_css())
 
+                # Add references in the article if any.
+                article_html = article.article_html()
+                article_html = article_html.replace("__REFERENCE__", self.__links(article_html))
+
                 # index_value/__ARTICLE__ = article_dir/article.html
-                index_value = index_value.replace("__ARTICLE__", article.article_html())
+                index_value = index_value.replace("__ARTICLE__", article_html)
 
                 # page_dir/index.html = index_value
                 with open(page_dir / "index.html", "w") as index:
@@ -247,6 +266,25 @@ class Actor:
 
     def __articles(self):
         return [Article(path) for path in self.__paths()]
+
+    def __links(self, html_string):
+        parsed = BeautifulSoup(html_string, 'html.parser')
+        pairs = {}
+        for link in parsed.find_all('a'):
+            href = link.get('href')
+            if href not in pairs:
+                if href and href.startswith('https://'):
+                    name = ''.join(str(content) for content in link.contents)
+                    pairs[href] = name
+        for link in parsed.find_all('x-blockquote'):
+            href = link.get('url')
+            if href not in pairs:
+                if href and href.startswith('https://'):
+                    name = link.get('source')
+                    pairs[href] = name
+        pairs = sorted(pairs.items(), key=lambda p: p[1])
+        to_reference = lambda pair: f'<li><a href={pair[0]}>{pair[1]}</a></li>'
+        return "\n".join(map(to_reference, pairs))
 
     def __str__(self):
         return f"Actor articles={self._articles}"

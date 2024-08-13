@@ -10,6 +10,7 @@ if __name__ == "__main__":
         format='%(asctime)s - %(levelname)s -  %(name)s - %(message)s',
         level=os.environ.get('LOGLEVEL', 'INFO').upper()
     )
-    actor = Actor(Path(sys.argv[1]), execution=os.environ.get('EXECUTION', 'PARALLEL').upper())
+    execution = os.environ.get('EXECUTION', 'PARALLEL').upper()
+    actor = Actor(Path(sys.argv[1]), execution=execution)
     print(actor.argv(sys.argv[2:]))
     sys.exit(0)

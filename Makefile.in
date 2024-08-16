@@ -2,333 +2,445 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+
+
+#########
+# State #
+#########
+
+
+# All rules use Bash.
 SHELL := bash
-.SHELLFLAGS := -ceuo pipefail
+
+
+# One Bash process is started per rule.
 .ONESHELL:
+
+
+# Bash uses strict mode.
+# http://redsymbol.net/articles/unofficial-bash-strict-mode/
+.SHELLFLAGS := -ceuo pipefail
+
+
+# Make does not clog stdout.
 .SILENT:
+
+
+# https://www.gnu.org/software/make/manual/html_node/Secondary-Expansion.html
 .SECONDEXPANSION:
 
 
-# $(call list_files, glob, dir) ≡ files : List Path
+# $(call list_files, ${dir}, ${glob}) lists all files under ${dir} verifying ${glob} pattern.
 define list_files
 	$(shell fd -uu -t f -g $(2) $(1))
 endef
 
 
-# Where the source files of the pages are saved.
-SOURCE=__SOURCE__
+# $(call objective, $objective) prints ${objective}.
+define objective
+	echo "┌─"
+	echo "│objective: $(1)"
+	echo "└─"
+endef
 
 
-# The directory under which the website will be installed.
-PREFIX=__PREFIX__
+# $(call result, $result) prints ${result}.
+define result
+	echo "┌─"
+	echo "│result: $(1)"
+	echo "└─"
+endef
 
 
-# Where the website is built.
+# ${ARTICLES} represents the parent directory of all articles.
+ARTICLES := __SOURCE__
+
+
+# ${INDEX_UUID} represents the uuid of the article in which articles are indexed.
+INDEX_UUID := __INDEX_UUID__
+
+
+# ${TEMPLATE} represents the template where each article is included to form a webpage.
+TEMPLATE := template.html
+
+
+# ${BUILD_DIR} represents the parent directory where the website is built.
 BUILD_DIR := _build
 $(shell mkdir -p ${BUILD_DIR})
 
 
-help: ## This help.
+# ${FONT_DIR} represents the parent directory of all font source files.
+FONT_DIR := font
+
+
+# ${JS_DIR} represents the parent directory of all JS source files.
+JS_DIR := js
+
+
+# ${TEMPLATE_DIR} represents the parent directory of all pages templates.
+TEMPLATE_DIR := template
+
+
+# ${CSS_DIR} represents the parent directory of all CSS source files.
+CSS_DIR := css
+
+
+# The actor to which a few rules are delegated.
+# ${PYTHON_DIR} represents the parent directory of all Python source files.
+PYTHON_DIR := python
+# see: https://docs.python.org/3/howto/logging.html#when-to-use-logging
+LOGLEVEL := __LOGLEVEL__
+# see: ${PYTHON_DIR}/lib/actor.py
+EXECUTION := __EXECUTION__
+ifeq ($(EXECUTION), parallel)
+MAKEFLAGS := --jobs=$(shell nproc)
+MAKEFLAGS += --output-sync=recurse 
+endif
+
+
+ENV := PYTHONPATH=${PYTHON_DIR} EXECUTION=${EXECUTION} LOGLEVEL=${LOGLEVEL}
+PYTHON := python3
+MAIN = ${PYTHON_DIR}/main.py
+ACTOR := ${ENV} ${PYTHON} ${MAIN} ${ARTICLES}
+
+
+# ${PREFIX} represents the parent directory where the website is installed.
+PREFIX=__PREFIX__
+
+
+#############
+# Interface #
+#############
+
+
+help: ## This help is printed.
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "make %-30s %s\n", $$1, $$2}'
 
 
-# deps
-## Context
-## Objective
-## Rule
+# Context
+# Result
+# Message
 .PHONY: deps
-deps:  ## TODO: Check and install dependencies.
-	echo "TODO"
+deps:  ## TODO: All dependencies are installed.
+	$(call objective, "TODO: All dependencies are installed.")
 	npm install
+	$(call result, "TODO.")
 
 
-# robots
-## Context
-ROBOTS := robots.txt
-## Objective
-ROBOTS_FILE := ${BUILD_DIR}/${ROBOTS}
-## Rule
+# Context
+B1B1_ROBOTS_FILE := robots.txt
+# Result
+B1B1_ROBOTS := ${BUILD_DIR}/${B1B1_ROBOTS_FILE}
+# Message
 .PHONY: robots
-robots: ${ROBOTS_FILE} ## Install the ROBOTS under ${BUILD_DIR}.
-${ROBOTS_FILE}: ${ROBOTS}
+robots: ${B1B1_ROBOTS} ## robots.txt is installed.
+${B1B1_ROBOTS}: ${B1B1_ROBOTS_FILE}
+	$(call objective, "robots.txt is installed.")
 	cp $< $@
+	$(call result, "$@")
 
-# cname
-## Context
-CNAME := CNAME
-## Objective
-CNAME_FILE := ${BUILD_DIR}/CNAME
-## Rule
+
+# Context
+E502_CNAME_FILE := CNAME
+# Result
+E502_CNAME := ${BUILD_DIR}/${E502_CNAME_FILE}
+# Message
 .PHONY: cname
-cname: ${CNAME_FILE} ## Install the CNAME under ${BUILD_DIR}.
-${CNAME_FILE}: ${CNAME}
+cname: ${E502_CNAME} ## CNAME is installed.
+${E502_CNAME}: ${E502_CNAME_FILE}
+	$(call objective, "CNAME installed.")
 	cp $< $@
+	$(call result, "$@")
 
 
-# manifest
-## Context
-MANIFEST := site.webmanifest
-## Objective
-MANIFEST_FILE := ${BUILD_DIR}/site.webmanifest
-## Rule
+# Context
+F809_MANIFEST_FILE := site.webmanifest
+# Result
+F809_MANIFEST := ${BUILD_DIR}/${F809_MANIFEST_FILE}
+# Message
 .PHONY: manifest
-manifest: ${MANIFEST_FILE} ## Install the webmanifest under ${BUILD_DIR}.
-${MANIFEST_FILE}: ${MANIFEST}
+manifest: ${F809_MANIFEST} ## site.webmanifest is installed.
+${F809_MANIFEST}: ${F809_MANIFEST_FILE}
+	$(call objective, "site.manifest is installed.")
 	cp $< $@
+	$(call result, "$@")
 
 
-# format
-## Context
-## Objective
-## Rule
-.PHONY: format
-format: ## Format all code.
+# Context
+BC1B_JS_DIR := ${JS_DIR}
+# Result
+# Message
+.PHONY: code
+code: ## All code is analysed, formatted and checked.
+	$(call objective, "All code is analysed formatted and checked.")
+	npx eslint --fix ${BC1B_JS_DIR}
 	npx prettier . --write
-
-
-# check
-## Context
-## Objective
-## Rule
-.PHONY: check
-check: ## Check all code.
 	npx prettier . --check
+	echo "TODO: do the same for python code."
+	$(call result, "See above.")
 
 
-# analysis
-## Context
-JS_DIR := js
-## Objective
-## Rule
-.PHONY: analyse
-analyse: ## Analyse all code using static analysis tools.
-	npx eslint --fix ${JS_DIR}
-
-
-# css
-## Context
-CSS_DIR := css
-CSS_FILES := $(call list_files, ${CSS_DIR}, '*')
-## Objective
-CSS_OBJ := ${BUILD_DIR}/${CSS_DIR}/main.css
-## Rule
+# Context
+B547_CSS_FILES := $(call list_files, ${CSS_DIR}, '*')
+B547_BUILD_DIR := ${BUILD_DIR}/${CSS_DIR}
+# Result
+B547_CSS := ${B547_BUILD_DIR}/main.css
+# Message
 .PHONY: css
-css: ${CSS_OBJ} ## Install the css directory under ${BUILD_DIR}.
-${CSS_OBJ}: ${CSS_FILES}
-	mkdir -p ${BUILD_DIR}/${CSS_DIR}
+css: ${B547_CSS} ## The CSS source code is installed.
+${B547_CSS}: ${B547_CSS_FILES}
+	$(call objective, "The CSS source code is installed.")
+	mkdir -p ${B547_BUILD_DIR}
 	npx esbuild --bundle css/main.css --loader:.ttf=file --outfile=$@ --target=chrome58,edge16,firefox57,safari11
+	$(call result, "See above.")
 
 
-# favicon
-## Context
-FAVICON_DIR := favicon
-FAVICON_FILES := $(call list_files, ${FAVICON_DIR}, '*')
-## Objective
-FAVICON_OBJ := $(FAVICON_FILES:%=${BUILD_DIR}/%)
-## Rule
+# Context
+BF58_DIR := favicon
+BF58_FILES := $(call list_files, ${BF58_DIR}, '*')
+BF58_BUILD_DIR := ${BUILD_DIR}/${BF58_DIR}
+BF58_BUILD_FILES := $(BF58_FILES:%=${BUILD_DIR}/%)
+# Result
+BF58_FAVICON := ${BF58_BUILD_DIR}
+# Message
 .PHONY: favicon
-favicon: ${FAVICON_OBJ} ## Install the favicon directory under ${BUILD_DIR}.
-${BUILD_DIR}/${FAVICON_DIR}/%: ${FAVICON_DIR}/%
+favicon: ${BF58_FAVICON} ## favicon directory is installed.
+${BF58_FAVICON}: ${BF58_BUILD_FILES}
+	$(call objective, "favicon directory is installed.")
+	touch $@
+	$(call result, "$@")
+${BF58_BUILD_DIR}/%: ${BF58_DIR}/%
 	OUT="$@"
 	OUT_DIR="$${OUT%/*}"
 	mkdir -p "$${OUT_DIR}"
 	cp $< $@
 
 
-# font
-## Context
-FONT_DIR := font
-FONT_FILES := $(call list_files, ${FONT_DIR}, '*')
-## Objective
-FONT_OBJ := $(FONT_FILES:%=${BUILD_DIR}/%)
-## Rule
+# Context
+E915_FONT_DIR := ${FONT_DIR}
+E915_FONT_DIR_FILES := $(call list_files, ${E915_FONT_DIR}, '*')
+E915_BUILD_DIR := ${BUILD_DIR}/${E915_FONT_DIR}
+E915_BUILD_DIR_FILES := $(E915_FONT_DIR_FILES:%=${BUILD_DIR}/%)
+# Result
+E915_FONT := ${E915_BUILD_DIR}
+# Message
 .PHONY: font
-font: ${FONT_OBJ} ## Install the font directory under ${BUILD_DIR}.
-${BUILD_DIR}/${FONT_DIR}/%: ${FONT_DIR}/%
+font: ${E915_FONT} ## Fonts are installed.
+${E915_FONT}: ${E915_BUILD_DIR_FILES}
+	$(call objective, "Font directory is installed.")
+	touch $@
+	$(call result, "$@")
+${E915_BUILD_DIR}/%: ${E915_FONT_DIR}/%
 	OUT="$@"
 	OUT_DIR="$${OUT%/*}"
 	mkdir -p "$${OUT_DIR}"
 	cp $< $@
 
 
-# js
-## Context
-JS_MAIN_FILES := $(shell echo js/module/* js/main.js)
-JS_BUILD_DIR := ${BUILD_DIR}/${JS_DIR}
-## Objective
-JS_OBJ := ${JS_BUILD_DIR}/main/main.min.js
-## Rule
+# Context
+E42A_DIR := ${JS_DIR}
+E42A_DIR_FILES := $(call list_files, ${E42A_DIR}, '*')
+E42A_MAIN := ${E42A_DIR}/main.js
+# Result
+E42A_JS := ${BUILD_DIR}/js/main.min.js
+# Message
 .PHONY: js
-js: ${JS_OBJ} ## Install the minified javascript under ${BUILD_DIR}.
-${JS_OBJ}: ${JS_MAIN_FILES}
-	npx esbuild ${JS_DIR}/main.js --bundle --minify --sourcemap  --outfile=${JS_BUILD_DIR}/main.min.js
+js: ${E42A_JS} ## The JavaScript code is installed.
+${E42A_JS}: ${E42A_DIR_FILES}
+	$(call objective, "JavaScript code is installed.")
+	npx esbuild ${E42A_MAIN} --bundle --minify --sourcemap --outfile="$@"
+	$(call result, "See above.")
 
 
-
-# page ${UUID}
-## Context
-TEMPLATE := template.html
-ARTICLES_DIR := ${SOURCE}
-ARTICLE_DIR := ${ARTICLES_DIR}/${UUID}
-ARTICLE_FILES := $(call list_files, ${ARTICLE_DIR}, '*')
-LANG_FILE := ${ARTICLE_DIR}/lang
-DATA_DIR := ${ARTICLE_DIR}/data
-DESCRIPTION_FILE := ${ARTICLE_DIR}/description
-ARTICLE_FILE := ${ARTICLE_DIR}/article.html
-PAGE_CTX := ${TEMPLATE} ${ARTICLE_FILES}
-PAGES := ${BUILD_DIR}/page
-PAGE_DIR := ${PAGES}/${UUID}
-PYTHON_SRC := python
-
-# see: https://docs.python.org/3/howto/logging.html#when-to-use-logging
-LOGLEVEL := ERROR
-
-# see: ${PYTHON_SRC}/lib/actor.py
-EXECUTION := PARALLEL
-
-ENV := PYTHONPATH=${PYTHON_SRC} EXECUTION=${EXECUTION} LOGLEVEL=${LOGLEVEL}
-
-PYTHON := python3
-
-MAIN = ${PYTHON_SRC}/main.py
-
-ACTOR := ${ENV} ${PYTHON} ${MAIN}
-
-## Objective
-PAGE_FILE := ${PAGE_DIR}/index.html
-## Rule
+# Context
+CD6D_UUID := ${UUID}
+CD6D_TEMPLATE := ${TEMPLATE}
+CD6D_ARTICLE := ${ARTICLES}/${CD6D_UUID}
+CD6D_FILES := $(call list_files, ${CD6D_ARTICLE}, '*')
+CD6D_CTX := ${TEMPLATE} ${CD6D_FILES}
+CD6D_ACTOR := ${ACTOR}
+CD6D_PAGE_DIR := ${BUILD_DIR}/page
+# Result
+CD6D_PAGE := ${CD6D_PAGE_DIR}/${CD6D_UUID}/index.html
+# Message
 .PHONY: page
-page: ${PAGE_FILE}  ## Install the page with UUID ${UUID} under ${BUILD_DIR}.
-${PAGE_FILE}: ${PAGE_CTX}
+page: ${CD6D_PAGE}  ## UUID=$UUID. Page with id $UUID is installed.
+${CD6D_PAGE}: ${CD6D_CTX}
+	$(call objective, "Page with id ${UUID} is installed.")
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
-	${ACTOR} ${ARTICLES_DIR} page ${UUID} ${TEMPLATE} ${PAGES}
+	${CD6D_ACTOR} page ${CD6D_UUID} ${CD6D_TEMPLATE} ${CD6D_PAGE_DIR}
+	$(call result, "See above.")
 
 
-# index
-## Context
-ARTICLES_FILES := $(call list_files,${ARTICLES_DIR}, '*')
-INDEX_UUID=8e11bcd7-a050-40d6-ab93-71bee0640990
-INDEX_DIR := ${PAGES}/${INDEX_UUID}
-## Objective
-INDEX_FILE := ${INDEX_DIR}/index.html
-## Rule
+# Context
+BDBC_TEMPLATE := ${TEMPLATE}
+BDBC_FILES := $(call list_files, ${ARTICLES}, '*')
+# Result
+BDBC_ARTICLES := ${BUILD_DIR}/page
+# Message
+.PHONY: articles
+articles: ${BDBC_ARTICLES}  ## All articles are installed.
+${BDBC_ARTICLES}: ${BDBC_TEMPLATE} ${BDBC_FILES}
+	$(call objective, "All articles are installed.")
+	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
+	${ACTOR} pages ${BDBC_TEMPLATE} ${BDBC_ARTICLES} &>/dev/null
+	touch "$@"
+	$(call result, "$@")
+
+
+# Context
+FCBA_ARTICLES := ${BDBC_ARTICLES}
+FCBA_UUID := ${INDEX_UUID}
+# Result
+FCBA_INDEX := ${FCBA_ARTICLES}/${FCBA_UUID}/index.html
+# Message
 .PHONY: index
-index: ${INDEX_FILE}
-${INDEX_FILE}: ${ARTICLES_FILES}
+index: ${FCBA_INDEX}  ## The index is built.
+${FCBA_INDEX}: ${FCBA_ARTICLES}
+	$(call objective, "Index of articles is built.")
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
-	${ACTOR} ${ARTICLES_DIR} page ${INDEX_UUID} ${TEMPLATE} ${PAGES}
+	${ACTOR} index ${FCBA_ARTICLES} ${FCBA_UUID} &>/dev/null
+	$(call result, "$@")
+
+
+# Context
+C2E3_FILES := $(call list_files, ${ARTICLES}, '*')
+C2E3_BUILD := ${BUILD_DIR}
+# Result
+C2E3_SITEMAP := ${C2E3_BUILD}/sitemap.xml
+# Message
+.PHONY: sitemap
+sitemap: ${C2E3_SITEMAP}  ## The sitemap is built.
+${C2E3_SITEMAP}: ${C2E3_FILES}
+	$(call objective, "Sitemap is built.")
+	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
+	${ACTOR} sitemap ${C2E3_BUILD} &>/dev/null
+	$(call result, "$@")
+
+
+# Context
+B972_ARTICLES := ${BDBC_ARTICLES}
+B972_LANDING := page/00000000-0000-0000-0000-000000000000
+B972_BUILD := ${BUILD_DIR}
+# Result
+# Message
+.PHONY: landing
+landing: ${B972_ARTICLES} ## The landing page is linked.
+	$(call objective, "The landing page is linked.")
+	ln -sndfv ${B972_LANDING}/bg.webp ${B972_BUILD}/bg.webp
+	ln -sndfv ${B972_LANDING}/data ${B972_BUILD}/data
+	ln -sndfv ${B972_LANDING}/index.html ${B972_BUILD}/index.html
+	$(call result, "See above.")
+
+
+# Context
+# Result
+# Message
+.PHONY: duplicated-uuids
+duplicated-uuids:  ## There are no duplicated uuids.
+	$(call objective, "There are no duplicated uuids.")
+	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
+	${ACTOR} duplicated-uuids &>/dev/null
+	$(call result, "No duplicated uuids found.")
 
 
 # all
-## Context
-LANDING_UUID=00000000-0000-0000-0000-000000000000
-ARTICLES_DIRS := $(shell echo ${ARTICLES_DIR}/*)
-## Objective
-UUIDS := $(ARTICLES_DIRS:${ARTICLES_DIR}/%=%)
-## Rule
+# Context
+F3BE_CTX := duplicated-uuids ${B1B1_ROBOTS} ${E502_CNAME}
+F3BE_CTX += ${B547_CSS} ${BF58_FAVICON} ${E915_FONT}
+F3BE_CTX += ${E42A_JS} ${C2E3_SITEMAP} ${F809_MANIFEST}
+F3BE_CTX += ${BDBC_ARTICLES} ${FCBA_INDEX} landing
+# Result
+### Build the whole website.
+# Message
 .PHONY: all
-all: ${CNAME_FILE} ${MANIFEST_FILE} ${CSS_OBJ} ${FAVICON_OBJ} ${FONT_OBJ} ${JS_OBJ} ${INDEX_FILE} ${ROBOTS_FILE} ## Build the website under ${BUILD_DIR}. If given ONCHANGE=true, then: rebuild on change
-	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
-	${ACTOR} ${ARTICLES_DIR} all ${INDEX_UUID} ${TEMPLATE} ${BUILD_DIR}
-	ln -sndf page/${LANDING_UUID}/bg.webp ${BUILD_DIR}/bg.webp
-	ln -sndf page/${LANDING_UUID}/data ${BUILD_DIR}/data
-	ln -sndf page/${LANDING_UUID}/index.html ${BUILD_DIR}/index.html
+all: ${F3BE_CTX} ## [ONCHANGE=true]. Build the website. If: ONCHANGE=true, then: rebuild on change.
 	if [[ "${ONCHANGE}" == "true" ]]; then
-		inotifywait -q -e create,modify,move,delete -r "$$PWD" ${ARTICLES_DIR}
+		inotifywait -q -e create,modify,move,delete -r "$$PWD" -r ${ARTICLES}
 		${MAKE} all ONCHANGE=true
 	fi
 
 
 # server
-## Context
-## Objective
-## Rule
+# Context
+# Result
+# Message
 .PHONY: server
 server: all ## Start a web server serving files from the current directory.
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
 	cd ${BUILD_DIR}
-	PYTHONPATH=${PYTHON_SRC} ${PYTHON} -m http.server
+	PYTHONPATH=${PYTHON_DIR} ${PYTHON} -m http.server
 
 
 # new-actor
-## Context
+# Context
 ACTOR_EXAMPLE_UUID := 101e3f53-f9e2-465a-a0e3-d0685b8e4f21
-ACTOR_EXAMPLE := ${ARTICLES_DIR}/${ACTOR_EXAMPLE_UUID}
+ACTOR_EXAMPLE := ${ARTICLES}/${ACTOR_EXAMPLE_UUID}
 NEW_ACTOR_UUID := $(shell cat /proc/sys/kernel/random/uuid)
-## Objective
-NEW_ACTOR := ${ARTICLES_DIR}/${NEW_ACTOR_UUID}
-## Rule
+# Result
+NEW_ACTOR := ${ARTICLES}/${NEW_ACTOR_UUID}
+# Message
 .PHONY: new-actor
 new-actor: ## Add a new actor page.
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
-	${ACTOR} ${ARTICLES_DIR} clone ${ACTOR_EXAMPLE} ${NEW_ACTOR}
+	${ACTOR} clone ${ACTOR_EXAMPLE} ${NEW_ACTOR} &>/dev/null
 
 
 # new-article
-## Context
-ARTICLE_EXAMPLE_UUID := 55194423-8458-4fcd-932e-f04098d09056
-ARTICLE_EXAMPLE := ${ARTICLES_DIR}/${ARTICLE_EXAMPLE_UUID}
-NEW_ARTICLE_UUID := $(shell cat /proc/sys/kernel/random/uuid)
-## Objective
-NEW_ARTICLE := ${ARTICLES_DIR}/${NEW_ARTICLE_UUID}
-## Rule
+# Context
+DFBD_ARTICLE_TEMPLATE := template/article
+DFBD_NEW_UUID := $(shell cat /proc/sys/kernel/random/uuid)
+DFBD_ARTICLES := ${ARTICLES}
+# Result
+DFBD_NEW_ARTICLE := ${DFBD_ARTICLES}/${DFBD_NEW_UUID}
+# Message
 .PHONY: new-article
-new-article: ## Create a new article.
+new-article: ## Build a new article.
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
-	${ACTOR} ${ARTICLES_DIR} clone ${ARTICLE_EXAMPLE} ${NEW_ARTICLE}
-
-
-# duplicated_ids
-## Context
-## Objective
-## Rule
-.PHONY: duplicated_ids
-duplicated_ids: ## List duplicated ids
-	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
-	${ACTOR} ${ARTICLES_DIR} duplicated_uuids
+	${ACTOR} ${DFBD_ARTICLES} clone ${DFBD_ARTICLE_TEMPLATE} ${DFBD_NEW_ARTICLE} &>/dev/null
 
 
 # list
-## Context
-## Objective
-## Rule
+# Context
+# Result
+# Message
 .PHONY: list
 list: ## List articles.
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
-	${ACTOR} ${ARTICLES_DIR} list
+	${ACTOR} list &>/dev/null
 
 
 # doing
-## Context
-## Objective
-## Rule
+# Context
+# Result
+# Message
 .PHONY: doing
 doing: ## doing articles.
-	rg -i '<x-doing>|state="doing"' ${ARTICLES_DIR}
+	rg -i '<x-doing>|state="doing"' ${ARTICLES}
 
 
 # todo
-## Context
-## Objective
-## Rule
+# Context
+# Result
+# Message
 .PHONY: todo
 todo: ## todo articles.
-	rg -i '<x-todo>|state="todo"' ${ARTICLES_DIR}
+	rg -i '<x-todo>|state="todo"' ${ARTICLES}
 
 
 # delete
-## Context
-## Objective
-## Rule
+# Context
+# Result
+# Message
 .PHONY: delete
 delete: ## Delete a page with uuid UUID.
 	rm -rvf ${PAGES}/${UUID}
 
 
 # install
-## Context
-## Objective
-## Rule
+# Context
+# Result
+# Message
 .PHONY: install
 install: clean ## Install the website under ${PREFIX}.
 	${MAKE} all
@@ -336,9 +448,9 @@ install: clean ## Install the website under ${PREFIX}.
 
 
 # publish
-## Context
-## Objective
-## Rule
+# Context
+# Result
+# Message
 .PHONY: publish
 publish:  ## Publish the website.
 	pushd ${PREFIX}
@@ -359,19 +471,21 @@ publish:  ## Publish the website.
 
 
 # links ${PAGE}
-## Context
-## Objective
-## Rule
+# Context
+# Result
+# Message
 .PHONY: links
 links:
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
-	${ACTOR} ${ARTICLES_DIR} links ${PAGE}
+	${ACTOR} links ${PAGE} &>/dev/null
 
 
 # clean
-## Context
-## Objective
-## Rule
+# Context
+# Result
+# Message
 .PHONY: clean
 clean: ## Clean all generated files.
+	$(call objective, "Remove all generated files.")	
 	rm -rvf ${BUILD_DIR}
+	$(call result, "See above.")

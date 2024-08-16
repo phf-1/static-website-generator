@@ -21,7 +21,8 @@ class Answer extends Cartridge {
                 border-color: var(--x-answer-border-color, black);
             }
 
-            :host(.hidden), :host(.hidden) * {
+            :host(.hidden),
+            :host(.hidden) * {
                 /*
                  * display: none; does not work because of a bug.
                  * bug: https://bugs.webkit.org/show_bug.cgi?id=188259
@@ -44,15 +45,14 @@ class Answer extends Cartridge {
     }
 
     render() {
-				let hidden = ""
-				if (this._hidden) {
-						hidden = "hidden"
-						this.shadowRoot.host.classList.add("hidden")
-				}
-				else {
-						hidden = ""
-						this.shadowRoot.host.classList.remove("hidden")
-				}
+        let hidden = "";
+        if (this._hidden) {
+            hidden = "hidden";
+            this.shadowRoot.host.classList.add("hidden");
+        } else {
+            hidden = "";
+            this.shadowRoot.host.classList.remove("hidden");
+        }
 
         return html`
             <div class="${Cartridge.css.class} answer ${hidden}">

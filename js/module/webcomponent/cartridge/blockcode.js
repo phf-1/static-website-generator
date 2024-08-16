@@ -55,7 +55,7 @@ const remove_indentation = function (str) {
 class Blockcode extends LitElement {
     static properties = {
         _hihlighted: { state: true },
-    lang: {}
+        lang: {},
     };
 
     // TODO: find a better way.
@@ -167,10 +167,12 @@ class Blockcode extends LitElement {
             this.shadowRoot
                 .querySelector("slot")
                 .assignedNodes()[0]
-                .wholeText
-                .trimEnd()
+                .wholeText.trimEnd(),
         );
-        this._hihlighted = hljs.highlight(code, { language: this.lang || "plaintext", ignoreIllegals: true });
+        this._hihlighted = hljs.highlight(code, {
+            language: this.lang || "plaintext",
+            ignoreIllegals: true,
+        });
     }
 }
 

@@ -16,7 +16,7 @@ class H6 extends Heading {
             }
 
             a:hover {
-              text-decoration: none;
+                text-decoration: none;
             }
 
             i {
@@ -51,7 +51,9 @@ class H6 extends Heading {
     render() {
         return html`
             <section>
-                <a href="#${this.id}"><h6><i>🔗</i>${this.keyword()}${this.name}</h6></a>
+                <a href="#${this.id}"
+                    ><h6><i>🔗</i>${this.keyword()}${this.name}</h6></a
+                >
                 <slot></slot>
             </section>
         `;

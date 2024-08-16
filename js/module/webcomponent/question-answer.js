@@ -16,7 +16,7 @@ class QuestionAnswer extends LitElement {
         sharedStyles,
         css`
             .question-answer {
-              margin-top: var(--qa-margin-top, 4rem);
+                margin-top: var(--qa-margin-top, 4rem);
             }
 
             .question-answer .actions {
@@ -29,13 +29,12 @@ class QuestionAnswer extends LitElement {
                 flex-direction: column;
             }
 
-@media (max-width: 800px) {
-		.button {
-				padding: var(--qa-button-size, 0.70rem);
-				font-size: var(--qa-button-size, 0.70rem);
-		}
-}
-
+            @media (max-width: 800px) {
+                .button {
+                    padding: var(--qa-button-size, 0.7rem);
+                    font-size: var(--qa-button-size, 0.7rem);
+                }
+            }
         `,
     ];
 

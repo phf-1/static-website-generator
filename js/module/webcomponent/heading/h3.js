@@ -16,7 +16,7 @@ class H3 extends Heading {
             }
 
             a:hover {
-              text-decoration: none;
+                text-decoration: none;
             }
 
             i {
@@ -51,7 +51,9 @@ class H3 extends Heading {
     render() {
         return html`
             <section>
-                <a href="#${this.id}"><h3><i>🔗</i>${this.keyword()}${this.name}</h3></a>
+                <a href="#${this.id}"
+                    ><h3><i>🔗</i>${this.keyword()}${this.name}</h3></a
+                >
                 <slot></slot>
             </section>
         `;

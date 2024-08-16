@@ -68,7 +68,9 @@ class Toc extends LitElement {
                 margin-left: 4rem;
             }
 
-            i { display: none; }
+            i {
+                display: none;
+            }
 
             nav::before {
                 content: "Contents";

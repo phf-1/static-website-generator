@@ -9,6 +9,8 @@ IFS=$'\n\t'
 
 SOURCE=""
 PREFIX="_install"
+EXECUTION="parallel" # parallel + error
+LOGLEVEL="error" # error + debug
 while (( $# )); do
   case $1 in
 	--source)
@@ -19,6 +21,18 @@ while (( $# )); do
 	  shift
 	  PREFIX="$(realpath $1)"
 	  ;;
+	--execution)
+	  shift
+	  EXECUTION="$1"
+	  ;;
+	--loglevel)
+	  shift
+	  LOGLEVEL="$1"
+	  ;;
+	--index-uuid)
+		shift
+		INDEX_UUID="$1"
+		;;
 	*)
 	  echo "Error. Unexpected argument: "
 	  exit 1
@@ -37,7 +51,13 @@ fi
 chmod +w Makefile
 sed "s|__PREFIX__|${PREFIX}|g" Makefile.in > Makefile
 sed -i "s|__SOURCE__|${SOURCE}|g" Makefile
+sed -i "s|__EXECUTION__|${EXECUTION}|g" Makefile
+sed -i "s|__LOGLEVEL__|${LOGLEVEL}|g" Makefile
+sed -i "s|__INDEX_UUID__|${INDEX_UUID}|g" Makefile
 chmod -w Makefile
 echo Makefile
 echo "  SOURCE = ${SOURCE}"
 echo "  PREFIX = ${PREFIX}"
+echo "  INDEX_UUID = ${INDEX_UUID}"
+echo "  EXECUTION = ${EXECUTION}"
+echo "  LOGLEVEL = ${LOGLEVEL}"

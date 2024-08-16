@@ -32,10 +32,10 @@ class Definition extends Cartridge {
                 margin-bottom: var(--x-definition-term-margin-bottom, 1rem);
             }
             a {
-              color: inherit;
+                color: inherit;
             }
             a:hover {
-              text-decoration: none;
+                text-decoration: none;
             }
 
             i {
@@ -58,7 +58,10 @@ class Definition extends Cartridge {
         this.id || Utils.raise("An id must be defined.");
         return html`
             <div class="${Cartridge.css.class} definition">
-                <a href="#${this.id}"><i>🔗</i><p id="term"><strong>${this.term}</strong></p></a>
+                <a href="#${this.id}"
+                    ><i>🔗</i>
+                    <p id="term"><strong>${this.term}</strong></p></a
+                >
                 <slot></slot>
             </div>
         `;

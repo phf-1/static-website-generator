@@ -56,7 +56,10 @@ class Actor:
             case ["links", str(path)]:
                 message = Links(self, Path(path))
 
-            case ["duplicated_uuids"]:
+            case ["index", str(path), str(uuid)]:
+                message = Index(self, Path(path), uuid)
+
+            case ["duplicated-uuids"]:
                 message = DuplicatedUUIDs(self)
 
             case ["pages", str(template), str(pages)]:
@@ -193,7 +196,9 @@ class Actor:
 
                 # Add references in the article if any.
                 article_html = article.article_html()
-                article_html = article_html.replace("__REFERENCE__", self.__links(article_html))
+                REFERENCE = "__REFERENCE__"
+                if REFERENCE in article_html:
+                    article_html = article_html.replace(REFERENCE, self.__links(article_html))
 
                 # index_value/__ARTICLE__ = article_dir/article.html
                 index_value = index_value.replace("__ARTICLE__", article_html)
@@ -255,8 +260,11 @@ class Actor:
                 uuids = reduce(lambda acc, article: acc + article.uuids(), self.__articles(), [])
                 seen = set()
                 duplicates = [id for id in uuids if id in seen or seen.add(id)]
-                msg = "No duplicated uuids found in articles." if len(duplicates) == 0 else "Duplicated uuids found in articles:" + "  \n".join(set(duplicates))
-                return msg + "\n"
+                if len(duplicates) == 0:
+                    msg = "No duplicated uuids found in articles." 
+                    return msg
+                else:
+                    error("Duplicated uuids found in articles:" + "  \n".join(set(duplicates)))
 
     def __paths(self):
         return [Path(path) for path in glob(str(self._articles / '*'))]
@@ -273,7 +281,7 @@ class Actor:
         for link in parsed.find_all('a'):
             href = link.get('href')
             if href not in pairs:
-                if href and href.startswith('https://'):
+                if href and (href.startswith('https://') or href.startswith('/page/')):
                     name = ''.join(str(content) for content in link.contents)
                     pairs[href] = name
         for link in parsed.find_all('x-blockquote'):

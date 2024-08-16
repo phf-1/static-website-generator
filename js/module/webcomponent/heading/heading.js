@@ -4,7 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-import { html, css,  LitElement } from "lit";
+import { html, LitElement } from "lit";
 import { sharedStyles } from "../style";
 import { Utils } from "../../utils";
 
@@ -28,9 +28,7 @@ class Heading extends LitElement {
         }
     }
 
-    static styles = [
-				sharedStyles
-		];
+    static styles = [sharedStyles];
 
     render() {
         return html`<section>
@@ -39,7 +37,8 @@ class Heading extends LitElement {
     }
 
     heading() {
-        return this.renderRoot.firstElementChild.firstElementChild.firstElementChild;
+        return this.renderRoot.firstElementChild.firstElementChild
+            .firstElementChild;
     }
 
     // Private

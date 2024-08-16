@@ -9,42 +9,21 @@
 #########
 
 
-# All rules use Bash.
-SHELL := bash
+# Library
 
-
-# One Bash process is started per rule.
-.ONESHELL:
-
-
-# Bash uses strict mode.
-# http://redsymbol.net/articles/unofficial-bash-strict-mode/
-.SHELLFLAGS := -ceuo pipefail
-
-
-# Make does not clog stdout.
-.SILENT:
-
-
-# https://www.gnu.org/software/make/manual/html_node/Secondary-Expansion.html
-.SECONDEXPANSION:
-
-
-# $(call list_files, ${dir}, ${glob}) lists all files under ${dir} verifying ${glob} pattern.
+# $(call list_files, ${dir}, ${glob}). All files under ${dir} verifying ${glob} pattern are listed.
 define list_files
 	$(shell fd -uu -t f -g $(2) $(1))
 endef
 
-
-# $(call objective, $objective) prints ${objective}.
+# $(call objective, $objective). Prints ${objective}.
 define objective
 	echo "┌─"
 	echo "│objective: $(1)"
 	echo "└─"
 endef
 
-
-# $(call result, $result) prints ${result}.
+# $(call result, $result) prints ${result}. Prints ${result}.
 define result
 	echo "┌─"
 	echo "│result: $(1)"
@@ -52,74 +31,149 @@ define result
 endef
 
 
-# ${ARTICLES} represents the parent directory of all articles.
-ARTICLES := __SOURCE__
+# Input is described
 
+# ${ARTICLE} represents the parent directory of all articles.
+ARTICLE := __SOURCE__
+
+# ${ARTICLE_FILES} represents all files under ${ARTICLE}
+ARTICLE_FILES := $(call list_files, ${ARTICLE}, '*')
 
 # ${INDEX_UUID} represents the uuid of the article in which articles are indexed.
 INDEX_UUID := __INDEX_UUID__
 
 
-# ${TEMPLATE} represents the template where each article is included to form a webpage.
-TEMPLATE := template.html
-
-
-# ${BUILD_DIR} represents the parent directory where the website is built.
-BUILD_DIR := _build
-$(shell mkdir -p ${BUILD_DIR})
-
-
-# ${FONT_DIR} represents the parent directory of all font source files.
-FONT_DIR := font
-
-
-# ${JS_DIR} represents the parent directory of all JS source files.
-JS_DIR := js
-
-
-# ${TEMPLATE_DIR} represents the parent directory of all pages templates.
-TEMPLATE_DIR := template
-
-
-# ${CSS_DIR} represents the parent directory of all CSS source files.
-CSS_DIR := css
-
-
-# The actor to which a few rules are delegated.
-# ${PYTHON_DIR} represents the parent directory of all Python source files.
-PYTHON_DIR := python
-# see: https://docs.python.org/3/howto/logging.html#when-to-use-logging
-LOGLEVEL := __LOGLEVEL__
-# see: ${PYTHON_DIR}/lib/actor.py
-EXECUTION := __EXECUTION__
-ifeq ($(EXECUTION), parallel)
-MAKEFLAGS := --jobs=$(shell nproc)
-MAKEFLAGS += --output-sync=recurse 
-endif
-
-
-ENV := PYTHONPATH=${PYTHON_DIR} EXECUTION=${EXECUTION} LOGLEVEL=${LOGLEVEL}
-PYTHON := python3
-MAIN = ${PYTHON_DIR}/main.py
-ACTOR := ${ENV} ${PYTHON} ${MAIN} ${ARTICLES}
-
+# Output is descibed
 
 # ${PREFIX} represents the parent directory where the website is installed.
 PREFIX=__PREFIX__
+
+
+# Resources are described
+
+# ${TEMPLATE} represents the template where each article is included to form a webpage.
+TEMPLATE := template.html
+
+# ${FONT} represents the parent directory of all font source files.
+FONT := font
+
+# ${FONT_FILES} represents all files under ${FONT}
+FONT_FILES := $(call list_files, ${FONT}, '*')
+
+# ${JS} represents the parent directory of all JS source files.
+JS := js
+
+# ${JS_FILES} represents all files under ${JS}
+JS_FILES := $(call list_files, ${JS}, '*')
+
+# ${MODEL} represents the parent directory of all pages templates.
+MODEL := model
+
+# ${MODEL_FILES} represents all files under ${MODEL}
+MODEL_FILES := $(call list_files, ${MODEL}, '*')
+
+# ${CSS} represents the parent directory of all CSS source files.
+CSS := css
+
+# ${CSS_FILES} represents all files under ${CSS}
+CSS_FILES := $(call list_files, ${CSS}, '*')
+
+# see: https://developers.google.com/search/docs/crawling-indexing/robots/intro
+ROBOTS := robots.txt
+
+# see: https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/managing-a-custom-domain-for-your-github-pages-site
+CNAME := CNAME
+
+# see: https://developer.mozilla.org/en-US/docs/Web/Manifest
+MANIFEST := site.webmanifest
+
+# see: https://developer.mozilla.org/en-US/docs/Glossary/Favicon
+FAVICON := favicon
+
+# ${FAVICON_FILES} represents all files under ${FAVICON}
+FAVICON_FILES := $(call list_files, ${FAVICON}, '*')
+
+# see: https://docs.python.org/3/howto/logging.html#when-to-use-logging
+LOGLEVEL := __LOGLEVEL__
+
+# see: python/lib/actor.py
+EXECUTION := __EXECUTION__
+
+# ${ENV} represents environment variables used by the actor.
+ENV := PYTHONPATH=python EXECUTION=${EXECUTION} LOGLEVEL=${LOGLEVEL}
+
+# ${ACTOR} represents the actor to which this makefile send messages.
+ACTOR := ${ENV} python3 python/main.py ${ARTICLE}
+
+# ${BUILD} represents the parent directory where the website is built.
+BUILD := _build
+$(shell mkdir -p ${BUILD})
+
+
+# Makefile configuration
+
+# All rules use Bash.
+SHELL := bash
+
+# One Bash process is started per rule.
+.ONESHELL:
+
+# http://redsymbol.net/articles/unofficial-bash-strict-mode/
+.SHELLFLAGS := -ceuo pipefail
+
+# Make does not clog stdout.
+.SILENT:
+
+# https://www.gnu.org/software/make/manual/html_node/Secondary-Expansion.html
+.SECONDEXPANSION:
+
+# This makefile may use as much power as possible.
+ifeq ($(EXECUTION), parallel)
+
+# Use as many processors as possible.
+MAKEFLAGS := --jobs=$(shell nproc)
+
+# Logs make sens, even if jobs are parallelized.
+MAKEFLAGS += --output-sync=recurse
+endif
+
 
 
 #############
 # Interface #
 #############
 
+# Rule
+#
+# A rule is built as follow:
+#   - It has an id like `DC49'.
+#   - It has a name like `rule'.
+#   - It has a context, if any.
+#     - A context is a list of variables.
+#     - Each variable has a name of the form `_$ID_$NAME', e.g. `_DC49_FILE'.
+#       - The id is used to create a namespace.
+#       - A value may only reference an exported variable i.e. does not start with `_'.
+#  - It has a result, if any.
+#    - A result is a variable of the form `$ID_$RULENAME', e.g. `DC49_RULE'
+#  - It has instructions.
+#     - A rule instructions may only read its context.
+#
+# Destroying a rule may break other rules.
+#
+# A rule named `rule' is used as follow: `make rule [$KEY=$VALUE …]'
+#   - Where [$KEY=$VALUE …] is a sequence of parameters, if any.
+#
+# A `make rule [$KEY=$VALUE …]' may be interpreted as follow:
+#   - "make received the message `rule [$KEY=$VALUE …]'".
+#   - As a consequence, make will print which objective should it reach.
+#   - If the objective is reached, then: it will give a proof that it has.
+#   - else, it will crash and explain why.
+
 
 help: ## This help is printed.
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "make %-30s %s\n", $$1, $$2}'
 
 
-# Context
-# Result
-# Message
 .PHONY: deps
 deps:  ## TODO: All dependencies are installed.
 	$(call objective, "TODO: All dependencies are installed.")
@@ -128,52 +182,48 @@ deps:  ## TODO: All dependencies are installed.
 
 
 # Context
-B1B1_ROBOTS_FILE := robots.txt
+_B1B1_FILE := ${ROBOTS}
 # Result
-B1B1_ROBOTS := ${BUILD_DIR}/${B1B1_ROBOTS_FILE}
-# Message
+B1B1_ROBOTS := ${BUILD}/${_B1B1_FILE}
 .PHONY: robots
 robots: ${B1B1_ROBOTS} ## robots.txt is installed.
-${B1B1_ROBOTS}: ${B1B1_ROBOTS_FILE}
+${B1B1_ROBOTS}: ${_B1B1_FILE}
 	$(call objective, "robots.txt is installed.")
 	cp $< $@
 	$(call result, "$@")
 
 
 # Context
-E502_CNAME_FILE := CNAME
+_E502_FILE := ${CNAME}
 # Result
-E502_CNAME := ${BUILD_DIR}/${E502_CNAME_FILE}
-# Message
+E502_CNAME := ${BUILD}/${_E502_FILE}
 .PHONY: cname
 cname: ${E502_CNAME} ## CNAME is installed.
-${E502_CNAME}: ${E502_CNAME_FILE}
+${E502_CNAME}: ${_E502_FILE}
 	$(call objective, "CNAME installed.")
 	cp $< $@
 	$(call result, "$@")
 
 
 # Context
-F809_MANIFEST_FILE := site.webmanifest
+_F809_FILE := ${MANIFEST}
 # Result
-F809_MANIFEST := ${BUILD_DIR}/${F809_MANIFEST_FILE}
-# Message
+F809_MANIFEST := ${BUILD}/${_F809_FILE}
 .PHONY: manifest
 manifest: ${F809_MANIFEST} ## site.webmanifest is installed.
-${F809_MANIFEST}: ${F809_MANIFEST_FILE}
+${F809_MANIFEST}: ${_F809_FILE}
 	$(call objective, "site.manifest is installed.")
 	cp $< $@
 	$(call result, "$@")
 
 
 # Context
-BC1B_JS_DIR := ${JS_DIR}
+_BC1B_DIR := ${JS}
 # Result
-# Message
 .PHONY: code
 code: ## All code is analysed, formatted and checked.
 	$(call objective, "All code is analysed formatted and checked.")
-	npx eslint --fix ${BC1B_JS_DIR}
+	npx eslint --fix ${_BC1B_DIR}
 	npx prettier . --write
 	npx prettier . --check
 	echo "TODO: do the same for python code."
@@ -181,35 +231,32 @@ code: ## All code is analysed, formatted and checked.
 
 
 # Context
-B547_CSS_FILES := $(call list_files, ${CSS_DIR}, '*')
-B547_BUILD_DIR := ${BUILD_DIR}/${CSS_DIR}
+_B547_FILES := ${CSS_FILES}
+_B547_BUILD := ${BUILD}/${CSS}
 # Result
-B547_CSS := ${B547_BUILD_DIR}/main.css
-# Message
+B547_CSS := ${_B547_BUILD}/main.css
 .PHONY: css
 css: ${B547_CSS} ## The CSS source code is installed.
-${B547_CSS}: ${B547_CSS_FILES}
+${B547_CSS}: ${_B547_FILES}
 	$(call objective, "The CSS source code is installed.")
-	mkdir -p ${B547_BUILD_DIR}
+	mkdir -p ${_B547_BUILD}
 	npx esbuild --bundle css/main.css --loader:.ttf=file --outfile=$@ --target=chrome58,edge16,firefox57,safari11
 	$(call result, "See above.")
 
 
 # Context
-BF58_DIR := favicon
-BF58_FILES := $(call list_files, ${BF58_DIR}, '*')
-BF58_BUILD_DIR := ${BUILD_DIR}/${BF58_DIR}
-BF58_BUILD_FILES := $(BF58_FILES:%=${BUILD_DIR}/%)
+_BF58_DIR := ${FAVICON}
+_BF58_BUILD := ${BUILD}/${_BF58_DIR}
+_BF58_BUILD_FILES := $(FAVICON_FILES:%=${BUILD}/%)
 # Result
-BF58_FAVICON := ${BF58_BUILD_DIR}
-# Message
+BF58_FAVICON := ${_BF58_BUILD}
 .PHONY: favicon
 favicon: ${BF58_FAVICON} ## favicon directory is installed.
-${BF58_FAVICON}: ${BF58_BUILD_FILES}
+${BF58_FAVICON}: ${_BF58_BUILD_FILES}
 	$(call objective, "favicon directory is installed.")
 	touch $@
 	$(call result, "$@")
-${BF58_BUILD_DIR}/%: ${BF58_DIR}/%
+${_BF58_BUILD}/%: ${_BF58_DIR}/%
 	OUT="$@"
 	OUT_DIR="$${OUT%/*}"
 	mkdir -p "$${OUT_DIR}"
@@ -217,20 +264,18 @@ ${BF58_BUILD_DIR}/%: ${BF58_DIR}/%
 
 
 # Context
-E915_FONT_DIR := ${FONT_DIR}
-E915_FONT_DIR_FILES := $(call list_files, ${E915_FONT_DIR}, '*')
-E915_BUILD_DIR := ${BUILD_DIR}/${E915_FONT_DIR}
-E915_BUILD_DIR_FILES := $(E915_FONT_DIR_FILES:%=${BUILD_DIR}/%)
+_E915_DIR := ${FONT}
+_E915_BUILD := ${BUILD}/${_E915_DIR}
+_E915_BUILD_FILES := $(FONT_FILES:%=${BUILD}/%)
 # Result
-E915_FONT := ${E915_BUILD_DIR}
-# Message
+E915_FONT := ${_E915_BUILD}
 .PHONY: font
 font: ${E915_FONT} ## Fonts are installed.
-${E915_FONT}: ${E915_BUILD_DIR_FILES}
+${E915_FONT}: ${_E915_BUILD_FILES}
 	$(call objective, "Font directory is installed.")
 	touch $@
 	$(call result, "$@")
-${E915_BUILD_DIR}/%: ${E915_FONT_DIR}/%
+${_E915_BUILD}/%: ${_E915_DIR}/%
 	OUT="$@"
 	OUT_DIR="$${OUT%/*}"
 	mkdir -p "$${OUT_DIR}"
@@ -238,104 +283,98 @@ ${E915_BUILD_DIR}/%: ${E915_FONT_DIR}/%
 
 
 # Context
-E42A_DIR := ${JS_DIR}
-E42A_DIR_FILES := $(call list_files, ${E42A_DIR}, '*')
-E42A_MAIN := ${E42A_DIR}/main.js
+_E42A_DIR := ${JS}
+_E42A_FILES := ${JS_FILES}
+_E42A_MAIN := ${_E42A_DIR}/main.js
 # Result
-E42A_JS := ${BUILD_DIR}/js/main.min.js
-# Message
+E42A_JS := ${BUILD}/js/main.min.js
 .PHONY: js
 js: ${E42A_JS} ## The JavaScript code is installed.
-${E42A_JS}: ${E42A_DIR_FILES}
+${E42A_JS}: ${_E42A_FILES}
 	$(call objective, "JavaScript code is installed.")
-	npx esbuild ${E42A_MAIN} --bundle --minify --sourcemap --outfile="$@"
+	npx esbuild ${_E42A_MAIN} --bundle --minify --sourcemap --outfile="$@"
 	$(call result, "See above.")
 
 
 # Context
-CD6D_UUID := ${UUID}
-CD6D_TEMPLATE := ${TEMPLATE}
-CD6D_ARTICLE := ${ARTICLES}/${CD6D_UUID}
-CD6D_FILES := $(call list_files, ${CD6D_ARTICLE}, '*')
-CD6D_CTX := ${TEMPLATE} ${CD6D_FILES}
-CD6D_ACTOR := ${ACTOR}
-CD6D_PAGE_DIR := ${BUILD_DIR}/page
+_CD6D_UUID := ${UUID}
+_CD6D_ARTICLE := ${ARTICLE}/${_CD6D_UUID}
+_CD6D_FILES := $(call list_files, ${_CD6D_ARTICLE}, '*')
+_CD6D_TEMPLATE := ${TEMPLATE}
+_CD6D_CTX := ${_CD6D_TEMPLATE} ${_CD6D_FILES}
+_CD6D_ACTOR := ${ACTOR}
+_CD6D_PAGE_DIR := ${BUILD}/page
 # Result
-CD6D_PAGE := ${CD6D_PAGE_DIR}/${CD6D_UUID}/index.html
-# Message
+CD6D_PAGE := ${_CD6D_PAGE_DIR}/${_CD6D_UUID}/index.html
 .PHONY: page
 page: ${CD6D_PAGE}  ## UUID=$UUID. Page with id $UUID is installed.
-${CD6D_PAGE}: ${CD6D_CTX}
+${CD6D_PAGE}: ${_CD6D_CTX}
 	$(call objective, "Page with id ${UUID} is installed.")
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
-	${CD6D_ACTOR} page ${CD6D_UUID} ${CD6D_TEMPLATE} ${CD6D_PAGE_DIR}
+	${_CD6D_ACTOR} page ${_CD6D_UUID} ${_CD6D_TEMPLATE} ${_CD6D_PAGE_DIR}
 	$(call result, "See above.")
 
 
 # Context
-BDBC_TEMPLATE := ${TEMPLATE}
-BDBC_FILES := $(call list_files, ${ARTICLES}, '*')
+_BDBC_TEMPLATE := ${TEMPLATE}
+_BDBC_FILES := ${ARTICLE_FILES}
 # Result
-BDBC_ARTICLES := ${BUILD_DIR}/page
-# Message
+BDBC_ARTICLE := ${BUILD}/page
 .PHONY: articles
-articles: ${BDBC_ARTICLES}  ## All articles are installed.
-${BDBC_ARTICLES}: ${BDBC_TEMPLATE} ${BDBC_FILES}
+articles: ${BDBC_ARTICLE}  ## All articles are installed.
+${BDBC_ARTICLE}: ${_BDBC_TEMPLATE} ${_BDBC_FILES}
 	$(call objective, "All articles are installed.")
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
-	${ACTOR} pages ${BDBC_TEMPLATE} ${BDBC_ARTICLES} &>/dev/null
+	${ACTOR} pages ${_BDBC_TEMPLATE} ${BDBC_ARTICLE} &>/dev/null
 	touch "$@"
 	$(call result, "$@")
 
 
 # Context
-FCBA_ARTICLES := ${BDBC_ARTICLES}
-FCBA_UUID := ${INDEX_UUID}
+_FCBA_ARTICLE := ${BDBC_ARTICLE}
+_FCBA_UUID := ${INDEX_UUID}
 # Result
-FCBA_INDEX := ${FCBA_ARTICLES}/${FCBA_UUID}/index.html
-# Message
+FCBA_INDEX := ${_FCBA_ARTICLE}/${_FCBA_UUID}/index.html
 .PHONY: index
 index: ${FCBA_INDEX}  ## The index is built.
-${FCBA_INDEX}: ${FCBA_ARTICLES}
+${FCBA_INDEX}: ${_FCBA_ARTICLE}
 	$(call objective, "Index of articles is built.")
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
-	${ACTOR} index ${FCBA_ARTICLES} ${FCBA_UUID} &>/dev/null
+	${ACTOR} index ${_FCBA_ARTICLE} ${_FCBA_UUID} &>/dev/null
 	$(call result, "$@")
 
 
 # Context
-C2E3_FILES := $(call list_files, ${ARTICLES}, '*')
-C2E3_BUILD := ${BUILD_DIR}
+_C2E3_FILES := ${ARTICLE_FILES}
+_C2E3_BUILD := ${BUILD}
 # Result
-C2E3_SITEMAP := ${C2E3_BUILD}/sitemap.xml
-# Message
+C2E3_SITEMAP := ${_C2E3_BUILD}/sitemap.xml
 .PHONY: sitemap
 sitemap: ${C2E3_SITEMAP}  ## The sitemap is built.
-${C2E3_SITEMAP}: ${C2E3_FILES}
+${C2E3_SITEMAP}: ${_C2E3_FILES}
 	$(call objective, "Sitemap is built.")
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
-	${ACTOR} sitemap ${C2E3_BUILD} &>/dev/null
+	${ACTOR} sitemap ${_C2E3_BUILD} &>/dev/null
 	$(call result, "$@")
 
 
 # Context
-B972_ARTICLES := ${BDBC_ARTICLES}
-B972_LANDING := page/00000000-0000-0000-0000-000000000000
-B972_BUILD := ${BUILD_DIR}
+_B972_ARTICLE := ${BDBC_ARTICLE}
+_B972_BUILD := ${BUILD}
+
+# relative to ${BUILD}.
+_B972_LANDING := page/00000000-0000-0000-0000-000000000000
+
 # Result
-# Message
 .PHONY: landing
-landing: ${B972_ARTICLES} ## The landing page is linked.
+landing: ${_B972_ARTICLE} ## The landing page is linked.
 	$(call objective, "The landing page is linked.")
-	ln -sndfv ${B972_LANDING}/bg.webp ${B972_BUILD}/bg.webp
-	ln -sndfv ${B972_LANDING}/data ${B972_BUILD}/data
-	ln -sndfv ${B972_LANDING}/index.html ${B972_BUILD}/index.html
+	ln -sndfv ${_B972_LANDING}/bg.webp ${_B972_BUILD}/bg.webp
+	ln -sndfv ${_B972_LANDING}/data ${_B972_BUILD}/data
+	ln -sndfv ${_B972_LANDING}/index.html ${_B972_BUILD}/index.html
 	$(call result, "See above.")
 
 
-# Context
-# Result
-# Message
 .PHONY: duplicated-uuids
 duplicated-uuids:  ## There are no duplicated uuids.
 	$(call objective, "There are no duplicated uuids.")
@@ -344,113 +383,68 @@ duplicated-uuids:  ## There are no duplicated uuids.
 	$(call result, "No duplicated uuids found.")
 
 
-# all
 # Context
-F3BE_CTX := duplicated-uuids ${B1B1_ROBOTS} ${E502_CNAME}
-F3BE_CTX += ${B547_CSS} ${BF58_FAVICON} ${E915_FONT}
-F3BE_CTX += ${E42A_JS} ${C2E3_SITEMAP} ${F809_MANIFEST}
-F3BE_CTX += ${BDBC_ARTICLES} ${FCBA_INDEX} landing
+_F3BE_CTX := duplicated-uuids ${B1B1_ROBOTS} ${E502_CNAME}
+_F3BE_CTX += ${B547_CSS} ${BF58_FAVICON} ${E915_FONT}
+_F3BE_CTX += ${E42A_JS} ${C2E3_SITEMAP} ${F809_MANIFEST}
+_F3BE_CTX += ${BDBC_ARTICLE} ${FCBA_INDEX} landing
 # Result
 ### Build the whole website.
-# Message
 .PHONY: all
-all: ${F3BE_CTX} ## [ONCHANGE=true]. Build the website. If: ONCHANGE=true, then: rebuild on change.
+all: ${_F3BE_CTX} ## [ONCHANGE=true]. Build the website. If: ONCHANGE=true, then: rebuild on change.
 	if [[ "${ONCHANGE}" == "true" ]]; then
-		inotifywait -q -e create,modify,move,delete -r "$$PWD" -r ${ARTICLES}
+		inotifywait -q -e create,modify,move,delete -r "$$PWD" -r ${ARTICLE}
 		${MAKE} all ONCHANGE=true
 	fi
 
 
-# server
-# Context
-# Result
-# Message
 .PHONY: server
 server: all ## Start a web server serving files from the current directory.
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
-	cd ${BUILD_DIR}
-	PYTHONPATH=${PYTHON_DIR} ${PYTHON} -m http.server
+	cd ${BUILD}
+	python3 -m http.server
 
 
-# new-actor
 # Context
-ACTOR_EXAMPLE_UUID := 101e3f53-f9e2-465a-a0e3-d0685b8e4f21
-ACTOR_EXAMPLE := ${ARTICLES}/${ACTOR_EXAMPLE_UUID}
-NEW_ACTOR_UUID := $(shell cat /proc/sys/kernel/random/uuid)
+_DFBD_MODEL := ${MODEL}/article
+_DFBD_UUID := $(shell cat /proc/sys/kernel/random/uuid)
+_DFBD_ARTICLE := ${ARTICLE}
 # Result
-NEW_ACTOR := ${ARTICLES}/${NEW_ACTOR_UUID}
-# Message
-.PHONY: new-actor
-new-actor: ## Add a new actor page.
-	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
-	${ACTOR} clone ${ACTOR_EXAMPLE} ${NEW_ACTOR} &>/dev/null
-
-
-# new-article
-# Context
-DFBD_ARTICLE_TEMPLATE := template/article
-DFBD_NEW_UUID := $(shell cat /proc/sys/kernel/random/uuid)
-DFBD_ARTICLES := ${ARTICLES}
-# Result
-DFBD_NEW_ARTICLE := ${DFBD_ARTICLES}/${DFBD_NEW_UUID}
-# Message
+DFBD_NEW_ARTICLE := ${_DFBD_ARTICLE}/${_DFBD_UUID}
 .PHONY: new-article
 new-article: ## Build a new article.
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
-	${ACTOR} ${DFBD_ARTICLES} clone ${DFBD_ARTICLE_TEMPLATE} ${DFBD_NEW_ARTICLE} &>/dev/null
+	${ACTOR} clone ${_DFBD_MODEL} ${DFBD_NEW_ARTICLE} &>/dev/null
 
 
-# list
-# Context
-# Result
-# Message
 .PHONY: list
 list: ## List articles.
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
 	${ACTOR} list &>/dev/null
 
 
-# doing
-# Context
-# Result
-# Message
 .PHONY: doing
 doing: ## doing articles.
-	rg -i '<x-doing>|state="doing"' ${ARTICLES}
+	rg -i '<x-doing>|state="doing"' ${ARTICLE}
 
 
-# todo
-# Context
-# Result
-# Message
 .PHONY: todo
 todo: ## todo articles.
-	rg -i '<x-todo>|state="todo"' ${ARTICLES}
+	rg -i '<x-todo>|state="todo"' ${ARTICLE}
 
 
-# delete
-# Context
-# Result
-# Message
 .PHONY: delete
 delete: ## Delete a page with uuid UUID.
 	rm -rvf ${PAGES}/${UUID}
 
 
-# install
-# Context
-# Result
-# Message
 .PHONY: install
-install: clean ## Install the website under ${PREFIX}.
+install: ## Install the website under ${PREFIX}.
+	${MAKE} clean # else, some remaining content may be installed, e.g. if an article has been deleted in the meantime.
 	${MAKE} all
-	cp -rvf ${BUILD_DIR}/* "${PREFIX}/"
+	cp -rvf ${BUILD}/* "${PREFIX}/"
 
 
-# publish
-# Context
-# Result
-# Message
 .PHONY: publish
 publish:  ## Publish the website.
 	pushd ${PREFIX}
@@ -470,22 +464,8 @@ publish:  ## Publish the website.
 	popd
 
 
-# links ${PAGE}
-# Context
-# Result
-# Message
-.PHONY: links
-links:
-	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
-	${ACTOR} links ${PAGE} &>/dev/null
-
-
-# clean
-# Context
-# Result
-# Message
 .PHONY: clean
 clean: ## Clean all generated files.
-	$(call objective, "Remove all generated files.")	
-	rm -rvf ${BUILD_DIR}
+	$(call objective, "Remove all generated files.")
+	rm -rvf ${BUILD}
 	$(call result, "See above.")

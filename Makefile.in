@@ -100,14 +100,22 @@ LOGLEVEL := __LOGLEVEL__
 EXECUTION := __EXECUTION__
 
 # ${ENV} represents environment variables used by the actor.
-ENV := PYTHONPATH=python EXECUTION=${EXECUTION} LOGLEVEL=${LOGLEVEL}
+ENV := MYPYPATH=python PYTHONPATH=python EXECUTION=${EXECUTION} LOGLEVEL=${LOGLEVEL}
 
 # ${ACTOR} represents the actor to which this makefile send messages.
-ACTOR := ${ENV} python3 python/main.py ${ARTICLE}
+PYTHON := python
+PYTHON_FILES := $(call list_files, ${PYTHON}, '*')
+MAIN_PY := ${PYTHON}/main.py
+ACTOR := ${ENV} python3 ${MAIN_PY} ${ARTICLE}
 
 # ${BUILD} represents the parent directory where the website is built.
 BUILD := _build
 $(shell mkdir -p ${BUILD})
+
+
+# ${LOG} represents the parent directory where the website is built.
+LOG := _log
+$(shell mkdir -p ${LOG})
 
 
 # Makefile configuration
@@ -218,16 +226,52 @@ ${F809_MANIFEST}: ${_F809_FILE}
 
 
 # Context
-_BC1B_DIR := ${JS}
+_AFF0_DIR := ${PYTHON}
+_AFF0_FILES := ${PYTHON_FILES}
 # Result
-.PHONY: code
-code: ## All code is analysed, formatted and checked.
-	$(call objective, "All code is analysed formatted and checked.")
-	npx eslint --fix ${_BC1B_DIR}
-	npx prettier . --write
-	npx prettier . --check
-	echo "TODO: do the same for python code."
+AFF0_CODE_PYTHON := ${LOG}/python-code-analysis.txt
+.PHONY: code-python
+code-python: ${AFF0_CODE_PYTHON}  ## Python code is analysed, formatted and checked.
+${AFF0_CODE_PYTHON}: ${_AFF0_FILES}
+	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
+
+	$(call objective, "Python code is  formatted.")
+	${ENV} black ${_AFF0_DIR} | tee "$@"
 	$(call result, "See above.")
+
+	$(call objective, "Python style is enforced.")
+	${ENV} flake8 ${_AFF0_DIR} | tee -a "$@"
+	$(call result, "See above.")
+
+	$(call objective, "Python code is typed checked.")
+	${ENV} mypy --explicit-package-bases ${_AFF0_DIR} | tee -a "$@"
+	$(call result, "See above.")
+
+	$(call objective, "Python code security is checked.")
+	${ENV} bandit -r ${_AFF0_DIR} | tee -a "$@"
+	$(call result, "See above.")
+
+
+# Context
+_A739_DIR := ${JS}
+_A739_FILES := ${JS_FILES}
+# Result
+A739_CODE_JS := ${LOG}/js-code-analysis.txt
+.PHONY: code-js
+code-js: ${A739_CODE_JS}  ## JavaScript code is analysed, formatted and checked.
+${A739_CODE_JS}: ${_A739_FILES}
+	$(call objective, "Python code is  formatted.")
+	npx prettier . --write | tee "$@"
+	npx prettier . --check | tee -a "$@"
+	$(call result, "See above.")
+
+	$(call objective, "Python style is enforced.")
+	npx eslint --fix ${_A739_DIR} | tee -a "$@"
+	$(call result, "See above.")
+
+
+.PHONY: code
+code: ${A739_CODE_JS} ${AFF0_CODE_PYTHON} ## All code is analysed, formatted and checked.
 
 
 # Context
@@ -415,8 +459,10 @@ _DFBD_ARTICLE := ${ARTICLE}
 DFBD_NEW_ARTICLE := ${_DFBD_ARTICLE}/${_DFBD_UUID}
 .PHONY: new-article
 new-article: ## Build a new article.
+	$(call objective, "Build a new article.")
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
-	${ACTOR} clone ${_DFBD_MODEL} ${DFBD_NEW_ARTICLE} &>/dev/null
+	${ACTOR} clone ${_DFBD_MODEL} ${DFBD_NEW_ARTICLE}
+	$(call result, "See above.")
 
 
 .PHONY: list
@@ -469,5 +515,5 @@ publish:  ## Publish the website.
 .PHONY: clean
 clean: ## Clean all generated files.
 	$(call objective, "Remove all generated files.")
-	rm -rvf ${BUILD}
+	rm -rvf ${BUILD} ${LOG}
 	$(call result, "See above.")

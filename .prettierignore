@@ -15,4 +15,4 @@ package-lock.json
 python
 README.md
 site.webmanifest
-
+.mypy_cache

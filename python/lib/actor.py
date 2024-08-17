@@ -7,7 +7,7 @@ from itertools import groupby
 from pathlib import Path
 import logging
 import shutil
-import uuid
+
 
 from PIL import Image
 
@@ -110,14 +110,12 @@ class Actor:
         logger.info(f"{self} ← {msg}")
 
         match msg:
-            case Clone(address=self, article=article, target=target):
-                article.exists() or error(
-                    f"article does not exist. article = {article}"
-                )
+            case Clone(address=self, article=path, target=target):
+                path.exists() or error(f"article does not exist. article = {path}")
                 not (target.exists()) or error(
                     f"target does not exist. target = {target}"
                 )
-                shutil.copytree(article, target)
+                shutil.copytree(path, target)
                 target_article = Article(target)
                 target_article.replace_ids()
                 return target_article.root_dir()
@@ -168,7 +166,10 @@ class Actor:
                 articles = [
                     Article(Path(path)) for path in glob(str(self._articles / "*"))
                 ]
-                line = lambda art: f"{art.article_html_file()} | {art.description()}"
+
+                def line(art: Article) -> str:
+                    return f"{art.article_html_file()} | {art.description()}"
+
                 lines = map(line, sorted(articles, key=lambda x: x.description()))
                 return "\n".join(lines)
 
@@ -180,7 +181,8 @@ class Actor:
                     return page_dir
 
                 # page_dir points to an empty directory.
-                page_dir.exists() and shutil.rmtree(page_dir)
+                if page_dir.exists():
+                    shutil.rmtree(page_dir)
                 page_dir.mkdir(parents=True)
 
                 # page_dir/data = article_dir/data
@@ -192,7 +194,9 @@ class Actor:
                     width, height = img.size
                     new_width = 1500
                     new_height = int((new_width / width) * height)
-                    resized_img = img.resize((new_width, new_height), Image.LANCZOS)
+                    resized_img = img.resize(
+                        (new_width, new_height), Image.Resampling.LANCZOS
+                    )
                     resized_img.save(str(page_dir / "bg.webp"))
                     resized_img.save(str(page_dir / "bg.jpg"))
 
@@ -283,14 +287,18 @@ class Actor:
                 return sitemap_path
 
             case DuplicatedUUIDs(address=self):
-                uuids = reduce(
+                uuids: list[str] = reduce(
                     lambda acc, article: acc + article.uuids(), self.__articles(), []
                 )
                 seen = set()
-                duplicates = [id for id in uuids if id in seen or seen.add(id)]
+                duplicates = []
+                for id in uuids:
+                    if id in seen:
+                        duplicates.append(id)
+                    else:
+                        seen.add(id)
                 if len(duplicates) == 0:
-                    msg = "No duplicated uuids found in articles."
-                    return msg
+                    return "No duplicated uuids found in articles."
                 else:
                     error(
                         "Duplicated uuids found in articles:"
@@ -322,7 +330,10 @@ class Actor:
                     name = link.get("source")
                     pairs[href] = name
         pairs = sorted(pairs.items(), key=lambda p: p[1])
-        to_reference = lambda pair: f"<li><a href={pair[0]}>{pair[1]}</a></li>"
+
+        def to_reference(pair: list) -> str:
+            return f"<li><a href={pair[0]}>{pair[1]}</a></li>"
+
         return "\n".join(map(to_reference, pairs))
 
     def __str__(self):

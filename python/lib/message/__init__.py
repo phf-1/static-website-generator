@@ -7,4 +7,4 @@ class Message:
     address: Any
 
     def __str__(self):
-        return f"Message"
+        return "Message"

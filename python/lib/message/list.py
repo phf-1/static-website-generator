@@ -6,4 +6,4 @@ from lib.message import Message
 @dataclass
 class List(Message):
     def __str__(self):
-        return f"List"
+        return "List"

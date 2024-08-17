@@ -103,7 +103,7 @@ class Article:
         message = ReplaceIds(self)
         return self.receive(message)
 
-    def uuids(self):
+    def uuids(self) -> list[str]:
         with open(self._article_html, "r") as file:
             content = file.read()
             return re.findall(uuid4regex, content)

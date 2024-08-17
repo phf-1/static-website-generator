@@ -10,18 +10,13 @@ from lib.message.replace_ids import ReplaceIds
 logger = logging.getLogger(__name__)
 uuid4regex = re.compile(r'id="([0-9a-f]{12}4[0-9a-f]{3}[89ab][0-9a-f]{15}\Z)"', re.I)
 
-def replace_with_uuid(match):
-        return f'id="{uuid.uuid4()}"'
 
-def replace_ids_in_file(path:Path) -> None:
-    with open(target / "article.html", 'r+') as file:
-        content = file.read()
-        file.seek(0)
-        updated_content = re.sub(r'id="[^"]*"', replace_with_uuid, content)
-        file.write(updated_content)
+def replace_with_uuid(match):
+    return f'id="{uuid.uuid4()}"'
+
 
 class Article:
-    def __init__(self, root:Path):
+    def __init__(self, root: Path):
         self._root = root
         self._article_html = root / "article.html"
         self._article_css = root / "article.css"
@@ -39,9 +34,12 @@ class Article:
             self._description,
             self._lang,
         ]
-        self._article_css.is_file() and self._files.append(self._article_css)
-        self._files += [Path(p).resolve() for p in glob(str(self._data_dir / "**"), recursive=True)]
-        logger.info(f'{self}')
+        if self._article_css.is_file():
+            self._files.append(self._article_css)
+        self._files += [
+            Path(p).resolve() for p in glob(str(self._data_dir / "**"), recursive=True)
+        ]
+        logger.info(f"{self}")
 
     # Public
 
@@ -106,7 +104,7 @@ class Article:
         return self.receive(message)
 
     def uuids(self):
-        with open(self._article_html, 'r') as file:
+        with open(self._article_html, "r") as file:
             content = file.read()
             return re.findall(uuid4regex, content)
 
@@ -119,12 +117,12 @@ class Article:
         else:
             raise AssertionError("Not in the file system.")
 
-    def receive(self, msg:Message):
-        logger.info(f'{self} ← {msg}')
+    def receive(self, msg: Message):
+        logger.info(f"{self} ← {msg}")
 
         match msg:
             case ReplaceIds(address=self):
-                with open(self._article_html, 'r+') as file:
+                with open(self._article_html, "r+") as file:
                     content = file.read()
                     file.seek(0)
                     updated_content = re.sub(r'id="[^"]*"', replace_with_uuid, content)
@@ -132,7 +130,7 @@ class Article:
                 return self
 
             case _:
-                raise AssertionError(f'Unexpected msg. msg = {msg}')
+                raise AssertionError(f"Unexpected msg. msg = {msg}")
 
     # Private
 

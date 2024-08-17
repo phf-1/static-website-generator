@@ -1,11 +1,13 @@
 from pathlib import Path
 from glob import glob
 
+
 def _error(msg):
     raise AssertionError(msg)
 
+
 class Page:
-    def __init__(self, path:Path):
+    def __init__(self, path: Path):
         self._paths = []
 
         bg_img_jpg = path / "bg.jpg"
@@ -14,14 +16,13 @@ class Page:
         bg_img_webp = path / "bg.webp"
         self._paths.append(bg_img_webp)
 
-        self._background_imgs = {
-            "jpg": bg_img_jpg,
-            "webp": bg_img_webp
-        }
+        self._background_imgs = {"jpg": bg_img_jpg, "webp": bg_img_webp}
 
         self._data = path / "data"
         self._paths.append(self._data)
-        self._paths += [Path(p) for p in glob(str(Path(self._data / "**")), recursive=True)]
+        self._paths += [
+            Path(p) for p in glob(str(Path(self._data / "**")), recursive=True)
+        ]
 
         self._index = path / "index.html"
         self._paths.append(self._index)

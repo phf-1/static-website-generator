@@ -158,7 +158,7 @@ endif
 #  - It has instructions.
 #     - A rule instructions may only read its context.
 #
-# Destroying a rule may break other rules.
+# Destroying a rule may break other rules, unless its output (if any) is not used.
 #
 # A rule named `rule' is used as follow: `make rule [$KEY=$VALUE …]'
 #   - Where [$KEY=$VALUE …] is a sequence of parameters, if any.
@@ -389,9 +389,11 @@ _F3BE_CTX += ${B547_CSS} ${BF58_FAVICON} ${E915_FONT}
 _F3BE_CTX += ${E42A_JS} ${C2E3_SITEMAP} ${F809_MANIFEST}
 _F3BE_CTX += ${BDBC_ARTICLE} ${FCBA_INDEX} landing
 # Result
-### Build the whole website.
+F3BE_ALL := ${BUILD}
 .PHONY: all
-all: ${_F3BE_CTX} ## [ONCHANGE=true]. Build the website. If: ONCHANGE=true, then: rebuild on change.
+all: ${F3BE_ALL} ## [ONCHANGE=true]. Build the website. If: ONCHANGE=true, then: rebuild on change.
+${F3BE_ALL}: ${_F3BE_CTX}
+	touch "$@"
 	if [[ "${ONCHANGE}" == "true" ]]; then
 		inotifywait -q -e create,modify,move,delete -r "$$PWD" -r ${ARTICLE}
 		${MAKE} all ONCHANGE=true
@@ -439,7 +441,7 @@ delete: ## Delete a page with uuid UUID.
 
 
 .PHONY: install
-install: ## Install the website under ${PREFIX}.
+install: ${F3BE_ALL} ## Install the website under ${PREFIX}.
 	${MAKE} clean # else, some remaining content may be installed, e.g. if an article has been deleted in the meantime.
 	${MAKE} all
 	cp -rvf ${BUILD}/* "${PREFIX}/"

@@ -182,6 +182,7 @@ help: ## This help is printed.
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "make %-30s %s\n", $$1, $$2}'
 
 
+# Rule
 .PHONY: deps
 deps:  ## TODO: All dependencies are installed.
 	$(call objective, "TODO: All dependencies are installed.")
@@ -193,6 +194,7 @@ deps:  ## TODO: All dependencies are installed.
 _B1B1_FILE := ${ROBOTS}
 # Result
 B1B1_ROBOTS := ${BUILD}/${_B1B1_FILE}
+# Rule
 .PHONY: robots
 robots: ${B1B1_ROBOTS} ## robots.txt is installed.
 ${B1B1_ROBOTS}: ${_B1B1_FILE}
@@ -205,6 +207,7 @@ ${B1B1_ROBOTS}: ${_B1B1_FILE}
 _E502_FILE := ${CNAME}
 # Result
 E502_CNAME := ${BUILD}/${_E502_FILE}
+# Rule
 .PHONY: cname
 cname: ${E502_CNAME} ## CNAME is installed.
 ${E502_CNAME}: ${_E502_FILE}
@@ -217,6 +220,7 @@ ${E502_CNAME}: ${_E502_FILE}
 _F809_FILE := ${MANIFEST}
 # Result
 F809_MANIFEST := ${BUILD}/${_F809_FILE}
+# Rule
 .PHONY: manifest
 manifest: ${F809_MANIFEST} ## site.webmanifest is installed.
 ${F809_MANIFEST}: ${_F809_FILE}
@@ -230,6 +234,7 @@ _AFF0_DIR := ${PYTHON}
 _AFF0_FILES := ${PYTHON_FILES}
 # Result
 AFF0_CODE_PYTHON := ${LOG}/python-code-analysis.txt
+# Rule
 .PHONY: code-python
 code-python: ${AFF0_CODE_PYTHON}  ## Python code is analysed, formatted and checked.
 ${AFF0_CODE_PYTHON}: ${_AFF0_FILES}
@@ -257,6 +262,7 @@ _A739_DIR := ${JS}
 _A739_FILES := ${JS_FILES}
 # Result
 A739_CODE_JS := ${LOG}/js-code-analysis.txt
+# Rule
 .PHONY: code-js
 code-js: ${A739_CODE_JS}  ## JavaScript code is analysed, formatted and checked.
 ${A739_CODE_JS}: ${_A739_FILES}
@@ -270,6 +276,7 @@ ${A739_CODE_JS}: ${_A739_FILES}
 	$(call result, "See above.")
 
 
+# Rule
 .PHONY: code
 code: ${A739_CODE_JS} ${AFF0_CODE_PYTHON} ## All code is analysed, formatted and checked.
 
@@ -279,6 +286,7 @@ _B547_FILES := ${CSS_FILES}
 _B547_BUILD := ${BUILD}/${CSS}
 # Result
 B547_CSS := ${_B547_BUILD}/main.css
+# Rule
 .PHONY: css
 css: ${B547_CSS} ## The CSS source code is installed.
 ${B547_CSS}: ${_B547_FILES}
@@ -294,6 +302,7 @@ _BF58_BUILD := ${BUILD}/${_BF58_DIR}
 _BF58_BUILD_FILES := $(FAVICON_FILES:%=${BUILD}/%)
 # Result
 BF58_FAVICON := ${_BF58_BUILD}
+# Rule
 .PHONY: favicon
 favicon: ${BF58_FAVICON} ## favicon directory is installed.
 ${BF58_FAVICON}: ${_BF58_BUILD_FILES}
@@ -313,6 +322,7 @@ _E915_BUILD := ${BUILD}/${_E915_DIR}
 _E915_BUILD_FILES := $(FONT_FILES:%=${BUILD}/%)
 # Result
 E915_FONT := ${_E915_BUILD}
+# Rule
 .PHONY: font
 font: ${E915_FONT} ## Fonts are installed.
 ${E915_FONT}: ${_E915_BUILD_FILES}
@@ -332,6 +342,7 @@ _E42A_FILES := ${JS_FILES}
 _E42A_MAIN := ${_E42A_DIR}/main.js
 # Result
 E42A_JS := ${BUILD}/js/main.min.js
+# Rule
 .PHONY: js
 js: ${E42A_JS} ## The JavaScript code is installed.
 ${E42A_JS}: ${_E42A_FILES}
@@ -348,14 +359,23 @@ _CD6D_TEMPLATE := ${TEMPLATE}
 _CD6D_CTX := ${_CD6D_TEMPLATE} ${_CD6D_FILES}
 _CD6D_ACTOR := ${ACTOR}
 _CD6D_PAGE_DIR := ${BUILD}/page
+_CD6D_ROOT := ${_CD6D_PAGE_DIR}/${_CD6D_UUID}
 # Result
-CD6D_PAGE := ${_CD6D_PAGE_DIR}/${_CD6D_UUID}/index.html
+CD6D_PAGE := ${_CD6D_ROOT}/index.html
+# Rule
 .PHONY: page
 page: ${CD6D_PAGE}  ## UUID=$UUID. Page with id $UUID is installed.
 ${CD6D_PAGE}: ${_CD6D_CTX}
 	$(call objective, "Page with id ${UUID} is installed.")
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
 	${_CD6D_ACTOR} page ${_CD6D_UUID} ${_CD6D_TEMPLATE} ${_CD6D_PAGE_DIR}
+	DATA=${_CD6D_ROOT}/data
+	if [[ -d "$$DATA" ]]; then
+		pushd "$$DATA"
+		if [[ -f Makefile ]]; then
+			${MAKE}
+		fi
+	fi
 	$(call result, "See above.")
 
 
@@ -364,6 +384,7 @@ _BDBC_TEMPLATE := ${TEMPLATE}
 _BDBC_FILES := ${ARTICLE_FILES}
 # Result
 BDBC_ARTICLE := ${BUILD}/page
+# Rule
 .PHONY: articles
 articles: ${BDBC_ARTICLE}  ## All articles are installed.
 ${BDBC_ARTICLE}: ${_BDBC_TEMPLATE} ${_BDBC_FILES}
@@ -379,6 +400,7 @@ _FCBA_ARTICLE := ${BDBC_ARTICLE}
 _FCBA_UUID := ${INDEX_UUID}
 # Result
 FCBA_INDEX := ${_FCBA_ARTICLE}/${_FCBA_UUID}/index.html
+# Rule
 .PHONY: index
 index: ${FCBA_INDEX}  ## The index is built.
 ${FCBA_INDEX}: ${_FCBA_ARTICLE}
@@ -393,6 +415,7 @@ _C2E3_FILES := ${ARTICLE_FILES}
 _C2E3_BUILD := ${BUILD}
 # Result
 C2E3_SITEMAP := ${_C2E3_BUILD}/sitemap.xml
+# Rule
 .PHONY: sitemap
 sitemap: ${C2E3_SITEMAP}  ## The sitemap is built.
 ${C2E3_SITEMAP}: ${_C2E3_FILES}
@@ -410,6 +433,7 @@ _B972_BUILD := ${BUILD}
 _B972_LANDING := page/00000000-0000-0000-0000-000000000000
 
 # Result
+# Rule
 .PHONY: landing
 landing: ${_B972_ARTICLE} ## The landing page is linked.
 	$(call objective, "The landing page is linked.")
@@ -419,6 +443,7 @@ landing: ${_B972_ARTICLE} ## The landing page is linked.
 	$(call result, "See above.")
 
 
+# Rule
 .PHONY: duplicated-uuids
 duplicated-uuids:  ## There are no duplicated uuids.
 	$(call objective, "There are no duplicated uuids.")
@@ -434,6 +459,7 @@ _F3BE_CTX += ${E42A_JS} ${C2E3_SITEMAP} ${F809_MANIFEST}
 _F3BE_CTX += ${BDBC_ARTICLE} ${FCBA_INDEX} landing
 # Result
 F3BE_ALL := ${BUILD}
+# Rule
 .PHONY: all
 all: ${F3BE_ALL} ## [ONCHANGE=true]. Build the website. If: ONCHANGE=true, then: rebuild on change.
 ${F3BE_ALL}: ${_F3BE_CTX}
@@ -444,6 +470,7 @@ ${F3BE_ALL}: ${_F3BE_CTX}
 	fi
 
 
+# Rule
 .PHONY: server
 server: all ## Start a web server serving files from the current directory.
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
@@ -457,6 +484,7 @@ _DFBD_UUID := $(shell cat /proc/sys/kernel/random/uuid)
 _DFBD_ARTICLE := ${ARTICLE}
 # Result
 DFBD_NEW_ARTICLE := ${_DFBD_ARTICLE}/${_DFBD_UUID}
+# Rule
 .PHONY: new-article
 new-article: ## Build a new article.
 	$(call objective, "Build a new article.")
@@ -465,27 +493,32 @@ new-article: ## Build a new article.
 	$(call result, "See above.")
 
 
+# Rule
 .PHONY: list
 list: ## List articles.
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
 	${ACTOR} list &>/dev/null
 
 
+# Rule
 .PHONY: doing
 doing: ## doing articles.
 	rg -i '<x-doing>|state="doing"' ${ARTICLE}
 
 
+# Rule
 .PHONY: todo
 todo: ## todo articles.
 	rg -i '<x-todo>|state="todo"' ${ARTICLE}
 
 
+# Rule
 .PHONY: delete
 delete: ## Delete a page with uuid UUID.
 	rm -rvf ${PAGES}/${UUID}
 
 
+# Rule
 .PHONY: install
 install: ${F3BE_ALL} ## Install the website under ${PREFIX}.
 	${MAKE} clean # else, some remaining content may be installed, e.g. if an article has been deleted in the meantime.
@@ -493,6 +526,7 @@ install: ${F3BE_ALL} ## Install the website under ${PREFIX}.
 	cp -rvf ${BUILD}/* "${PREFIX}/"
 
 
+# Rule
 .PHONY: publish
 publish:  ## Publish the website.
 	pushd ${PREFIX}
@@ -512,6 +546,7 @@ publish:  ## Publish the website.
 	popd
 
 
+# Rule
 .PHONY: clean
 clean: ## Clean all generated files.
 	$(call objective, "Remove all generated files.")

@@ -55,7 +55,9 @@ const remove_indentation = function (str) {
 class Blockcode extends LitElement {
     static properties = {
         _hihlighted: { state: true },
+				_url_content: { state: true },
         lang: {},
+				url: {},
     };
 
     // TODO: find a better way.
@@ -148,7 +150,10 @@ class Blockcode extends LitElement {
 
     constructor() {
         super();
+				this.lang = "";
+				this.url = null;
         this._hihlighted = null;
+				this._url_content = null;
     }
 
     render() {
@@ -156,24 +161,39 @@ class Blockcode extends LitElement {
             this._hihlighted === null
                 ? { content: html`<slot></slot>`, language: "" }
                 : {
-                      content: html`${unsafeHTML(this._hihlighted.value)}`,
-                      language: this._hihlighted.language,
-                  };
+                    content: html`${unsafeHTML(this._hihlighted.value)}`,
+                    language: this._hihlighted.language,
+                };
         return html`<pre><code data-highlighted="yes" class="hljs ${res.language}">${res.content}</code></pre>`;
     }
 
-    firstUpdated() {
-        const code = remove_indentation(
-            this.shadowRoot
-                .querySelector("slot")
-                .assignedNodes()[0]
-                .wholeText.trimEnd(),
-        );
+    async firstUpdated() {
+				const code = await this.#fetch_code()
         this._hihlighted = hljs.highlight(code, {
             language: this.lang || "plaintext",
             ignoreIllegals: true,
         });
     }
+
+		async #fetch_code() {
+				const url = this.url;
+				if (url === null) {
+						return remove_indentation(
+								this.shadowRoot
+										.querySelector("slot")
+										.assignedNodes()[0]
+										.wholeText.trimEnd(),
+						);
+				}
+				else {
+						const response = await fetch(url);
+						if (!response.ok) {
+								const msg = `Content from url has not been fetched. url: ${url}`
+								throw new Error(msg)
+						}
+						return await response.text()
+				}
+		}
 }
 
 customElements.define("x-blockcode", Blockcode);

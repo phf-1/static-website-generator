@@ -11,9 +11,9 @@
 
 # Library
 
-# $(call list_files, ${dir}, ${glob}). All files under ${dir} verifying ${glob} pattern are listed.
+# $(call list_files,${dir},${regex}). All files under ${dir} verifying ${regex} pattern are listed.
 define list_files
-	$(shell fd -uu -t f -g $(2) $(1))
+	$(shell fd -t f -g '$(2)' $(1))
 endef
 
 # $(call objective, $objective). Prints ${objective}.
@@ -37,7 +37,7 @@ endef
 ARTICLE := __SOURCE__
 
 # ${ARTICLE_FILES} represents all files under ${ARTICLE}
-ARTICLE_FILES := $(call list_files, ${ARTICLE}, '*')
+ARTICLE_FILES := $(call list_files,${ARTICLE},*)
 
 # ${INDEX_UUID} represents the uuid of the article in which articles are indexed.
 INDEX_UUID := __INDEX_UUID__
@@ -58,25 +58,25 @@ TEMPLATE := template.html
 FONT := font
 
 # ${FONT_FILES} represents all files under ${FONT}
-FONT_FILES := $(call list_files, ${FONT}, '*')
+FONT_FILES := $(call list_files,${FONT},*)
 
 # ${JS} represents the parent directory of all JS source files.
 JS := js
 
 # ${JS_FILES} represents all files under ${JS}
-JS_FILES := $(call list_files, ${JS}, '*')
+JS_FILES := $(call list_files,${JS},*)
 
 # ${MODEL} represents the parent directory of all pages templates.
 MODEL := model
 
 # ${MODEL_FILES} represents all files under ${MODEL}
-MODEL_FILES := $(call list_files, ${MODEL}, '*')
+MODEL_FILES := $(call list_files,${MODEL},*)
 
 # ${CSS} represents the parent directory of all CSS source files.
 CSS := css
 
 # ${CSS_FILES} represents all files under ${CSS}
-CSS_FILES := $(call list_files, ${CSS}, '*')
+CSS_FILES := $(call list_files,${CSS},*)
 
 # see: https://developers.google.com/search/docs/crawling-indexing/robots/intro
 ROBOTS := robots.txt
@@ -91,7 +91,7 @@ MANIFEST := site.webmanifest
 FAVICON := favicon
 
 # ${FAVICON_FILES} represents all files under ${FAVICON}
-FAVICON_FILES := $(call list_files, ${FAVICON}, '*')
+FAVICON_FILES := $(call list_files,${FAVICON},*)
 
 # see: https://docs.python.org/3/howto/logging.html#when-to-use-logging
 LOGLEVEL := __LOGLEVEL__
@@ -104,7 +104,7 @@ ENV := MYPYPATH=python PYTHONPATH=python EXECUTION=${EXECUTION} LOGLEVEL=${LOGLE
 
 # ${ACTOR} represents the actor to which this makefile send messages.
 PYTHON := python
-PYTHON_FILES := $(call list_files, ${PYTHON}, '*')
+PYTHON_FILES := $(call list_files,${PYTHON},*)
 MAIN_PY := ${PYTHON}/main.py
 ACTOR := ${ENV} python3 ${MAIN_PY} ${ARTICLE}
 
@@ -354,12 +354,13 @@ ${E42A_JS}: ${_E42A_FILES}
 # Context
 _CD6D_UUID := ${UUID}
 _CD6D_ARTICLE := ${ARTICLE}/${_CD6D_UUID}
-_CD6D_FILES := $(call list_files, ${_CD6D_ARTICLE}, '*')
+_CD6D_FILES := $(call list_files,${_CD6D_ARTICLE},*)
 _CD6D_TEMPLATE := ${TEMPLATE}
 _CD6D_CTX := ${_CD6D_TEMPLATE} ${_CD6D_FILES}
 _CD6D_ACTOR := ${ACTOR}
 _CD6D_PAGE_DIR := ${BUILD}/page
 _CD6D_ROOT := ${_CD6D_PAGE_DIR}/${_CD6D_UUID}
+_CD6D_DATA := ${_CD6D_ROOT}/data
 # Result
 CD6D_PAGE := ${_CD6D_ROOT}/index.html
 # Rule
@@ -369,12 +370,12 @@ ${CD6D_PAGE}: ${_CD6D_CTX}
 	$(call objective, "Page with id ${UUID} is installed.")
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
 	${_CD6D_ACTOR} page ${_CD6D_UUID} ${_CD6D_TEMPLATE} ${_CD6D_PAGE_DIR}
-	DATA=${_CD6D_ROOT}/data
-	if [[ -d "$$DATA" ]]; then
-		pushd "$$DATA"
+	if [[ -d "${_CD6D_DATA}" ]]; then
+		pushd "${_CD6D_DATA}"
 		if [[ -f Makefile ]]; then
 			${MAKE}
 		fi
+		popd
 	fi
 	$(call result, "See above.")
 

@@ -4,6 +4,7 @@ from datetime import datetime, timezone, date
 from functools import reduce
 from glob import glob
 from itertools import groupby
+import subprocess
 from pathlib import Path
 import logging
 import shutil
@@ -186,7 +187,8 @@ class Actor:
                 page_dir.mkdir(parents=True)
 
                 # page_dir/data = article_dir/data
-                shutil.copytree(article.data_dir(), page_dir / "data")
+                page_data = page_dir / "data"
+                shutil.copytree(article.data_dir(), page_data)
 
                 # page_dir/bg.webp = resize(article_dir/bg.*)
                 bg_img_path = article.background_img_file()
@@ -199,6 +201,11 @@ class Actor:
                     )
                     resized_img.save(str(page_dir / "bg.webp"))
                     resized_img.save(str(page_dir / "bg.jpg"))
+
+                # Make files, if any to make.
+                page_data_makefile = page_data / "Makefile"
+                if page_data_makefile.exists():
+                    result = subprocess.run(["make"], cwd=page_data, capture_output=True, text=True)
 
                 # index_value = template_value
                 with open(template) as f:

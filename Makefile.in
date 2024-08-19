@@ -240,12 +240,12 @@ code-python: ${AFF0_CODE_PYTHON}  ## Python code is analysed, formatted and chec
 ${AFF0_CODE_PYTHON}: ${_AFF0_FILES}
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
 
-	$(call objective, "Python code is  formatted.")
-	${ENV} black ${_AFF0_DIR} | tee "$@"
+	$(call objective, "Python code is formatted.")
+	${ENV} ruff format ${_AFF0_DIR} | tee "$@"
 	$(call result, "See above.")
 
-	$(call objective, "Python style is enforced.")
-	${ENV} flake8 ${_AFF0_DIR} | tee -a "$@"
+	$(call objective, "Python code is linted.")
+	${ENV} ruff check --fix ${_AFF0_DIR} | tee -a "$@"
 	$(call result, "See above.")
 
 	$(call objective, "Python code is typed checked.")
@@ -266,12 +266,12 @@ A739_CODE_JS := ${LOG}/js-code-analysis.txt
 .PHONY: code-js
 code-js: ${A739_CODE_JS}  ## JavaScript code is analysed, formatted and checked.
 ${A739_CODE_JS}: ${_A739_FILES}
-	$(call objective, "Python code is  formatted.")
+	$(call objective, "JavaScript code is formatted.")
 	npx prettier . --write | tee "$@"
 	npx prettier . --check | tee -a "$@"
 	$(call result, "See above.")
 
-	$(call objective, "Python style is enforced.")
+	$(call objective, "JavaScript style is linted.")
 	npx eslint --fix ${_A739_DIR} | tee -a "$@"
 	$(call result, "See above.")
 
@@ -360,7 +360,6 @@ _CD6D_CTX := ${_CD6D_TEMPLATE} ${_CD6D_FILES}
 _CD6D_ACTOR := ${ACTOR}
 _CD6D_PAGE_DIR := ${BUILD}/page
 _CD6D_ROOT := ${_CD6D_PAGE_DIR}/${_CD6D_UUID}
-_CD6D_DATA := ${_CD6D_ROOT}/data
 # Result
 CD6D_PAGE := ${_CD6D_ROOT}/index.html
 # Rule
@@ -370,13 +369,6 @@ ${CD6D_PAGE}: ${_CD6D_CTX}
 	$(call objective, "Page with id ${UUID} is installed.")
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
 	${_CD6D_ACTOR} page ${_CD6D_UUID} ${_CD6D_TEMPLATE} ${_CD6D_PAGE_DIR}
-	if [[ -d "${_CD6D_DATA}" ]]; then
-		pushd "${_CD6D_DATA}"
-		if [[ -f Makefile ]]; then
-			${MAKE}
-		fi
-		popd
-	fi
 	$(call result, "See above.")
 
 

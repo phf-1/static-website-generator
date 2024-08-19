@@ -4,11 +4,10 @@ from datetime import datetime, timezone, date
 from functools import reduce
 from glob import glob
 from itertools import groupby
-import subprocess
+import subprocess  # nosec B404
 from pathlib import Path
 import logging
 import shutil
-
 
 from PIL import Image
 
@@ -35,7 +34,7 @@ def error(msg):
     raise AssertionError(msg)
 
 
-# Used to parallelize pages creations.
+# Used to parallelize builds of pages.
 def make_page(args, execution=PARALLEL):
     articles, uuid, template, pages = args
     actor = Actor(articles, execution=execution)
@@ -50,7 +49,7 @@ class Actor:
 
     def argv(self, args):
         logger.info(f"{self} ← argv({args})")
-        match (args):
+        match args:
             case ["clone", str(article), str(target)]:
                 message = Clone(self, Path(article), Path(target))
 
@@ -205,7 +204,7 @@ class Actor:
                 # Make files, if any to make.
                 page_data_makefile = page_data / "Makefile"
                 if page_data_makefile.exists():
-                    result = subprocess.run(["make"], cwd=page_data, capture_output=True, text=True)
+                    subprocess.run(["/bin/make"], cwd=page_data)  # nosec B603
 
                 # index_value = template_value
                 with open(template) as f:

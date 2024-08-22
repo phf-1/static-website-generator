@@ -8,7 +8,12 @@ from lib.message import Message
 from lib.message.replace_ids import ReplaceIds
 
 logger = logging.getLogger(__name__)
-uuid4regex = re.compile(r'id="([0-9a-f]{12}4[0-9a-f]{3}[89ab][0-9a-f]{15}\Z)"', re.I)
+alphanum_restr = f'[0-9a-f]'
+uuid_restr = f'{alphanum_restr}{{8}}-{alphanum_restr}{{4}}-4{alphanum_restr}{{3}}-{alphanum_restr}{{4}}-{alphanum_restr}{{12}}'
+href_restr = f'href="({uuid_restr})"'
+href_re = re.compile(href_restr, re.I)
+id_restr = f'id="({uuid_restr})"'
+id_re = re.compile(id_restr, re.I)
 
 
 def replace_with_uuid(match):
@@ -39,6 +44,7 @@ class Article:
         self._files += [
             Path(p).resolve() for p in glob(str(self._data_dir / "**"), recursive=True)
         ]
+        self.__uuids_cache = None
         logger.info(f"{self}")
 
     # Public
@@ -49,12 +55,27 @@ class Article:
     def article_html_file(self):
         return self._article_html
 
-    def article_html(self):
+    def article_html(self, ctx):
+        html = ""
+
         if self._article_html.is_file():
             with open(self._article_html) as f:
-                return f.read()
+                html = f.read()
         else:
             raise AssertionError(f"{self._article_html} is not a file.")
+
+        for uuid in re.findall(href_re, html):
+            if ctx.page_has_id(uuid):
+                html = html.replace(f'href="{uuid}"', f'href="/page/{uuid}"')
+            else:
+                match ctx.page_with_id(uuid):
+                    case None:
+                        raise AssertionError(f"No page has been found with uuid {uuid}")
+                    case page_id:
+                        html = html.replace(f'href="{uuid}"', f'href="/page/{page_id}#{uuid}"')
+
+        return html
+
 
     def article_css_file(self):
         return self._article_css
@@ -104,9 +125,14 @@ class Article:
         return self.receive(message)
 
     def uuids(self) -> list[str]:
-        with open(self._article_html, "r") as file:
-            content = file.read()
-            return re.findall(uuid4regex, content)
+        if self.__uuids_cache == None:
+            with open(self._article_html, "r") as file:
+                content = file.read()
+                self.__uuids_cache = re.findall(id_re, content)
+        return self.__uuids_cache
+
+    def has(self, id):
+        return id in self.uuids()
 
     def exists(self):
         return all([p.exists() for p in self._files])

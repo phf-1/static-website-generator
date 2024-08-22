@@ -11,7 +11,7 @@
 
 # Library
 
-# $(call list_files,${dir},${regex}). All files under ${dir} verifying ${regex} pattern are listed.
+# $(call list_files,${dir},${regex}) is the list of files under ${dir} verifying ${regex} pattern.
 define list_files
 	$(shell fd -t f -g '$(2)' $(1))
 endef
@@ -383,7 +383,7 @@ articles: ${BDBC_ARTICLE}  ## All articles are installed.
 ${BDBC_ARTICLE}: ${_BDBC_TEMPLATE} ${_BDBC_FILES}
 	$(call objective, "All articles are installed.")
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
-	${ACTOR} pages ${_BDBC_TEMPLATE} ${BDBC_ARTICLE} &>/dev/null
+	${ACTOR} pages ${_BDBC_TEMPLATE} ${BDBC_ARTICLE}
 	touch "$@"
 	$(call result, "$@")
 
@@ -399,7 +399,7 @@ index: ${FCBA_INDEX}  ## The index is built.
 ${FCBA_INDEX}: ${_FCBA_ARTICLE}
 	$(call objective, "Index of articles is built.")
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
-	${ACTOR} index ${_FCBA_ARTICLE} ${_FCBA_UUID} &>/dev/null
+	${ACTOR} index ${_FCBA_ARTICLE} ${_FCBA_UUID}
 	$(call result, "$@")
 
 
@@ -441,7 +441,7 @@ landing: ${_B972_ARTICLE} ## The landing page is linked.
 duplicated-uuids:  ## There are no duplicated uuids.
 	$(call objective, "There are no duplicated uuids.")
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
-	${ACTOR} duplicated-uuids &>/dev/null
+	${ACTOR} duplicated-uuids # &>/dev/null
 	$(call result, "No duplicated uuids found.")
 
 

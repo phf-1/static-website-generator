@@ -13,6 +13,7 @@ from PIL import Image
 
 from lib.article import Article
 from lib.message import Message
+from lib.message.resolve_ids import ResolveIds
 from lib.message.all import All
 from lib.message.clone import Clone
 from lib.message.duplicated_uuids import DuplicatedUUIDs
@@ -20,6 +21,7 @@ from lib.message.index import Index
 from lib.message.links import Links
 from lib.message.list import List
 from lib.message.page import Page as PageMessage
+from lib.message.page_with_id import PageWithId
 from lib.message.pages import Pages
 from lib.message.sitemap import Sitemap
 from lib.page import Page
@@ -44,7 +46,9 @@ def make_page(args, execution=PARALLEL):
 class Actor:
     def __init__(self, articles: Path, execution=PARALLEL) -> None:
         self._articles = articles
+        self.__articles_cache = None
         self._execution = execution
+        self._resolved_ids = None
         logger.info(f"{self}")
 
     def argv(self, args):
@@ -55,6 +59,9 @@ class Actor:
 
             case ["page", str(uuid), str(template), str(pages)]:
                 message = PageMessage(self, uuid, Path(template), Path(pages))
+
+            case ["page_with_id", str(uuid)]:
+                message = PageWithId(self, uuid)
 
             case ["links", str(path)]:
                 message = Links(self, Path(path))
@@ -92,6 +99,10 @@ class Actor:
 
     def duplicated_uuids(self):
         message = DuplicatedUUIDs(self)
+        return self.receive(message)
+
+    def resolve_ids(self):
+        message = ResolveIds(self)
         return self.receive(message)
 
     def pages(self, template: Path, pages: Path):
@@ -162,6 +173,9 @@ class Actor:
                     html_content = f.read()
                 return f"{self.__links(html_content)}"
 
+            case PageWithId(address=self, id=uuid):
+                return self.page_with_id(uuid)
+
             case List(address=self):
                 articles = [
                     Article(Path(path)) for path in glob(str(self._articles / "*"))
@@ -222,7 +236,7 @@ class Actor:
                 index_value = index_value.replace("__CSS__", article.article_css())
 
                 # Add references in the article if any.
-                article_html = article.article_html()
+                article_html = article.article_html(self)
                 REFERENCE = "__REFERENCE__"
                 if REFERENCE in article_html:
                     article_html = article_html.replace(
@@ -311,6 +325,12 @@ class Actor:
                         + "  \n".join(set(duplicates))
                     )
 
+    def page_with_id(self, id):
+        return next((article.uuid() for article in self.__articles() if article.has(id)), None)
+
+    def page_has_id(self, id):
+        return next((True for article in self.__articles() if article.uuid() == id), False)
+
     def __paths(self):
         return [Path(path) for path in glob(str(self._articles / "*"))]
 
@@ -318,7 +338,9 @@ class Actor:
         return [path.parts[-1] for path in self.__paths()]
 
     def __articles(self):
-        return [Article(path) for path in self.__paths()]
+        if self.__articles_cache == None:
+            self.__articles_cache = [Article(path) for path in self.__paths()]
+        return self.__articles_cache
 
     def __links(self, html_string):
         parsed = BeautifulSoup(html_string, "html.parser")

@@ -1,0 +1,78 @@
+* Static Website Generator
+
+** Objective
+
+Given a list of articles:
+
+1. ~make all; make install~ builds a static website in a specified directory, suitable for GitHub Pages.
+2. ~make server~ starts a server on the localhost.
+3. ~make all ONCHANGE=true~ rebuilds only the articles that have changed.
+4. ~make new-article~ creates a new article.
+
+** Installation
+
+Provided the host system has the necessary dependencies, the website generator can be installed as follows:
+
+#+begin_src bash
+git clone https://github.com/phf-1/static-website-generator.git generator
+cd generator
+./configure --source ../articles --index-uuid ${INDEX_UUID} --prefix ../website
+#+end_src
+
+** Articles
+
+*** Structure
+
+An article is organized as a directory:
+
+#+begin_example
+$ tree -L 2 articles/400d660f-4f57-47cd-885f-9fbeb0a80806
+articles/400d660f-4f57-47cd-885f-9fbeb0a80806
+├── article.html
+├── article.css
+├── bg.jpg
+├── data
+│   ├── hello_world
+│   ├── Makefile
+│   ├── sketch-1.svg
+│   └── summary.dot
+├── description
+└── lang
+#+end_example
+
+*** Markup
+
+~article.html~ is constructed using web components for richer markup. For example:
+
+#+begin_example
+<x-abstract> … </x-abstract>
+<x-math> … </x-math>
+#+end_example
+
+*** References
+
+Articles and elements within articles are identified by UUIDs, allowing for direct referencing. For example:
+
+#+begin_example
+<a href="${EL_UUID}"> … </a>
+#+end_example
+
+This is mapped to:
+
+#+begin_example
+<a href="/page/${UUID}#${EL_UUID}"> … </a>
+#+end_example
+
+*** Makefile
+
+If a Makefile exists in the ~data~ directory of an article, it is executed with a command equivalent to:
+
+#+begin_src bash
+cd data/
+make
+#+end_src
+
+** Next Steps
+
+*** TODO Refactor
+SCHEDULED: <2024-08-23 Fri>

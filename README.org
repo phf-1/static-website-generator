@@ -74,6 +74,18 @@ cd data/
 make
 #+end_src
 
+*** Index
+Index of articles is written to an article like:
+
+#+begin_example
+<x-h1 name="Index of articles">
+	<x-abstract>Articles are listed by latest modification.</x-abstract>
+	__INDEX__
+</x-h1>
+#+end_example
+
+The id of the article should be given to the configuration script.
+
 ** Help
 
 #+begin_src bash :results raw :wrap example

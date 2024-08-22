@@ -83,11 +83,12 @@ class Article:
         finders = [in_page, page_has_id, page_with_id]
         for ref_uuid in re.findall(href_re, html):
             renderer = None
+
             for find in finders:
                 renderer = find(ref_uuid)
                 if renderer is not None:
                     html = renderer(html)
-                    continue
+                    break
 
             if renderer is None:
                 raise AssertionError(f"No element has been found with uuid {ref_uuid}")

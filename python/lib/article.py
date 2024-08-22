@@ -3,13 +3,14 @@ from pathlib import Path
 import logging
 import re
 import uuid
+from functools import cache
 
 from lib.message import Message
 from lib.message.replace_ids import ReplaceIds
 
 logger = logging.getLogger(__name__)
-alphanum_restr = f'[0-9a-f]'
-uuid_restr = f'{alphanum_restr}{{8}}-{alphanum_restr}{{4}}-4{alphanum_restr}{{3}}-{alphanum_restr}{{4}}-{alphanum_restr}{{12}}'
+alphanum_restr = "[0-9a-f]"
+uuid_restr = f"{alphanum_restr}{{8}}-{alphanum_restr}{{4}}-4{alphanum_restr}{{3}}-{alphanum_restr}{{4}}-{alphanum_restr}{{12}}"
 href_restr = f'href="({uuid_restr})"'
 href_re = re.compile(href_restr, re.I)
 id_restr = f'id="({uuid_restr})"'
@@ -44,7 +45,6 @@ class Article:
         self._files += [
             Path(p).resolve() for p in glob(str(self._data_dir / "**"), recursive=True)
         ]
-        self.__uuids_cache = None
         logger.info(f"{self}")
 
     # Public
@@ -55,6 +55,7 @@ class Article:
     def article_html_file(self):
         return self._article_html
 
+    @cache
     def article_html(self, ctx):
         html = ""
 
@@ -64,18 +65,34 @@ class Article:
         else:
             raise AssertionError(f"{self._article_html} is not a file.")
 
-        for uuid in re.findall(href_re, html):
-            if ctx.page_has_id(uuid):
-                html = html.replace(f'href="{uuid}"', f'href="/page/{uuid}"')
-            else:
-                match ctx.page_with_id(uuid):
-                    case None:
-                        raise AssertionError(f"No page has been found with uuid {uuid}")
-                    case page_id:
-                        html = html.replace(f'href="{uuid}"', f'href="/page/{page_id}#{uuid}"')
+        def in_page(id):
+            if self.has(id):
+                return lambda html: html.replace(f'href="{id}"', f'href="#{id}"')
+
+        def page_has_id(id):
+            if ctx.page_has_id(id):
+                return lambda html: html.replace(f'href="{id}"', f'href="/page/{id}"')
+
+        def page_with_id(id):
+            match ctx.page_with_id(id):
+                case page_id if isinstance(page_id, str):
+                    return lambda html: html.replace(
+                        f'href="{id}"', f'href="/page/{page_id}#{id}"'
+                    )
+
+        finders = [in_page, page_has_id, page_with_id]
+        for ref_uuid in re.findall(href_re, html):
+            renderer = None
+            for find in finders:
+                renderer = find(ref_uuid)
+                if renderer is not None:
+                    html = renderer(html)
+                    continue
+
+            if renderer is None:
+                raise AssertionError(f"No element has been found with uuid {ref_uuid}")
 
         return html
-
 
     def article_css_file(self):
         return self._article_css
@@ -124,13 +141,13 @@ class Article:
         message = ReplaceIds(self)
         return self.receive(message)
 
+    @cache
     def uuids(self) -> list[str]:
-        if self.__uuids_cache == None:
-            with open(self._article_html, "r") as file:
-                content = file.read()
-                self.__uuids_cache = re.findall(id_re, content)
-        return self.__uuids_cache
+        with open(self._article_html, "r") as file:
+            content = file.read()
+            return re.findall(id_re, content)
 
+    @cache
     def has(self, id):
         return id in self.uuids()
 

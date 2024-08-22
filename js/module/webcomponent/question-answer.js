@@ -40,7 +40,7 @@ class QuestionAnswer extends LitElement {
 
     constructor() {
         super();
-        this._hidden = true;
+        this._hidden = false;
     }
 
     // Public

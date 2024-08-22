@@ -62,8 +62,21 @@ Articles and elements within articles are identified by UUIDs, allowing for dire
 This is mapped to:
 
 #+begin_example
+<a href="#${EL_UUID}"> … </a>
+#+end_example
+
+or:
+
+#+begin_example
+<a href="/page/${EL_UUID}"> … </a>
+#+end_example
+
+or:
+
+#+begin_example
 <a href="/page/${PAGE_UUID}#${EL_UUID}"> … </a>
 #+end_example
+
 
 *** Makefile
 
@@ -129,3 +142,19 @@ make clean                          Clean all generated files.
 SCHEDULED: <2024-08-23 Fri>
 
 *** TODO ~make deps~ checks and installs dependencies
+
+*** DONE Direct references
+SCHEDULED: <2024-08-22 Thu>
+
+Articles and elements within articles are identified by UUIDs, allowing for direct
+referencing. For example:
+
+#+begin_example
+<a href="${EL_UUID}"> … </a>
+#+end_example
+
+This is mapped to:
+
+#+begin_example
+<a href="/page/${PAGE_UUID}#${EL_UUID}"> … </a>
+#+end_example

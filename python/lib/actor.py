@@ -326,10 +326,14 @@ class Actor:
                     )
 
     def page_with_id(self, id):
-        return next((article.uuid() for article in self.__articles() if article.has(id)), None)
+        return next(
+            (article.uuid() for article in self.__articles() if article.has(id)), None
+        )
 
     def page_has_id(self, id):
-        return next((True for article in self.__articles() if article.uuid() == id), False)
+        return next(
+            (True for article in self.__articles() if article.uuid() == id), False
+        )
 
     def __paths(self):
         return [Path(path) for path in glob(str(self._articles / "*"))]
@@ -338,7 +342,7 @@ class Actor:
         return [path.parts[-1] for path in self.__paths()]
 
     def __articles(self):
-        if self.__articles_cache == None:
+        if self.__articles_cache is None:
             self.__articles_cache = [Article(path) for path in self.__paths()]
         return self.__articles_cache
 

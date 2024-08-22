@@ -12,7 +12,7 @@ class Blockquote extends Cartridge {
         author: {},
         url: {},
         source: {},
-				id: {},
+        id: {},
     };
 
     static styles = [
@@ -43,7 +43,7 @@ class Blockquote extends Cartridge {
         this.author = "AUTHOR";
         this.source = "SOURCE";
         this.url = "https://example.com";
-				this.id = ""
+        this.id = "";
     }
 
     render() {

@@ -80,7 +80,6 @@ make
 make help
 #+end_src
 
-#+RESULTS:
 #+begin_example
 make help                           This help is printed.
 make deps                           TODO: All dependencies are installed.

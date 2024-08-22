@@ -76,11 +76,12 @@ make
 
 ** Help
 
-#+begin_src bash :results raw
+#+begin_src bash :results raw :wrap example
 make help
 #+end_src
 
 #+RESULTS:
+#+begin_example
 make help                           This help is printed.
 make deps                           TODO: All dependencies are installed.
 make robots                         robots.txt is installed.
@@ -109,6 +110,7 @@ make delete                         Delete a page with uuid UUID.
 make install                        Install the website under ${PREFIX}.
 make publish                        Publish the website.
 make clean                          Clean all generated files.
+#+end_example
 
 ** Next Steps
 

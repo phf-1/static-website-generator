@@ -8,6 +8,8 @@ Given a list of articles:
 2. ~make server~ starts a server on the localhost.
 3. ~make all ONCHANGE=true~ rebuilds only the articles that have changed.
 4. ~make new-article~ creates a new article.
+5. ~make publish~ publishes the website.
+6. ~make help~ prints… help message.
 
 ** Installation
 
@@ -60,7 +62,7 @@ Articles and elements within articles are identified by UUIDs, allowing for dire
 This is mapped to:
 
 #+begin_example
-<a href="/page/${UUID}#${EL_UUID}"> … </a>
+<a href="/page/${PAGE_UUID}#${EL_UUID}"> … </a>
 #+end_example
 
 *** Makefile
@@ -71,6 +73,42 @@ If a Makefile exists in the ~data~ directory of an article, it is executed with 
 cd data/
 make
 #+end_src
+
+** Help
+
+#+begin_src bash :results raw
+make help
+#+end_src
+
+#+RESULTS:
+make help                           This help is printed.
+make deps                           TODO: All dependencies are installed.
+make robots                         robots.txt is installed.
+make cname                          CNAME is installed.
+make manifest                       site.webmanifest is installed.
+make code-python                    Python code is analysed, formatted and checked.
+make code-js                        JavaScript code is analysed, formatted and checked.
+make code                           All code is analysed, formatted and checked.
+make css                            The CSS source code is installed.
+make favicon                        favicon directory is installed.
+make font                           Fonts are installed.
+make js                             The JavaScript code is installed.
+make page                           UUID=$UUID. Page with id $UUID is installed.
+make articles                       All articles are installed.
+make index                          The index is built.
+make sitemap                        The sitemap is built.
+make landing                        The landing page is linked.
+make duplicated-uuids               There are no duplicated uuids.
+make all                            [ONCHANGE=true]. Build the website. If: ONCHANGE=true, then: rebuild on change.
+make server                         Start a web server serving files from the current directory.
+make new-article                    Build a new article.
+make list                           List articles.
+make doing                          doing articles.
+make todo                           todo articles.
+make delete                         Delete a page with uuid UUID.
+make install                        Install the website under ${PREFIX}.
+make publish                        Publish the website.
+make clean                          Clean all generated files.
 
 ** Next Steps
 

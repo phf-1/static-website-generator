@@ -7,8 +7,8 @@ from lib.message import Message
 
 
 @dataclass
-class PageWithId(Message):
+class ArticleWithId(Message):
     id: str
 
     def __str__(self):
-        return "PageWithId"
+        return "ArticleWithId"

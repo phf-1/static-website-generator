@@ -9,6 +9,7 @@ import re
 import uuid
 from functools import cache
 from datetime import datetime, timezone, date
+from bs4 import BeautifulSoup
 
 from lib.message import Message
 from lib.message.replace_ids import ReplaceIds
@@ -21,12 +22,32 @@ href_re = re.compile(href_restr, re.I)
 id_restr = f'id="({uuid_restr})"'
 id_re = re.compile(id_restr, re.I)
 
-
 def replace_with_uuid(match):
     return f'id="{uuid.uuid4()}"'
 
-
 class Article:
+
+    def __links(self, html_string):
+        parsed = BeautifulSoup(html_string, "html.parser")
+        pairs = {}
+        for link in parsed.find_all("a"):
+            href = link.get("href")
+            if href not in pairs:
+                if href and (href.startswith("https://") or href.startswith("/page/")):
+                    name = "".join(str(content) for content in link.contents)
+                    pairs[href] = name
+        for link in parsed.find_all("x-blockquote"):
+            href = link.get("url")
+            if href not in pairs:
+                if href and href.startswith("https://"):
+                    name = link.get("source")
+                    pairs[href] = name
+                    pairs = sorted(pairs.items(), key=lambda p: p[1])
+
+        def to_reference(pair: list) -> str:
+            return f"<li><a href={pair[0]}>{pair[1]}</a></li>"
+
+        return "\n".join(map(to_reference, pairs))
 
     def __str__(self):
         return f"Article root={self._root}"
@@ -56,6 +77,21 @@ class Article:
         ]
         logger.info(f"{self}")
 
+    def receive(self, msg: Message):
+        logger.info(f"{self} ← {msg}")
+
+        match msg:
+            case ReplaceIds():
+                with open(self._article_html, "r+") as file:
+                    content = file.read()
+                    file.seek(0)
+                    updated_content = re.sub(r'id="[^"]*"', replace_with_uuid, content)
+                    file.write(updated_content)
+                return self
+
+            case _:
+                raise AssertionError(f"Unexpected msg. msg = {msg}")
+
     def root(self):
         return self._root
 
@@ -80,14 +116,14 @@ class Article:
             if ctx.page_has_id(id):
                 return lambda html: html.replace(f'href="{id}"', f'href="/page/{id}"')
 
-        def page_with_id(id):
-            match ctx.page_with_id(id):
-                case page_id if isinstance(page_id, str):
+        def article_with_id(id):
+            match ctx.article_with_id(id):
+                case article if isinstance(article, Article):
                     return lambda html: html.replace(
-                        f'href="{id}"', f'href="/page/{page_id}#{id}"'
+                        f'href="{id}"', f'href="/page/{article.uuid()}#{id}"'
                     )
 
-        finders = [in_page, page_has_id, page_with_id]
+        finders = [in_page, page_has_id, article_with_id]
         for ref_uuid in re.findall(href_re, html):
             renderer = None
 
@@ -99,6 +135,10 @@ class Article:
 
             if renderer is None:
                 raise AssertionError(f"No element has been found with uuid {ref_uuid}")
+
+        REFERENCE = "__REFERENCE__"
+        if REFERENCE in html:
+            article_html = html.replace(REFERENCE, self.__links(html))
 
         return html
 
@@ -167,19 +207,4 @@ class Article:
             return max([p.stat().st_mtime for p in self._files])
         else:
             raise AssertionError("Not in the file system.")
-
-    def receive(self, msg: Message):
-        logger.info(f"{self} ← {msg}")
-
-        match msg:
-            case ReplaceIds():
-                with open(self._article_html, "r+") as file:
-                    content = file.read()
-                    file.seek(0)
-                    updated_content = re.sub(r'id="[^"]*"', replace_with_uuid, content)
-                    file.write(updated_content)
-                return self
-
-            case _:
-                raise AssertionError(f"Unexpected msg. msg = {msg}")
 

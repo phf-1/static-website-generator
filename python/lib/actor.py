@@ -72,13 +72,17 @@ class Actor:
                   * This article has the given UUID.
                   * `__INDEX__' has been replaced with and index of PAGES.
                 """
-                key = lambda art: art.mtime()
+
+                def key(article):
+                    timestamp = article.mtime()
+                    a_datetime = datetime.fromtimestamp(timestamp, tz=timezone.utc)
+                    return date(a_datetime.year, a_datetime.month, 1)
+
                 articles = sorted(self.__articles(), key=key, reverse=True)
                 groups = groupby(articles, key)
                 sections = ""
-                for mtime, g in groups:
-                    date = datetime.fromtimestamp(mtime, tz=timezone.utc)
-                    date_str = date.strftime("%Y-%m")
+                for a_date, g in groups:
+                    date_str = a_date.strftime("%Y-%m")
                     sections += f'<x-h2 name="{date_str}" id="{date_str}">'
                     sections += "<ul>"
                     uuid_desc = [(art.uuid(), art.description()) for art in g]

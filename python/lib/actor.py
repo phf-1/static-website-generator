@@ -1,3 +1,7 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 from bs4 import BeautifulSoup
 from concurrent.futures import ProcessPoolExecutor
 from datetime import datetime, timezone, date
@@ -8,10 +12,13 @@ import subprocess  # nosec B404
 from pathlib import Path
 import logging
 import shutil
+from functools import cache
+from typing import List
 
 from PIL import Image
 
 from lib.article import Article
+from lib.page import Page
 from lib.message import Message
 from lib.message.resolve_ids import ResolveIds
 from lib.message.all import All
@@ -25,129 +32,145 @@ from lib.message.page_with_id import PageWithId
 from lib.message.pages import Pages
 from lib.message.sitemap import Sitemap
 from lib.page import Page
+from lib.utils import error
 
 logger = logging.getLogger(__name__)
 
 PARALLEL = "PARALLEL"
 SEQUENTIAL = "SEQUENTIAL"
 
-
-def error(msg):
-    raise AssertionError(msg)
-
-
-# Used to parallelize builds of pages.
-def make_page(args, execution=PARALLEL):
+def _make_page(args, execution=PARALLEL):
+    """Used to parallelize builds of pages."""
     articles, uuid, template, pages = args
     actor = Actor(articles, execution=execution)
     return actor.page(uuid, template, pages)
 
+def build_li(uuid, desc):
+    """Build a list item in the index."""
+    return f'<li><a href="/page/{uuid}/">{desc}</a></li>'
+
+def line(art: Article) -> str:
+    """Build a line when listing articles and descriptions."""
+    return f"{art.article_html_file()} | {art.description()}"
 
 class Actor:
     def __init__(self, articles: Path, execution=PARALLEL) -> None:
         self._articles = articles
-        self.__articles_cache = None
         self._execution = execution
         self._resolved_ids = None
         logger.info(f"{self}")
 
-    def argv(self, args):
-        logger.info(f"{self} ← argv({args})")
-        match args:
-            case ["clone", str(article), str(target)]:
-                message = Clone(self, Path(article), Path(target))
-
-            case ["page", str(uuid), str(template), str(pages)]:
-                message = PageMessage(self, uuid, Path(template), Path(pages))
-
-            case ["page_with_id", str(uuid)]:
-                message = PageWithId(self, uuid)
-
-            case ["links", str(path)]:
-                message = Links(self, Path(path))
-
-            case ["index", str(path), str(uuid)]:
-                message = Index(self, Path(path), uuid)
-
-            case ["duplicated-uuids"]:
-                message = DuplicatedUUIDs(self)
-
-            case ["pages", str(template), str(pages)]:
-                message = Pages(self, Path(template), Path(pages))
-
-            case ["sitemap", str(root)]:
-                message = Sitemap(self, Path(root))
-
-            case ["all", str(uuid), str(template), str(root)]:
-                message = All(self, uuid, Path(template), Path(root))
-
-            case ["list"]:
-                message = List(self)
-
-            case _:
-                raise AssertionError(f"Unexpected args. {args}")
-
-        return self.receive(message)
-
     def page(self, uuid: str, template: Path, pages: Path):
-        message = PageMessage(self, uuid, template, pages)
+        message = PageMessage(uuid, template, pages)
         return self.receive(message)
 
     def links(self, path: Path):
-        message = Links(self, path)
+        message = Links(path)
         return self.receive(message)
 
     def duplicated_uuids(self):
-        message = DuplicatedUUIDs(self)
+        message = DuplicatedUUIDs()
         return self.receive(message)
 
     def resolve_ids(self):
-        message = ResolveIds(self)
+        message = ResolveIds()
         return self.receive(message)
 
     def pages(self, template: Path, pages: Path):
-        message = Pages(self, template, pages)
+        message = Pages(template, pages)
         return self.receive(message)
 
     def sitemap(self, root: Path):
-        message = Sitemap(self, root)
+        message = Sitemap(root)
         return self.receive(message)
 
     def index(self, pages: Path, uuid: str):
-        message = Index(self, pages, uuid)
+        message = Index(pages, uuid)
         return self.receive(message)
+
+    def clone(self, article: Path, target: Path):
+        message = Clone(article, target)
+        return self.receive(message)
+
+    def page_with_id(self, uuid: str):
+        message = PageWithId(uuid)
+        return self.receive(message)
+
+    def all(self, uuid: str, template: Path, root: Path):
+        message = All(uuid, template, root)
+        return self.receive(message)
+
+    def list(self):
+        message = List()
+        return self.receive(message)
+
+    def argv(self, args):
+        match args:
+            case ["clone", str(article), str(target)]:
+                return self.clone(Path(article), Path(target))
+
+            case ["page", str(uuid), str(template), str(pages)]:
+                return self.page(uuid, Path(template), Path(pages))
+
+            case ["page_with_id", str(uuid)]:
+                return self.page_with_id(uuid)
+
+            case ["links", str(path)]:
+                return self.links(Path(path))
+
+            case ["index", str(path), str(uuid)]:
+                return self.index(Path(path), uuid)
+
+            case ["duplicated-uuids"]:
+                return self.duplicated_uuids()
+
+            case ["pages", str(template), str(pages)]:
+                return self.pages(Path(template), Path(pages))
+
+            case ["sitemap", str(root)]:
+                return self.sitemap(Path(root))
+
+            case ["all", str(uuid), str(template), str(root)]:
+                return self.all(uuid, Path(template), Path(root))
+
+            case ["list"]:
+                return self.list()
+
+            case _:
+                error(f"Unexpected args. {args}")
 
     def receive(self, msg: Message):
         logger.info(f"{self} ← {msg}")
 
         match msg:
-            case Clone(address=self, article=path, target=target):
+            case Clone(article=path, target=target):
+                """Return an Article.
+
+                  * This article is clone of an ARTICLE rooted at TARGET directory.
+                  * All uuids are replaced.
+                """
                 path.exists() or error(f"article does not exist. article = {path}")
-                not (target.exists()) or error(
-                    f"target does not exist. target = {target}"
+                (not target.exists()) or error(
+                    f"target exists. target = {target}"
                 )
                 shutil.copytree(path, target)
                 target_article = Article(target)
                 target_article.replace_ids()
-                return target_article.root_dir()
+                return target_article
 
-            case Index(address=self, pages=pages, uuid=uuid):
+            case Index(pages=pages, uuid=uuid):
+                """Return a Page.
 
-                def build_li(uuid, desc):
-                    return f'<li><a href="/page/{uuid}/">{desc}</a></li>'
-
-                articles = self.__articles()
-
-                def key(article):
-                    timestamp = article.mtime()
-                    a_datetime = datetime.fromtimestamp(timestamp, tz=timezone.utc)
-                    return date(a_datetime.year, a_datetime.month, 1)
-
-                articles = sorted(articles, key=key, reverse=True)
+                  * This article has the given UUID.
+                  * `__INDEX__' has been replaced with and index of PAGES.
+                """
+                key = lambda art: art.mtime()
+                articles = sorted(self.__articles(), key=key, reverse=True)
                 groups = groupby(articles, key)
                 sections = ""
-                for k, g in groups:
-                    date_str = k.strftime("%Y-%m")
+                for mtime, g in groups:
+                    date = datetime.fromtimestamp(mtime, tz=timezone.utc)
+                    date_str = date.strftime("%Y-%m")
                     sections += f'<x-h2 name="{date_str}" id="{date_str}">'
                     sections += "<ul>"
                     uuid_desc = [(art.uuid(), art.description()) for art in g]
@@ -158,36 +181,30 @@ class Actor:
                     sections += "</ul>"
                     sections += "</x-h2>"
 
-                index_page = pages / uuid / "index.html"
-                with open(index_page, "r+") as index_article:
-                    index_str = index_article.read()
-                    index_article.seek(0)
-                    index_str = index_str.replace("__INDEX__", sections)
-                    index_article.write(index_str)
+                index_page = Page(pages / uuid)
+                index_page.replace_target("__INDEX__", sections)
 
                 return index_page
 
-            case Links(address=self, path=path):
+            case Links(path=path):
+                """Return a Page.
+
+                  * This article has the given UUID.
+                  * `__INDEX__' has been replaced with and index of PAGES.
+                """
                 path.exists() or error(f"path does not exist. path={path}")
                 with open(path) as f:
                     html_content = f.read()
                 return f"{self.__links(html_content)}"
 
-            case PageWithId(address=self, id=uuid):
+            case PageWithId(id=uuid):
                 return self.page_with_id(uuid)
 
-            case List(address=self):
-                articles = [
-                    Article(Path(path)) for path in glob(str(self._articles / "*"))
-                ]
-
-                def line(art: Article) -> str:
-                    return f"{art.article_html_file()} | {art.description()}"
-
-                lines = map(line, sorted(articles, key=lambda x: x.description()))
+            case List():
+                lines = map(line, sorted(self.__articles(), key=lambda art: art.description()))
                 return "\n".join(lines)
 
-            case PageMessage(address=self, uuid=uuid, template=template, pages=pages):
+            case PageMessage(uuid=uuid, template=template, pages=pages):
                 article = Article(self._articles / uuid)
                 page_dir = pages / uuid
                 page = Page(page_dir)
@@ -252,23 +269,23 @@ class Actor:
 
                 return page_dir
 
-            case Pages(address=self, template=template, pages=pages):
+            case Pages(template=template, pages=pages):
                 args = (
                     (self._articles, uuid, template, pages) for uuid in self.__uuids()
                 )
 
                 if self._execution == PARALLEL:
                     with ProcessPoolExecutor() as executor:
-                        results = list(executor.map(make_page, args))
+                        results = list(executor.map(_make_page, args))
 
                 elif self._execution == SEQUENTIAL:
                     results = [
-                        make_page(arg, execution=self._execution) for arg in args
+                        _make_page(arg, execution=self._execution) for arg in args
                     ]
 
                 return "\n".join([str(res) for res in results])
 
-            case All(address=self, uuid=uuid, template=template, root=root):
+            case All(uuid=uuid, template=template, root=root):
                 report = self.duplicated_uuids()
                 pages = root / "page"
                 report += "\n".join(
@@ -278,7 +295,7 @@ class Actor:
                 report += f"\nsitemap = {self.sitemap(root)}"
                 return report
 
-            case Sitemap(address=self, root=root):
+            case Sitemap(root=root):
 
                 def loc(uuid):
                     return f"<loc>https://phfrohring.com/page/{uuid}/</loc>"
@@ -306,7 +323,7 @@ class Actor:
                     f.write(sitemap_)
                 return sitemap_path
 
-            case DuplicatedUUIDs(address=self):
+            case DuplicatedUUIDs():
                 uuids: list[str] = reduce(
                     lambda acc, article: acc + article.uuids(), self.__articles(), []
                 )
@@ -341,10 +358,9 @@ class Actor:
     def __uuids(self):
         return [path.parts[-1] for path in self.__paths()]
 
+    @cache
     def __articles(self):
-        if self.__articles_cache is None:
-            self.__articles_cache = [Article(path) for path in self.__paths()]
-        return self.__articles_cache
+        return [Article(path) for path in self.__paths()]
 
     def __links(self, html_string):
         parsed = BeautifulSoup(html_string, "html.parser")

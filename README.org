@@ -139,7 +139,7 @@ make clean                          Clean all generated files.
 ** Next Steps
 
 *** TODO Refactor
-SCHEDULED: <2024-08-23 Fri>
+SCHEDULED: <2024-08-23 Fri 07:30>
 
 *** TODO ~make deps~ checks and installs dependencies
 

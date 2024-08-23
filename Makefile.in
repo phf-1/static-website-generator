@@ -539,9 +539,23 @@ publish:  ## Publish the website.
 	popd
 
 
+# Context
+_5A6A_DIR := ${JS}
+_5A6A_FILES := ${JS_FILES}
+
+# Objective
+5A6A_CODE_DOC_JS := _js_doc
+# Rule
+.PHONY: code-doc-js
+code-doc-js:  ${5A6A_CODE_DOC_JS}  ## Build the JavaScript documentation.
+${5A6A_CODE_DOC_JS}: ${_5A6A_FILES}
+	npx jsdoc -c jsdoc.json
+	touch "$@"
+
+
 # Rule
 .PHONY: clean
 clean: ## Clean all generated files.
 	$(call objective, "Remove all generated files.")
-	rm -rvf ${BUILD} ${LOG}
+	rm -rvf ${BUILD} ${LOG} ${5A6A_CODE_DOC_JS}
 	$(call result, "See above.")

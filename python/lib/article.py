@@ -1,9 +1,14 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 from glob import glob
 from pathlib import Path
 import logging
 import re
 import uuid
 from functools import cache
+from datetime import datetime, timezone, date
 
 from lib.message import Message
 from lib.message.replace_ids import ReplaceIds
@@ -22,6 +27,10 @@ def replace_with_uuid(match):
 
 
 class Article:
+
+    def __str__(self):
+        return f"Article root={self._root}"
+
     def __init__(self, root: Path):
         self._root = root
         self._article_html = root / "article.html"
@@ -46,8 +55,6 @@ class Article:
             Path(p).resolve() for p in glob(str(self._data_dir / "**"), recursive=True)
         ]
         logger.info(f"{self}")
-
-    # Public
 
     def root(self):
         return self._root
@@ -165,7 +172,7 @@ class Article:
         logger.info(f"{self} ← {msg}")
 
         match msg:
-            case ReplaceIds(address=self):
+            case ReplaceIds():
                 with open(self._article_html, "r+") as file:
                     content = file.read()
                     file.seek(0)
@@ -176,7 +183,3 @@ class Article:
             case _:
                 raise AssertionError(f"Unexpected msg. msg = {msg}")
 
-    # Private
-
-    def __str__(self):
-        return f"Article root={self._root}"

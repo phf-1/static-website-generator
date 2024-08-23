@@ -6,6 +6,7 @@
     "eslint-config-prettier": "^9.1.0",
     "globals": "^15.8.0",
     "highlightjs-lean": "^1.2.0",
+    "jsdoc": "^4.0.3",
     "prettier": "3.3.2"
   },
   "dependencies": {

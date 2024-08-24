@@ -8,11 +8,11 @@ from functools import reduce
 from glob import glob
 from itertools import groupby
 from pathlib import Path
+from typing import Tuple
 import logging
 import shutil
 from functools import cache
 import tempfile
-
 
 from PIL import Image
 
@@ -21,10 +21,12 @@ from lib.page import Page as Publication
 from lib.message import *
 from lib.utils import error
 
+
 class Actor:
     # Class.Public
     PARALLEL = "PARALLEL"
     SEQUENTIAL = "SEQUENTIAL"
+    EXECUTION_VALUES = [PARALLEL, SEQUENTIAL]
 
     # Class.Private
     _logger = logging.getLogger(__name__)
@@ -47,10 +49,14 @@ class Actor:
         return actor.page(uuid, template, pages)
 
     # Instance.Public.Receive
-    def receive(self, msg: Message):
+    def receive(self, msg: Message | Tuple):
         self._logger.info(f"{self} ← {msg}")
 
         match msg:
+            case Help():
+                """Return a string that tells the messages I understand to the user."""
+                return "TODO: help"
+
             case Clone(article=path, target=target):
                 """Return an Article.
 
@@ -58,9 +64,7 @@ class Actor:
                   * All uuids are replaced.
                 """
                 path.exists() or error(f"article does not exist. article = {path}")
-                (not target.exists()) or error(
-                    f"target exists. target = {target}"
-                )
+                (not target.exists()) or error(f"target exists. target = {target}")
                 shutil.copytree(path, target)
                 target_article = Article(target)
                 target_article.replace_ids()
@@ -103,14 +107,20 @@ class Actor:
 
                   * This article has contains an element associated with UUID.
                 """
-                return next((article for article in self.__articles() if article.has(uuid)), None)
+                return next(
+                    (article for article in self.__articles() if article.has(uuid)),
+                    None,
+                )
 
             case List():
                 """Return a String.
 
                   * This string represents pairs: Article × Description
                 """
-                lines = map(_line, sorted(self.__articles(), key=lambda art: art.description()))
+                lines = map(
+                    self._line,
+                    sorted(self.__articles(), key=lambda art: art.description()),
+                )
                 return "\n".join(lines)
 
             case Page(uuid=uuid, template=template, pages=pages):
@@ -141,15 +151,14 @@ class Actor:
                     resized_img = img.resize(
                         (new_width, new_height), Image.Resampling.LANCZOS
                     )
-                    temp_webp = tempfile.NamedTemporaryFile(suffix='.webp').name
+                    temp_webp = tempfile.NamedTemporaryFile(suffix=".webp").name
                     resized_img.save(temp_webp)
 
-                    temp_jpg = tempfile.NamedTemporaryFile(suffix='.jpg').name
+                    temp_jpg = tempfile.NamedTemporaryFile(suffix=".jpg").name
                     resized_img.save(temp_jpg)
 
                 page.copy(Path(temp_webp), BG())
                 page.copy(Path(temp_jpg), BG())
-
 
                 article_html = article.article_html(self)
 
@@ -160,16 +169,16 @@ class Actor:
                     template_html = template_html.replace(
                         "__DESCRIPTION__", article.description()
                     )
-                    template_html = template_html.replace("__CSS__", article.article_css())
+                    template_html = template_html.replace(
+                        "__CSS__", article.article_css()
+                    )
                     template_html = template_html.replace("__ARTICLE__", article_html)
 
                 page.copy(template_html, Index())
                 return page
 
             case Pages(template=template, pages=pages):
-                args = (
-                    (self.__root, uuid, template, pages) for uuid in self.__uuids()
-                )
+                args = ((self.__root, uuid, template, pages) for uuid in self.__uuids())
 
                 if self.__execution == self.PARALLEL:
                     with ProcessPoolExecutor() as executor:
@@ -240,6 +249,12 @@ class Actor:
                     )
 
     # Instance.Public.API
+    def help(
+        self,
+    ):
+        message = Help()
+        return self.receive(message)
+
     def page(self, uuid: str, template: Path, pages: Path):
         message = Page(uuid, template, pages)
         return self.receive(message)
@@ -284,40 +299,47 @@ class Actor:
         message = List()
         return self.receive(message)
 
-    def argv(self, args):
+    def argv(self, args: Tuple) -> str | None:
+        res = str
+
         match args:
-            case ["clone", str(article), str(target)]:
-                return self.clone(Path(article), Path(target))
+            case ("help",):
+                res = self.help()
 
-            case ["page", str(uuid), str(template), str(pages)]:
-                return self.page(uuid, Path(template), Path(pages))
+            case ("clone", str(article), str(target)):
+                res = self.clone(Path(article), Path(target))
 
-            case ["article_with_id", str(uuid)]:
-                return self.article_with_id(uuid)
+            case ("page", str(uuid), str(template), str(pages)):
+                res = self.page(uuid, Path(template), Path(pages))
 
-            case ["links", str(path)]:
-                return self.links(Path(path))
+            case ("article_with_id", str(uuid)):
+                res = self.article_with_id(uuid)
 
-            case ["index", str(path), str(uuid)]:
-                return self.index(Path(path), uuid)
+            case ("links", str(path)):
+                res = self.links(Path(path))
 
-            case ["duplicated-uuids"]:
-                return self.duplicated_uuids()
+            case ("index", str(path), str(uuid)):
+                res = self.index(Path(path), uuid)
 
-            case ["pages", str(template), str(pages)]:
-                return self.pages(Path(template), Path(pages))
+            case ("duplicated-uuids",):
+                res = self.duplicated_uuids()
 
-            case ["sitemap", str(root)]:
-                return self.sitemap(Path(root))
+            case ("pages", str(template), str(pages)):
+                res = self.pages(Path(template), Path(pages))
 
-            case ["all", str(uuid), str(template), str(root)]:
-                return self.all(uuid, Path(template), Path(root))
+            case ("sitemap", str(root)):
+                res = self.sitemap(Path(root))
 
-            case ["list"]:
-                return self.list()
+            case ("all", str(uuid), str(template), str(root)):
+                res = self.all(uuid, Path(template), Path(root))
+
+            case ("list",):
+                res = self.list()
 
             case _:
                 error(f"Unexpected args. {args}")
+
+        return str(res)
 
     @cache
     def page_has_id(self, id):
@@ -332,8 +354,15 @@ class Actor:
         )
 
     # Instance.Private
-    def __init__(self, root: Path, execution:str = PARALLEL) -> None:
+    def __init__(self, root: Path, execution: str = PARALLEL) -> None:
+        if not root.is_dir():
+            error(f"root is not a directory. root = {root}")
         self.__root = root
+
+        if execution not in self.EXECUTION_VALUES:
+            error(
+                f"execution is unexpected. execution = {execution}. valid values: {self.EXECUTION_VALUES}"
+            )
         self.__execution = execution
         self.__resolved_ids = None
         self._logger.info(f"{self}")
@@ -352,5 +381,3 @@ class Actor:
 
     def __str__(self):
         return f"Actor articles={self.__root}"
-
-

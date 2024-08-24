@@ -69,7 +69,6 @@ const bg_pic_id = "bg-image";
  * @extends EventTarget
  */
 const Website = class extends EventTarget {
-
     start() {
         const body = new Body(document.body);
         const bgimage = new Backgroundimage(document.getElementById(bg_pic_id));
@@ -105,7 +104,6 @@ const Website = class extends EventTarget {
         if (qa_list.length == 0) {
             toggle_qa_btn.style.display = "none";
         } else {
-
             const toggle_all_qa = function () {
                 const all_qa_are_visible = qa_list.every((qa) =>
                     qa.is_visible(),

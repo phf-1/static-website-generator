@@ -8,8 +8,9 @@ import shutil
 import logging
 import subprocess  # nosec B404
 
-from lib.message import *
+from lib.message import Root, Data, Copy, BG, Index, Reset, Make, Message
 from lib.utils import error
+
 
 class Page:
     # Class.Public
@@ -17,7 +18,7 @@ class Page:
     _logger = logging.getLogger(__name__)
 
     # Instance.Public.Receive
-    def receive(self, msg:Message):
+    def receive(self, msg: Message):
         self._logger.info(f"{self} ← {msg}")
         match msg:
             case Root():
@@ -116,7 +117,7 @@ class Page:
                 return self.receive(message)
 
             case _:
-                error(f'Unexpected args. {args}')
+                error(f"Unexpected args. {args}")
 
     def data(self):
         return self._data
@@ -171,4 +172,3 @@ class Page:
 
     def __str__(self):
         return f"Page root = {self._root}"
-

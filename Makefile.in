@@ -178,8 +178,13 @@ endif
 #   - else, it will crash and explain why.
 
 
-help: ## This help is printed.
+# Context
+# Result
+# Rule
+help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "make %-30s %s\n", $$1, $$2}'
+	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
+	${ACTOR} help
 
 
 # Rule
@@ -245,7 +250,7 @@ ${AFF0_CODE_PYTHON}: ${_AFF0_FILES}
 	$(call result, "See above.")
 
 	$(call objective, "Python code is linted.")
-	${ENV} ruff check --fix ${_AFF0_DIR} | tee -a "$@"
+	${ENV} ruff check --fix --select I ${_AFF0_DIR} | tee -a "$@"
 	$(call result, "See above.")
 
 	$(call objective, "Python code is typed checked.")

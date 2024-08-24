@@ -3,10 +3,11 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from dataclasses import dataclass
+
 from lib.message import Message
 
 
 @dataclass
-class Index(Message):
+class Help(Message):
     def __str__(self):
-        return "Index"
+        return "Help"

@@ -8,7 +8,6 @@ import logging
 import re
 import uuid
 from functools import cache
-from datetime import datetime, timezone, date
 from bs4 import BeautifulSoup
 
 from lib.message import Message
@@ -22,18 +21,19 @@ href_re = re.compile(href_restr, re.I)
 id_restr = f'id="({uuid_restr})"'
 id_re = re.compile(id_restr, re.I)
 
+
 def replace_with_uuid(match):
     return f'id="{uuid.uuid4()}"'
 
-class Article:
 
+class Article:
     def __links(self, html_string):
         parsed = BeautifulSoup(html_string, "html.parser")
         pairs = {}
         for link in parsed.find_all("a"):
             href = link.get("href")
             if href not in pairs:
-                if href and (href.startswith("https://") or href.startswith("/page/")):
+                if href and href.startswith("https://"):
                     name = "".join(str(content) for content in link.contents)
                     pairs[href] = name
         for link in parsed.find_all("x-blockquote"):
@@ -138,7 +138,7 @@ class Article:
 
         REFERENCE = "__REFERENCE__"
         if REFERENCE in html:
-            article_html = html.replace(REFERENCE, self.__links(html))
+            html = html.replace(REFERENCE, self.__links(html))
 
         return html
 
@@ -186,7 +186,7 @@ class Article:
         return self._uuid
 
     def replace_ids(self):
-        message = ReplaceIds(self)
+        message = ReplaceIds()
         return self.receive(message)
 
     @cache
@@ -207,4 +207,3 @@ class Article:
             return max([p.stat().st_mtime for p in self._files])
         else:
             raise AssertionError("Not in the file system.")
-

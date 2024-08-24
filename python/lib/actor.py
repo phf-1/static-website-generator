@@ -13,6 +13,7 @@ from itertools import groupby
 from pathlib import Path
 from typing import Any, Tuple
 
+from lib.task import Task
 from lib.article import Article as ArticleT
 from lib.message import *
 from lib.page import Page as Publication
@@ -21,43 +22,7 @@ from PIL import Image
 
 
 class Actor:
-    """Actor that gives behavior to a set of articles.
-
-    Build
-    -----
-
-      root_dir = Path(…)
-      execution = PARALLEL
-      actor = Actor(root_dir, execution=PARALLEL)
-
-
-    Use
-    ---
-
-      actor.help()
-      actor.message(…)
-
-
-    Implementation
-    --------------
-
-      instance = Constructor(init_data)
-                   self.__init__(init_data)
-
-      instance.message(params)
-
-        # Calling a method is like having received a kind of message.
-        msg = Message(…)
-
-        return self.receive(msg)
-
-                 # All received messages may be logged.
-                 self._logger.info(f"{self} ← {msg}")
-
-                 match msg:
-                   case AMessage(…)
-                     return …
-    """
+    """Actor that gives behavior to a set of articles."""
 
     # Class.Public
     PARALLEL = "PARALLEL"
@@ -87,8 +52,7 @@ class Actor:
     # Instance.Public.API
     def help(self) -> str:
         """Return a string that tells the messages I understand to the user."""
-        message = Help()
-        return self.receive(message)
+        return self.receive(Task(c="help", o="String"))
 
     def page(self, uuid: str, template: Path, pages: Path) -> Publication:
         """Return a Page.
@@ -97,35 +61,30 @@ class Actor:
         * The article is injected in the TEMPLATE.
         * The page is built rooted at PAGES/UUID.
         """
-        message = Page(uuid, template, pages)
-        return self.receive(message)
+        return self.receive(Task(c=("page", uuid, template, pages), o="Page"))
 
     def duplicated_uuids(self) -> str:
         """Raise an error if there are duplicated uuids or return a report"""
-        message = DuplicatedUUIDs()
-        return self.receive(message)
+        return self.receive(Task(c="duplicated_uuids", o="String"))
 
     def pages(self, template: Path, pages: Path) -> str:
         """Build a page for each article and install it under PAGES using TEMPLATE."""
-        message = Pages(template, pages)
-        return self.receive(message)
+        return self.receive(Task(c=("pages", template, pages), o="String"))
 
     def sitemap(self, root: Path) -> str:
         """Return the path of the sitemap.
 
         * The sitemap is built and installed under ROOT.
         """
-        message = Sitemap(root)
-        return self.receive(message)
+        return self.receive(Task(c=("sitemap", root), o="String"))
 
-    def index(self, pages: Path, uuid: str):
+    def index(self, pages: Path, uuid: str) -> Publication:
         """Return a Publication.
 
         * This article has the given UUID.
         * `__INDEX__' has been replaced with and index of PAGES.
         """
-        message = (Index(), pages, uuid)
-        return self.receive(message)
+        return self.receive(Task(c=("index", pages, uuid), o="Page"))
 
     def clone(self, article: Path, target: Path) -> ArticleT:
         """Return an Article.
@@ -133,16 +92,14 @@ class Actor:
         * This article is clone of an ARTICLE rooted at TARGET directory.
         * All uuids are replaced.
         """
-        message = Clone(article, target)
-        return self.receive(message)
+        return self.receive(Task(c=("clone", article, target), o="Article"))
 
-    def article_with_id(self, uuid: str):
+    def article_with_id(self, uuid: str) -> ArticleT:
         """Return an Article.
 
-        * This article has contains an element associated with UUID.
+        * This article has an element associated with UUID.
         """
-        message = ArticleWithId(uuid)
-        return self.receive(message)
+        return self.receive(Task(c=("article_with_id", uuid), o="Article"))
 
     def all(self, uuid: str, template: Path, root: Path) -> str:
         """Return a report that informs the user about how building the website went.
@@ -150,19 +107,16 @@ class Actor:
         * The report comes from building the website under ROOT using TEMPLATE.
         * UUID is used to identify the article that will be used as the landing page.
         """
-        message = All(uuid, template, root)
-        return self.receive(message)
+        return self.receive(Task(c=("all", uuid, template, root), o="String"))
 
     def list(self) -> str:
         """Return a report that lists Article × Description."""
-        message = List()
-        return self.receive(message)
+        return self.receive(Task(c="list", o="String"))
 
     @cache
     def article_has_id(self, id: str) -> bool:
         """Return if there is an article identified by ID."""
-        message = (Exists(), Article(), id)
-        return self.receive(message)
+        return self.receive(Task(c=("article_has_id", id), o="Boolean"))
 
     def argv(self, args: Tuple) -> str | None:
         """Return a reply to the message represented by ARG."""
@@ -206,14 +160,14 @@ class Actor:
         return str(res)
 
     # Instance.Public.Receive
-    def receive(self, msg: Message | Tuple) -> Any:
-        self._logger.info(f"{self} ← {msg}")
+    def receive(self, task: Task) -> Any:
+        self._logger.info(f"{self} ← {task}")
 
-        match msg:
-            case Help():
+        match task:
+            case Task(c="help", o="String"):
                 return "TODO: help"
 
-            case Clone(article=path, target=target):
+            case Task(c=("clone", path, target), o="Article"):
                 path.exists() or error(f"article does not exist. article = {path}")
                 (not target.exists()) or error(f"target exists. target = {target}")
                 shutil.copytree(path, target)
@@ -221,8 +175,7 @@ class Actor:
                 target_article.replace_ids()
                 return target_article
 
-            case (Index(), Path() as pages, str(uuid)):
-
+            case Task(c=("index", pages, uuid), o="Page"):
                 def key(article):
                     timestamp = article.mtime()
                     a_datetime = datetime.fromtimestamp(timestamp, tz=timezone.utc)
@@ -248,20 +201,20 @@ class Actor:
 
                 return index_page
 
-            case ArticleWithId(id=uuid):
+            case Task(c=("article_with_id", uuid), o="Article"):
                 return next(
                     (article for article in self.__articles() if article.has(uuid)),
                     None,
                 )
 
-            case List():
+            case Task(c="list", o="String"):
                 lines = map(
                     self._line,
                     sorted(self.__articles(), key=lambda art: art.description()),
                 )
                 return "\n".join(lines)
 
-            case Page(uuid=uuid, template=template, pages=pages):
+            case Task(c=("page", uuid, template, pages), o="Page"):
                 match self.__article_by_id(uuid):
                     case None:
                         error(f"No article with uuid has been found. uuid = {uuid}")
@@ -315,7 +268,7 @@ class Actor:
 
                 return page
 
-            case Pages(template=template, pages=pages):
+            case Task(c=("pages", template, pages), o="String"):
                 args = ((self.__root, uuid, template, pages) for uuid in self.__uuids())
 
                 if self.__execution == self.PARALLEL:
@@ -329,7 +282,7 @@ class Actor:
 
                 return "\n".join([str(res) for res in results])
 
-            case All(uuid=uuid, template=template, root=root):
+            case Task(c=("all", uuid, template, root), o="String"):
                 report = self.duplicated_uuids()
                 pages = root / "page"
                 report += "\n".join(
@@ -339,7 +292,7 @@ class Actor:
                 report += f"\nsitemap = {self.sitemap(root)}"
                 return report
 
-            case Sitemap(root=root):
+            case Task(c=("sitemap", root), o="String"):
 
                 def loc(uuid):
                     return f"<loc>https://phfrohring.com/page/{uuid}/</loc>"
@@ -367,7 +320,7 @@ class Actor:
                     f.write(sitemap_)
                 return sitemap_path
 
-            case DuplicatedUUIDs():
+            case Task(c="duplicated_uuids", o="String"):
                 uuids: list[str] = reduce(
                     lambda acc, article: acc + article.uuids(), self.__articles(), []
                 )
@@ -386,7 +339,7 @@ class Actor:
                         + "  \n".join(set(duplicates))
                     )
 
-            case (Exists(), Article(), str(id)):
+            case Task(c=("article_has_id", id), o="Boolean"):
                 return next(
                     (True for article in self.__articles() if article.uuid() == id),
                     False,

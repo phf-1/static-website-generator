@@ -8,6 +8,6 @@ from lib.message.message import Message
 
 
 @dataclass
-class List(Message):
+class Exists(Message):
     def __str__(self):
-        return "List"
+        return "Exists"

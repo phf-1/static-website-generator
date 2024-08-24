@@ -4,10 +4,8 @@
 
 from dataclasses import dataclass
 
-from lib.message.message import Message
-
 
 @dataclass
-class List(Message):
+class Message:
     def __str__(self):
-        return "List"
+        return "Message"

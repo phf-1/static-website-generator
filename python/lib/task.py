@@ -3,11 +3,13 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from dataclasses import dataclass
-
-from lib.message.message import Message
+from typing import Any
 
 
 @dataclass
-class List(Message):
+class Task:
+    c: Any  # context
+    o: Any  # objective
+
     def __str__(self):
-        return "List"
+        return f"Task context={self.c} objective={self.o}"

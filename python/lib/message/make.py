@@ -4,7 +4,7 @@
 
 from dataclasses import dataclass
 
-from lib.message import Message
+from lib.message.message import Message
 
 
 @dataclass

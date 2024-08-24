@@ -4,7 +4,7 @@
 
 from dataclasses import dataclass
 from pathlib import Path
-from lib.message import Message
+from lib.message.message import Message
 
 
 @dataclass

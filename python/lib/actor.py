@@ -2,24 +2,22 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import logging
+import shutil
+import tempfile
 from concurrent.futures import ProcessPoolExecutor
-from datetime import datetime, timezone, date
-from functools import reduce
+from datetime import date, datetime, timezone
+from functools import cache, reduce
 from glob import glob
 from itertools import groupby
 from pathlib import Path
-from typing import Tuple, Any
-import logging
-import shutil
-from functools import cache
-import tempfile
-
-from PIL import Image
+from typing import Any, Tuple
 
 from lib.article import Article as ArticleT
-from lib.page import Page as Publication
 from lib.message import *
+from lib.page import Page as Publication
 from lib.utils import error
+from PIL import Image
 
 
 class Actor:

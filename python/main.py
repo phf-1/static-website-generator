@@ -30,10 +30,11 @@ If, for some reason, something goes wrong, then: the actor tells what went wrong
 how to likely correct the problem.
 """
 
-from pathlib import Path
 import logging
 import os
 import sys
+from pathlib import Path
+
 from lib.actor import Actor
 
 if __name__ == "__main__":

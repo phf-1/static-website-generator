@@ -2,13 +2,13 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from pathlib import Path
-from glob import glob
-import shutil
 import logging
+import shutil
 import subprocess  # nosec B404
+from glob import glob
+from pathlib import Path
 
-from lib.message import Root, Data, Copy, BG, Index, Reset, Make, Message
+from lib.message import BG, Copy, Data, Index, Make, Message, Reset, Root
 from lib.utils import error
 
 

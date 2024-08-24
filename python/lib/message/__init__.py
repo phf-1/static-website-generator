@@ -33,7 +33,6 @@ from lib.message.root import Root
 from lib.message.sitemap import Sitemap
 from lib.message.string import String
 
-
 __all__ = [
     "All",
     "Article",

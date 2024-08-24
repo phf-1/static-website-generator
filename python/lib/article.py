@@ -2,27 +2,16 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from glob import glob
-from pathlib import Path
 import logging
 import re
 import uuid
 from functools import cache
-from bs4 import BeautifulSoup
-from typing import Tuple, Any
+from glob import glob
+from pathlib import Path
+from typing import Any, Tuple
 
+from bs4 import BeautifulSoup
 from lib.task import Task
-from lib.message import (
-    Message,
-    File,
-    String,
-    Description,
-    CSS,
-    Id,
-    Lang,
-    List,
-    Replaced,
-)
 
 
 class Article:
@@ -37,49 +26,31 @@ class Article:
     # Class.Private
     _logger = logging.getLogger(__name__)
 
-    @staticmethod
-    def __links(html_string):
-        parsed = BeautifulSoup(html_string, "html.parser")
-        pairs = {}
-        for link in parsed.find_all("a"):
-            href = link.get("href")
-            if href not in pairs:
-                if href and href.startswith("https://"):
-                    name = "".join(str(content) for content in link.contents)
-                    pairs[href] = name
-        for link in parsed.find_all("x-blockquote"):
-            href = link.get("url")
-            if href not in pairs:
-                if href and href.startswith("https://"):
-                    name = link.get("source")
-                    pairs[href] = name
-                    pairs = sorted(pairs.items(), key=lambda p: p[1])
-
-        def to_reference(pair: list) -> str:
-            return f"<li><a href={pair[0]}>{pair[1]}</a></li>"
-
-        return "\n".join(map(to_reference, pairs))
-
     # Instance.Public.API
+    @cache
+    def read(self, path: Path) -> str:
+        """Return a string read from PATH."""
+        return self.receive(Task(c=path, o="String"))
+
+    @cache
     def description_file(self) -> Path:
         """Return the file that contains the description of the article."""
         return self.receive(Task(c="description", o="Path"))
 
-    def root(self) -> Path:
-        """Return the root path of the article."""
-        return self.receive(Task(c="root", o="Path"))
-
-    def article_html_file(self):
-        """Return the path of the html content of the article."""
-        return self.receive(Task(c="html", o="Path"))
-
+    @cache
     def description(self) -> str:
         """Return the description of the article."""
         return self.receive(Task(c="description", o="String"))
 
-    def data_dir(self) -> Path:
-        """Return the data path of the article."""
-        return self.receive(Task(c="data", o="Path"))
+    @cache
+    def root(self) -> Path:
+        """Return the root path of the article."""
+        return self.receive(Task(c="root", o="Path"))
+
+    @cache
+    def article_html_file(self):
+        """Return the path of the html content of the article."""
+        return self.receive(Task(c="html", o="Path"))
 
     @cache
     def article_html(self, ctx):
@@ -95,26 +66,37 @@ class Article:
         """
         return self.receive(Task(c=(ctx, "html"), o="String"))
 
+    @cache
+    def data_dir(self) -> Path:
+        """Return the data path of the article."""
+        return self.receive(Task(c="data", o="Path"))
+
+    @cache
     def article_css_file(self):
         """Return the path of the css file of the article."""
         return self.receive(Task(c="css", o="Path"))
 
+    @cache
     def article_css(self):
         """Return the path of the css content of the article."""
         return self.receive(Task(c="css", o="String"))
 
+    @cache
     def background_img_file(self) -> Path:
         """Return the path of the background image file of the article."""
         return self.receive(Task(c="bg", o="Path"))
 
+    @cache
     def lang_file(self) -> Path:
         """Return the file that contains the language of the article."""
         return self.receive(Task(c="lang", o="Path"))
 
+    @cache
     def lang(self) -> str:
         """Return the language of the article."""
         return self.receive(Task(c="lang", o="String"))
 
+    @cache
     def uuid(self) -> str:
         """Return the id of the article."""
         return self.receive(Task(c="id", o="String"))
@@ -141,10 +123,10 @@ class Article:
         return self.receive(Task(c=None, o="MTime"))
 
     # Instance.Public.Receive
-    def receive(self, msg: Message | Task | Tuple) -> Any:
-        self._logger.info(f"{self} ← {msg}")
+    def receive(self, task: Task) -> Any:
+        self._logger.info(f"{self} ← {task}")
 
-        match msg:
+        match task:
             case Task(c="description", o="Path"):
                 return self._description
 
@@ -174,21 +156,20 @@ class Article:
                     return f.read()
 
             case Task(c="description", o="String"):
-                return self.receive(Task(c=self.description_file(), o="String"))
+                return self.read(self.description_file())
 
             case Task(c="lang", o="String"):
-                return self.receive(Task(c=self.lang_file(), o="String"))
+                return self.read(self.lang_file())
 
             case Task(c="css", o="String"):
                 path = self.article_css_file()
                 if path.exists():
-                    return self.receive(Task(c=path, o="String"))
+                    return self.read(path)
                 else:
                     return ""
 
             case Task(c=(ctx, "html"), o="String"):
-                path = self.article_html_file()
-                html = self.receive(Task(c=path, o="String"))
+                html = self.read(self.article_html_file())
 
                 def in_page(id):
                     if self.has(id):
@@ -224,11 +205,7 @@ class Article:
                             f"No element has been found with uuid {ref_uuid}"
                         )
 
-                REFERENCE = "__REFERENCE__"
-                if REFERENCE in html:
-                    html = html.replace(REFERENCE, self.__links(html))
-
-                return html
+                return html.replace("__REFERENCE__", self.__links())
 
             case Task(c=id, o="Has"):
                 return id in self.uuids()
@@ -246,10 +223,8 @@ class Article:
                 return self._files
 
             case Task(c="ids", o="List[String]"):
-                path = self.article_html_file()
-                with open(path, "r") as file:
-                    content = file.read()
-                    return re.findall(self.id_re, content)
+                content = self.read(self.article_html_file())
+                return re.findall(self.id_re, content)
 
             case Task(c="replaced_ids", o="Article"):
                 html_file = self.article_html_file()
@@ -260,14 +235,12 @@ class Article:
                 with open(html_file, "r+") as file:
                     content = file.read()
                     file.seek(0)
-                    updated_content = re.sub(
-                        r'id="[^"]*"', replace_with_uuid, content
-                    )
+                    updated_content = re.sub(r'id="[^"]*"', replace_with_uuid, content)
                     file.write(updated_content)
                 return self
 
             case _:
-                raise AssertionError(f"Unexpected msg. msg = {msg}")
+                raise AssertionError(f"Unexpected task. task = {task}")
 
     # Instance.Private
     def __init__(self, root: Path):
@@ -300,6 +273,31 @@ class Article:
             Path(p).resolve() for p in glob(str(self._data_dir / "**"), recursive=True)
         ]
         self._logger.info(f"{self}")
+
+    @cache
+    def __links(self):
+        html = self.read(self.article_html_file())
+        parsed = BeautifulSoup(html, "html.parser")
+        pairs = {}
+        for link in parsed.find_all("a"):
+            href = link.get("href")
+            if href not in pairs:
+                if href and href.startswith("https://"):
+                    name = "".join(str(content) for content in link.contents)
+                    pairs[href] = name
+        for link in parsed.find_all("x-blockquote"):
+            href = link.get("url")
+            if href not in pairs:
+                if href and href.startswith("https://"):
+                    name = link.get("source")
+                    pairs[href] = name
+
+        def to_reference(pair: list) -> str:
+            return f"<li><a href={pair[0]}>{pair[1]}</a></li>"
+
+        pairs = sorted(pairs.items(), key=lambda p: p[1])
+
+        return "\n".join(map(to_reference, pairs))
 
     def __str__(self):
         return f"Article root={self._root}"

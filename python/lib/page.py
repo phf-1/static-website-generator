@@ -11,6 +11,7 @@ from pathlib import Path
 from lib.task import Task
 from lib.utils import error
 
+
 class Page:
     """p:Page means that p represents a Page of the website."""
 
@@ -25,7 +26,7 @@ class Page:
         """Return the root of this page in the filesystem."""
         return self.receive(Task(c="root", o="Path"))
 
-    def img(self, format:str) -> Path:
+    def img(self, format: str) -> Path:
         """Return the background image in format FORMAT."""
         return self.receive(Task(c=("img", format), o="Path"))
 
@@ -61,21 +62,23 @@ class Page:
         """True means: all this page files exist in the filesystem."""
         return self.receive(Task(o="Exists"))
 
-    def copy_to_bg(self, src:Path) -> "Page":
+    def copy_to_bg(self, src: Path) -> "Page":
         """Return this page after copying SRC to a its image."""
         return self.receive(Task(c=src, o="CopyToBg(self, src)"))
 
-    def copy_to_data(self, src:Path) -> "Page":
+    def copy_to_data(self, src: Path) -> "Page":
         """Return this page after copying SRC to a its data."""
         return self.receive(Task(c=src, o="CopyToData(self, src)"))
 
-    def copy_to_index(self, src:Path) -> "Page":
+    def copy_to_index(self, src: Path) -> "Page":
         """Return this page after copying SRC to a its index."""
         return self.receive(Task(c=src, o="CopyToIndex(self, src)"))
 
     def replace_target(self, target, content) -> "Page":
         """Return this page after copying replacing TARGET by CONTENT in its index."""
-        return self.receive(Task(c=(target, content), o="ReplacedTarget(self, target, content)"))
+        return self.receive(
+            Task(c=(target, content), o="ReplacedTarget(self, target, content)")
+        )
 
     # Instance.Public.Receive
     def receive(self, task: Task):

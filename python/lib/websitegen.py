@@ -13,9 +13,9 @@ from itertools import groupby
 from pathlib import Path
 from typing import Any, Tuple
 
-from lib.task import Task
 from lib.article import Article
 from lib.page import Page
+from lib.task import Task
 from lib.utils import error
 from PIL import Image
 
@@ -176,13 +176,13 @@ class WebsiteGen:
                 return "TODO: help"
 
             case Task(c=(article, target), o="Clone(article, target)"):
-                if path.exists():
-                    error(f"article does not exist. article = {path}")
+                if article.exists():
+                    error(f"article does not exist. article = {article}")
 
                 if not target.exists():
                     error(f"target exists. target = {target}")
 
-                shutil.copytree(path, target)
+                shutil.copytree(article, target)
                 target_article = Article(target)
                 target_article.replace_ids()
                 return target_article
@@ -239,6 +239,7 @@ class WebsiteGen:
                 return page
 
             case Task(c=(pages, uuid), o="Page(index)"):
+
                 def key(article):
                     timestamp = article.mtime()
                     a_datetime = datetime.fromtimestamp(timestamp, tz=timezone.utc)
@@ -367,7 +368,6 @@ class WebsiteGen:
         self.__execution = execution
         self.__resolved_ids = None
         self._logger.info(f"{self}")
-
 
     def _line(self, art: Article) -> str:
         """Build a line when listing articles and descriptions."""

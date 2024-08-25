@@ -49,7 +49,7 @@ class WebsiteGen:
         * its content is a copy of ARTICLE except that all uuids have been replaced ;
         * it has been installed under TARGET.
         """
-        return self.receive(Task(c=("clone", article, target), o="Article"))
+        return self.receive(Task(c=(article, target), o="Clone(article, target)"))
 
     def page(self, uuid: str, template: Path, pages: Path) -> Page:
         """Return a Page such that:
@@ -58,15 +58,15 @@ class WebsiteGen:
         * it has been built from the template TEMPLATE ;
         * it has been installed under PAGES.
         """
-        return self.receive(Task(c=("page", uuid, template, pages), o="Page"))
+        return self.receive(Task(c=(uuid, template, pages), o="Page"))
 
     def duplicated_uuids(self) -> str:
         """Raises an error is duplicated uuids are found or return a report."""
-        return self.receive(Task(c="duplicated_uuids", o="String"))
+        return self.receive(Task(o="Report(duplicated_uuids)"))
 
     def pages(self, template: Path, pages: Path) -> str:
         """Return a report giving the status of pages built under PAGES using TEMPLATE."""
-        return self.receive(Task(c=("pages", template, pages), o="String"))
+        return self.receive(Task(c=(template, pages), o="Report(pages)"))
 
     def sitemap(self, root: Path) -> Path:
         """Return a path such that:
@@ -74,7 +74,7 @@ class WebsiteGen:
         * it represents the sitemap of the website ;
         * it has been installed under ROOT.
         """
-        return self.receive(Task(c=("sitemap", root), o="String"))
+        return self.receive(Task(c=("sitemap", root), o="Path"))
 
     def index(self, pages: Path, uuid: str) -> Page:
         """Return a Page such that:
@@ -84,14 +84,14 @@ class WebsiteGen:
         * `__INDEX__' has been replaced with and index of PAGES.
         * it is installed under PAGES.
         """
-        return self.receive(Task(c=("index", pages, uuid), o="Page"))
+        return self.receive(Task(c=(pages, uuid), o="Page(index)"))
 
-    def article_with_id(self, uuid: str) -> Article:
+    def article_with_id(self, id: str) -> Article:
         """Return an Article such that:
 
         * its content has an element with id UUID.
         """
-        return self.receive(Task(c=("article_with_id", uuid), o="Article"))
+        return self.receive(Task(c=id, o="ArticleWith(id)"))
 
     def all(self, uuid: str, template: Path, root: Path) -> str:
         """Return a report such that:
@@ -100,7 +100,7 @@ class WebsiteGen:
         * the website has been installed under ROOT using TEMPLATE ;
         * the article with id UUID has been used to build the landing page.
         """
-        return self.receive(Task(c=("all", uuid, template, root), o="String"))
+        return self.receive(Task(c=(uuid, template, root), o="Report(website)"))
 
     def list(self) -> str:
         """Return a report such that:
@@ -110,12 +110,12 @@ class WebsiteGen:
         * Description is its oneline description ;
         * lines are alphabetically sorted.
         """
-        return self.receive(Task(c="list", o="String"))
+        return self.receive(Task(o="Report(list)"))
 
     @cache
     def article_has_id(self, id: str) -> bool:
         """True means that an article identified by ID exists."""
-        return self.receive(Task(c=("article_has_id", id), o="Boolean"))
+        return self.receive(Task(c=id, o="ArticleHas(id)"))
 
     def argv(self, msg: Tuple) -> str:
         """Return a report such that:
@@ -175,7 +175,7 @@ class WebsiteGen:
             case Task(c="help", o="String"):
                 return "TODO: help"
 
-            case Task(c=("clone", path, target), o="Article"):
+            case Task(c=(article, target), o="Clone(article, target)"):
                 if path.exists():
                     error(f"article does not exist. article = {path}")
 
@@ -187,7 +187,7 @@ class WebsiteGen:
                 target_article.replace_ids()
                 return target_article
 
-            case Task(c=("page", uuid, template, pages), o="Page"):
+            case Task(c=(uuid, template, pages), o="Page"):
                 match self.__article_by_id(uuid):
                     case None:
                         error(f"No article with uuid has been found. uuid = {uuid}")
@@ -238,7 +238,7 @@ class WebsiteGen:
 
                 return page
 
-            case Task(c=("index", pages, uuid), o="Page"):
+            case Task(c=(pages, uuid), o="Page(index)"):
                 def key(article):
                     timestamp = article.mtime()
                     a_datetime = datetime.fromtimestamp(timestamp, tz=timezone.utc)
@@ -264,20 +264,20 @@ class WebsiteGen:
 
                 return index_page
 
-            case Task(c=("article_with_id", uuid), o="Article"):
+            case Task(c=id, o="ArticleWith(id)"):
                 return next(
-                    (article for article in self.__articles() if article.has(uuid)),
+                    (article for article in self.__articles() if article.has(id)),
                     None,
                 )
 
-            case Task(c="list", o="String"):
+            case Task(o="Report(list)"):
                 lines = map(
                     self._line,
                     sorted(self.__articles(), key=lambda art: art.description()),
                 )
                 return "\n".join(lines)
 
-            case Task(c=("pages", template, pages), o="String"):
+            case Task(c=(template, pages), o="Report(pages)"):
                 args = ((self.__root, uuid, template, pages) for uuid in self.__uuids())
 
                 if self.__execution == self.PARALLEL:
@@ -291,7 +291,7 @@ class WebsiteGen:
 
                 return "\n".join([str(res) for res in results])
 
-            case Task(c=("all", uuid, template, root), o="String"):
+            case Task(c=(uuid, template, root), o="Report(website)"):
                 report = self.duplicated_uuids()
                 pages = root / "page"
                 report += "\n".join(
@@ -301,7 +301,7 @@ class WebsiteGen:
                 report += f"\nsitemap = {self.sitemap(root)}"
                 return report
 
-            case Task(c=("sitemap", root), o="String"):
+            case Task(c=("sitemap", root), o="Path"):
 
                 def loc(uuid):
                     return f"<loc>https://phfrohring.com/page/{uuid}/</loc>"
@@ -329,7 +329,7 @@ class WebsiteGen:
                     f.write(sitemap_)
                 return Path(sitemap_path)
 
-            case Task(c="duplicated_uuids", o="String"):
+            case Task(o="Report(duplicated_uuids)"):
                 uuids: list[str] = reduce(
                     lambda acc, article: acc + article.uuids(), self.__articles(), []
                 )
@@ -348,7 +348,7 @@ class WebsiteGen:
                         + "  \n".join(set(duplicates))
                     )
 
-            case Task(c=("article_has_id", id), o="Boolean"):
+            case Task(c=id, o="ArticleHas(id)"):
                 return next(
                     (True for article in self.__articles() if article.uuid() == id),
                     False,

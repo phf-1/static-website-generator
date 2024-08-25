@@ -29,7 +29,7 @@ class Article:
     # Instance.Public.API
     @cache
     def read(self, path: Path) -> str:
-        """Return a string read from PATH."""
+        """Return a content read from PATH."""
         return self.receive(Task(c=path, o="String"))
 
     @cache
@@ -48,12 +48,12 @@ class Article:
         return self.receive(Task(c="root", o="Path"))
 
     @cache
-    def article_html_file(self):
+    def article_html_file(self) -> Path:
         """Return the path of the html content of the article."""
-        return self.receive(Task(c="html", o="Path"))
+        return self.receive(Task(c="content", o="Path"))
 
     @cache
-    def article_html(self, ctx):
+    def article_html(self, ctx) -> str:
         """Return the html content of the article.
 
         * href references have been replaced.
@@ -64,7 +64,7 @@ class Article:
 
         * __REFERENCE__ is replaced by self.__links()
         """
-        return self.receive(Task(c=(ctx, "html"), o="String"))
+        return self.receive(Task(c=("content", ctx), o="HTML"))
 
     @cache
     def data_dir(self) -> Path:
@@ -102,25 +102,25 @@ class Article:
         return self.receive(Task(c="id", o="String"))
 
     def replace_ids(self) -> "Article":
-        return self.receive(Task(c="replaced_ids", o="Article"))
+        return self.receive(Task(o="ReplacedIds(self)"))
 
     @cache
     def uuids(self) -> list[str]:
-        return self.receive(Task(c="ids", o="List[String]"))
+        return self.receive(Task(o="List(Id)"))
 
     @cache
     def has(self, id) -> bool:
-        return self.receive(Task(c=id, o="Has"))
+        return self.receive(Task(c=id, o="Has(id)"))
 
     @cache
     def files(self) -> list[Path]:
-        return self.receive(Task(c="files", o="List[Path]"))
+        return self.receive(Task(o="List(Path)"))
 
     def exists(self) -> bool:
-        return self.receive(Task(c=self, o="Exists"))
+        return self.receive(Task(o="Exists"))
 
     def mtime(self) -> float:
-        return self.receive(Task(c=None, o="MTime"))
+        return self.receive(Task(o="MTime"))
 
     # Instance.Public.Receive
     def receive(self, task: Task) -> Any:
@@ -142,7 +142,7 @@ class Article:
             case Task(c="lang", o="Path"):
                 return self._lang
 
-            case Task(c="html", o="Path"):
+            case Task(c="content", o="Path"):
                 return self._article_html
 
             case Task(c="bg", o="Path"):
@@ -168,36 +168,36 @@ class Article:
                 else:
                     return ""
 
-            case Task(c=(ctx, "html"), o="String"):
-                html = self.read(self.article_html_file())
+            case Task(c=("content", ctx), o="HTML"):
+                content = self.read(self.article_html_file())
 
                 def in_page(id):
                     if self.has(id):
-                        return lambda html: html.replace(
+                        return lambda content: content.replace(
                             f'href="{id}"', f'href="#{id}"'
                         )
 
                 def article_has_id(id):
                     if ctx.article_has_id(id):
-                        return lambda html: html.replace(
+                        return lambda content: content.replace(
                             f'href="{id}"', f'href="/page/{id}"'
                         )
 
                 def article_with_id(id):
                     match ctx.article_with_id(id):
                         case article if isinstance(article, Article):
-                            return lambda html: html.replace(
+                            return lambda content: content.replace(
                                 f'href="{id}"', f'href="/page/{article.uuid()}#{id}"'
                             )
 
                 finders = [in_page, article_has_id, article_with_id]
-                for ref_uuid in re.findall(self.href_re, html):
+                for ref_uuid in re.findall(self.href_re, content):
                     renderer = None
 
                     for find in finders:
                         renderer = find(ref_uuid)
                         if renderer is not None:
-                            html = renderer(html)
+                            content = renderer(content)
                             break
 
                     if renderer is None:
@@ -205,28 +205,28 @@ class Article:
                             f"No element has been found with uuid {ref_uuid}"
                         )
 
-                return html.replace("__REFERENCE__", self.__links())
+                return content.replace("__REFERENCE__", self.__links())
 
-            case Task(c=id, o="Has"):
+            case Task(c=id, o="Has(id)"):
                 return id in self.uuids()
 
-            case Task(c=self, o="Exists"):
+            case Task(o="Exists"):
                 return all([p.exists() for p in self.files()])
 
-            case Task(c=None, o="MTime"):
+            case Task(o="MTime"):
                 if self.exists():
                     return max([p.stat().st_mtime for p in self.files()])
                 else:
                     raise AssertionError("Not in the file system.")
 
-            case Task(c="files", o="List[Path]"):
+            case Task(o="List(Path)"):
                 return self._files
 
-            case Task(c="ids", o="List[String]"):
+            case Task(o="List(Id)"):
                 content = self.read(self.article_html_file())
                 return re.findall(self.id_re, content)
 
-            case Task(c="replaced_ids", o="Article"):
+            case Task(o="ReplacedIds(self)"):
                 html_file = self.article_html_file()
 
                 def replace_with_uuid(match):

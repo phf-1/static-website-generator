@@ -43,15 +43,15 @@ class Page:
 
     def files(self) -> list[Path]:
         """Return all files of this page in the filesystem."""
-        return self.receive(Task(c="files", o="list[Path]"))
+        return self.receive(Task(c="files", o="List(Path)"))
 
     def reset(self) -> "Page":
         """Return this page after deleting all its data."""
-        return self.receive(Task(c="reset", o="Page"))
+        return self.receive(Task(o="Reset(self)"))
 
     def make(self) -> "Page":
         """Return this page after running `make' in its data directory."""
-        return self.receive(Task(c="make", o="Page"))
+        return self.receive(Task(o="Make(self)"))
 
     def mtime(self) -> float:
         """Return this page last modification time."""
@@ -59,23 +59,23 @@ class Page:
 
     def exists(self) -> bool:
         """True means: all this page files exist in the filesystem."""
-        return self.receive(Task(c="exists", o="Boolean"))
+        return self.receive(Task(o="Exists"))
 
     def copy_to_bg(self, src:Path) -> "Page":
         """Return this page after copying SRC to a its image."""
-        return self.receive(Task(c=("copy_to_bg", src), o="Page"))
+        return self.receive(Task(c=src, o="CopyToBg(self, src)"))
 
     def copy_to_data(self, src:Path) -> "Page":
         """Return this page after copying SRC to a its data."""
-        return self.receive(Task(c=("copy_to_data", src), o="Page"))
+        return self.receive(Task(c=src, o="CopyToData(self, src)"))
 
     def copy_to_index(self, src:Path) -> "Page":
         """Return this page after copying SRC to a its index."""
-        return self.receive(Task(c=("copy_to_index", src), o="Page"))
+        return self.receive(Task(c=src, o="CopyToIndex(self, src)"))
 
     def replace_target(self, target, content) -> "Page":
         """Return this page after copying replacing TARGET by CONTENT in its index."""
-        return self.receive(Task(c=("replace_target", target, content), o="Page"))
+        return self.receive(Task(c=(target, content), o="ReplacedTarget(self, target, content)"))
 
     # Instance.Public.Receive
     def receive(self, task: Task):
@@ -96,10 +96,10 @@ class Page:
             case Task(c="index", o="Path"):
                 return self._index
 
-            case Task(c="files", o="list[Path]"):
+            case Task(c="files", o="List(Path)"):
                 return self._paths
 
-            case Task(c="reset", o="Page"):
+            case Task(o="Reset(self)"):
                 root = self.root()
 
                 if root.exists():
@@ -109,7 +109,7 @@ class Page:
 
                 return self
 
-            case Task(c="make", o="Page"):
+            case Task(o="Make(self)"):
                 if self._makefile.exists():
                     subprocess.run(["/bin/make"], cwd=self.data())  # nosec B603
 
@@ -121,26 +121,26 @@ class Page:
                 else:
                     raise AssertionError("Not in the file system.")
 
-            case Task(c="exists", o="Boolean"):
+            case Task(o="Exists"):
                 return all([p.exists() for p in self._paths])
 
-            case Task(c=("copy_to_data", src), o="Page"):
+            case Task(c=src, o="CopyToData(self, src)"):
                 shutil.copytree(src, self.data())
                 return self
 
-            case Task(c=("copy_to_bg", src), o="Page"):
+            case Task(c=src, o="CopyToBg(self, src)"):
                 suffix = src.suffix
                 if suffix not in self.SUFFIX_VALUES:
                     raise AssertionError(f"unexpected suffix {suffix}.")
                 shutil.copy2(src, self.root() / f"bg{src.suffix}")
                 return self
 
-            case Task(c=("copy_to_index", src), o="Page"):
+            case Task(c=src, o="CopyToIndex(self, src)"):
                 with open(self._index, "w") as index:
                     index.write(src)
                 return self
 
-            case Task(c=("replace_target", target, content), o="Page"):
+            case Task(c=(target, content), o="ReplacedTarget(self, target, content)"):
                 with open(self.index(), "r+") as index_article:
                     index_str = index_article.read()
                     index_article.seek(0)

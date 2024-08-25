@@ -8,8 +8,8 @@ from typing import Any
 
 @dataclass
 class Task:
-    c: Any  # context
     o: Any  # objective
+    c: Any = None  # context
 
     def __str__(self):
         return f"Task context={self.c} objective={self.o}"

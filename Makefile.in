@@ -102,11 +102,14 @@ EXECUTION := __EXECUTION__
 # ${ENV} represents environment variables used by the actor.
 ENV := MYPYPATH=python PYTHONPATH=python EXECUTION=${EXECUTION} LOGLEVEL=${LOGLEVEL}
 
+# ${INTERPRETER} represents the ... interpreter.
+INTERPRETER := ${ENV} python3
+
 # ${ACTOR} represents the actor to which this makefile send messages.
 PYTHON := python
 PYTHON_FILES := $(call list_files,${PYTHON},*)
 MAIN_PY := ${PYTHON}/main.py
-ACTOR := ${ENV} python3 ${MAIN_PY} ${ARTICLE}
+ACTOR := ${INTERPRETER} ${MAIN_PY} ${ARTICLE}
 
 # ${BUILD} represents the parent directory where the website is built.
 BUILD := _build
@@ -547,7 +550,6 @@ publish:  ## Publish the website.
 # Context
 _5A6A_DIR := ${JS}
 _5A6A_FILES := ${JS_FILES}
-
 # Objective
 5A6A_CODE_DOC_JS := _js_doc
 # Rule
@@ -556,6 +558,23 @@ code-doc-js:  ${5A6A_CODE_DOC_JS}  ## Build the JavaScript documentation.
 ${5A6A_CODE_DOC_JS}: ${_5A6A_FILES}
 	npx jsdoc -c jsdoc.json
 	touch "$@"
+
+
+# Context
+# Objective
+# Rule
+.PHONY: repl
+repl:
+	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
+	${INTERPRETER}
+
+
+# Context
+# Objective
+# Rule
+.PHONY: cloc
+cloc:
+	gocloc ${PYTHON} ${JS} ${CSS} ${MODEL}
 
 
 # Rule

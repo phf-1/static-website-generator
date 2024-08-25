@@ -8,68 +8,99 @@ import subprocess  # nosec B404
 from glob import glob
 from pathlib import Path
 
-from lib.message import BG, Copy, Data, Index, Make, Message, Reset, Root
+from lib.task import Task
 from lib.utils import error
 
-
 class Page:
+    """p:Page means that p represents a Page of the website."""
+
     # Class.Public
+    SUFFIX_VALUES = [".webp", ".jpg"]
+
     # Class.Private
     _logger = logging.getLogger(__name__)
 
-    # Instance.Public.Receive
-    def receive(self, msg: Message):
-        self._logger.info(f"{self} ← {msg}")
-        match msg:
-            case Root():
-                """Return a Path.
+    # Instance.Public.API
+    def root(self) -> Path:
+        """Return the root of this page in the filesystem."""
+        return self.receive(Task(c="root", o="Path"))
 
-                  * This path is the root of the page in the filesystem.
-                """
+    def img(self, format:str) -> Path:
+        """Return the background image in format FORMAT."""
+        return self.receive(Task(c=("img", format), o="Path"))
+
+    def data(self) -> Path:
+        """Return the data of this page in the filesystem."""
+        return self.receive(Task(c="data", o="Path"))
+
+    def makefile(self) -> Path:
+        """Return the makefile of this page in the filesystem."""
+        return self.receive(Task(c="makefile", o="Path"))
+
+    def index(self):
+        """Return the index of this page in the filesystem."""
+        return self.receive(Task(c="index", o="Path"))
+
+    def files(self) -> list[Path]:
+        """Return all files of this page in the filesystem."""
+        return self.receive(Task(c="files", o="list[Path]"))
+
+    def reset(self) -> "Page":
+        """Return this page after deleting all its data."""
+        return self.receive(Task(c="reset", o="Page"))
+
+    def make(self) -> "Page":
+        """Return this page after running `make' in its data directory."""
+        return self.receive(Task(c="make", o="Page"))
+
+    def mtime(self) -> float:
+        """Return this page last modification time."""
+        return self.receive(Task(c="mtime", o="Float"))
+
+    def exists(self) -> bool:
+        """True means: all this page files exist in the filesystem."""
+        return self.receive(Task(c="exists", o="Boolean"))
+
+    def copy_to_bg(self, src:Path) -> "Page":
+        """Return this page after copying SRC to a its image."""
+        return self.receive(Task(c=("copy_to_bg", src), o="Page"))
+
+    def copy_to_data(self, src:Path) -> "Page":
+        """Return this page after copying SRC to a its data."""
+        return self.receive(Task(c=("copy_to_data", src), o="Page"))
+
+    def copy_to_index(self, src:Path) -> "Page":
+        """Return this page after copying SRC to a its index."""
+        return self.receive(Task(c=("copy_to_index", src), o="Page"))
+
+    def replace_target(self, target, content) -> "Page":
+        """Return this page after copying replacing TARGET by CONTENT in its index."""
+        return self.receive(Task(c=("replace_target", target, content), o="Page"))
+
+    # Instance.Public.Receive
+    def receive(self, task: Task):
+        self._logger.info(f"{self} ← {task}")
+        match task:
+            case Task(c="root", o="Path"):
                 return self._root
 
-            case Data():
-                """Return a Path.
+            case Task(c=("img", format), o="Path"):
+                return self._background_imgs[format]
 
-                  * This path is the data of the page in the filesystem.
-                """
+            case Task(c="data", o="Path"):
                 return self._data
 
-            case (Copy(), Path() as src, Data()):
-                """Return a Page.
+            case Task(c="makefile", o="Path"):
+                return self._makefile
 
-                  * This page is returned.
-                  * All files under SRC have been added to the data of this page.
-                """
-                shutil.copytree(src, self._data)
-                return self
+            case Task(c="index", o="Path"):
+                return self._index
 
-            case (Copy(), Path() as src, BG()):
-                """Return a Page.
+            case Task(c="files", o="list[Path]"):
+                return self._paths
 
-                  * This page is returned.
-                  * The background image represented by SRC is copied to this page.
-                """
-                shutil.copy2(src, self._root / f"bg{src.suffix}")
-                return self
-
-            case (Copy(), str(src), Index()):
-                """Return a Page.
-
-                  * This page is returned.
-                  * The index.html file content is copied from SRC.
-                """
-                with open(self._index, "w") as index:
-                    index.write(src)
-                return self
-
-            case Reset():
-                """Return a Page.
-
-                  * This page is returned.
-                  * The root directory is now empty.
-                """
-                root = self._root
+            case Task(c="reset", o="Page"):
+                root = self.root()
 
                 if root.exists():
                     shutil.rmtree(root)
@@ -78,73 +109,45 @@ class Page:
 
                 return self
 
-            case Make():
-                """Return a Page.
-
-                  * This page is returned.
-                  * If any, the Makefile in the data directory is executed.
-                """
+            case Task(c="make", o="Page"):
                 if self._makefile.exists():
-                    subprocess.run(["/bin/make"], cwd=self._data)  # nosec B603
+                    subprocess.run(["/bin/make"], cwd=self.data())  # nosec B603
 
                 return self
 
-    # Instance.Public.API
-    def root(self):
-        message = Root()
-        return self.receive(message)
+            case Task(c="mtime", o="Float"):
+                if self.exists():
+                    return max([p.stat().st_mtime for p in self._paths])
+                else:
+                    raise AssertionError("Not in the file system.")
 
-    def make(self):
-        message = Make()
-        return self.receive(message)
+            case Task(c="exists", o="Boolean"):
+                return all([p.exists() for p in self._paths])
 
-    def reset(self):
-        message = Reset()
-        return self.receive(message)
+            case Task(c=("copy_to_data", src), o="Page"):
+                shutil.copytree(src, self.data())
+                return self
 
-    def copy(self, *args):
-        match args:
-            case (Path() as src, Data() as dst):
-                message = (Copy(), src, dst)
-                return self.receive(message)
+            case Task(c=("copy_to_bg", src), o="Page"):
+                suffix = src.suffix
+                if suffix not in self.SUFFIX_VALUES:
+                    raise AssertionError(f"unexpected suffix {suffix}.")
+                shutil.copy2(src, self.root() / f"bg{src.suffix}")
+                return self
 
-            case (Path() as src, BG() as dst):
-                message = (Copy(), src, dst)
-                return self.receive(message)
+            case Task(c=("copy_to_index", src), o="Page"):
+                with open(self._index, "w") as index:
+                    index.write(src)
+                return self
 
-            case (str(src), Index() as dst):
-                message = (Copy(), src, dst)
-                return self.receive(message)
+            case Task(c=("replace_target", target, content), o="Page"):
+                with open(self.index(), "r+") as index_article:
+                    index_str = index_article.read()
+                    index_article.seek(0)
+                    index_str = index_str.replace(target, content)
+                    index_article.write(index_str)
 
-            case _:
-                error(f"Unexpected args. {args}")
-
-    def data(self):
-        return self._data
-
-    def index(self):
-        return self._index
-
-    def background_img(self, format):
-        return self._background_imgs[format]
-
-    def mtime(self):
-        if self.exists():
-            return max([p.stat().st_mtime for p in self._paths])
-        else:
-            raise AssertionError("Not in the file system.")
-
-    def exists(self):
-        return all([p.exists() for p in self._paths])
-
-    def replace_target(self, target, content):
-        with open(self._index, "r+") as index_article:
-            index_str = index_article.read()
-            index_article.seek(0)
-            index_str = index_str.replace(target, content)
-            index_article.write(index_str)
-
-        return self
+                return self
 
     # Instance.Private
     def __init__(self, root: Path):

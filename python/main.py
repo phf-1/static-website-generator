@@ -35,7 +35,7 @@ import os
 import sys
 from pathlib import Path
 
-from lib.actor import Actor
+from lib.websitegen import WebsiteGen
 
 if __name__ == "__main__":
     logging.basicConfig(
@@ -43,6 +43,6 @@ if __name__ == "__main__":
         level=os.environ.get("LOGLEVEL", "INFO").upper(),
     )
     execution = os.environ.get("EXECUTION", "PARALLEL").upper()
-    actor = Actor(Path(sys.argv[1]), execution=execution)
+    actor = WebsiteGen(Path(sys.argv[1]), execution=execution)
     print(actor.argv(tuple(sys.argv[2:])))
     sys.exit(0)

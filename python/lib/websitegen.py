@@ -14,15 +14,14 @@ from pathlib import Path
 from typing import Any, Tuple
 
 from lib.task import Task
-from lib.article import Article as ArticleT
-from lib.message import *
-from lib.page import Page as Publication
+from lib.article import Article
+from lib.page import Page
 from lib.utils import error
 from PIL import Image
 
 
-class Actor:
-    """Actor that gives behavior to a set of articles."""
+class WebsiteGen:
+    """a:WebsiteGen represents a website generator. Send it messages to do things."""
 
     # Class.Public
     PARALLEL = "PARALLEL"
@@ -33,97 +32,100 @@ class Actor:
     _logger = logging.getLogger(__name__)
 
     @staticmethod
-    def _build_li(uuid: str, desc: str) -> str:
-        """Build a list item in the index."""
-        return f'<li><a href="/page/{uuid}/">{desc}</a></li>'
-
-    @staticmethod
-    def _line(art: ArticleT) -> str:
-        """Build a line when listing articles and descriptions."""
-        return f"{art.article_html_file()} | {art.description()}"
-
-    @staticmethod
-    def _make_page(args, execution=PARALLEL) -> Publication:
+    def _make_page(args, execution=PARALLEL) -> Page:
         """Used to parallelize builds of pages."""
         articles, uuid, template, pages = args
-        actor = Actor(articles, execution=execution)
+        actor = WebsiteGen(articles, execution=execution)
         return actor.page(uuid, template, pages)
 
     # Instance.Public.API
     def help(self) -> str:
-        """Return a string that tells the messages I understand to the user."""
+        """Help message to the user."""
         return self.receive(Task(c="help", o="String"))
 
-    def page(self, uuid: str, template: Path, pages: Path) -> Publication:
-        """Return a Page.
+    def clone(self, article: Path, target: Path) -> Article:
+        """Return an Article such that:
 
-        * UUID is used to find the matching article.
-        * The article is injected in the TEMPLATE.
-        * The page is built rooted at PAGES/UUID.
+        * its content is a copy of ARTICLE except that all uuids have been replaced ;
+        * it has been installed under TARGET.
+        """
+        return self.receive(Task(c=("clone", article, target), o="Article"))
+
+    def page(self, uuid: str, template: Path, pages: Path) -> Page:
+        """Return a Page such that:
+
+        * it has been built from an article with id UUID ;
+        * it has been built from the template TEMPLATE ;
+        * it has been installed under PAGES.
         """
         return self.receive(Task(c=("page", uuid, template, pages), o="Page"))
 
     def duplicated_uuids(self) -> str:
-        """Raise an error if there are duplicated uuids or return a report"""
+        """Raises an error is duplicated uuids are found or return a report."""
         return self.receive(Task(c="duplicated_uuids", o="String"))
 
     def pages(self, template: Path, pages: Path) -> str:
-        """Build a page for each article and install it under PAGES using TEMPLATE."""
+        """Return a report giving the status of pages built under PAGES using TEMPLATE."""
         return self.receive(Task(c=("pages", template, pages), o="String"))
 
-    def sitemap(self, root: Path) -> str:
-        """Return the path of the sitemap.
+    def sitemap(self, root: Path) -> Path:
+        """Return a path such that:
 
-        * The sitemap is built and installed under ROOT.
+        * it represents the sitemap of the website ;
+        * it has been installed under ROOT.
         """
         return self.receive(Task(c=("sitemap", root), o="String"))
 
-    def index(self, pages: Path, uuid: str) -> Publication:
-        """Return a Publication.
+    def index(self, pages: Path, uuid: str) -> Page:
+        """Return a Page such that:
 
-        * This article has the given UUID.
+        * it represents the index of the website ;
+        * it has been built from a page with id UUID ;
         * `__INDEX__' has been replaced with and index of PAGES.
+        * it is installed under PAGES.
         """
         return self.receive(Task(c=("index", pages, uuid), o="Page"))
 
-    def clone(self, article: Path, target: Path) -> ArticleT:
-        """Return an Article.
+    def article_with_id(self, uuid: str) -> Article:
+        """Return an Article such that:
 
-        * This article is clone of an ARTICLE rooted at TARGET directory.
-        * All uuids are replaced.
-        """
-        return self.receive(Task(c=("clone", article, target), o="Article"))
-
-    def article_with_id(self, uuid: str) -> ArticleT:
-        """Return an Article.
-
-        * This article has an element associated with UUID.
+        * its content has an element with id UUID.
         """
         return self.receive(Task(c=("article_with_id", uuid), o="Article"))
 
     def all(self, uuid: str, template: Path, root: Path) -> str:
-        """Return a report that informs the user about how building the website went.
+        """Return a report such that:
 
-        * The report comes from building the website under ROOT using TEMPLATE.
-        * UUID is used to identify the article that will be used as the landing page.
+        * it informs the user of how went the website construction ;
+        * the website has been installed under ROOT using TEMPLATE ;
+        * the article with id UUID has been used to build the landing page.
         """
         return self.receive(Task(c=("all", uuid, template, root), o="String"))
 
     def list(self) -> str:
-        """Return a report that lists Article × Description."""
+        """Return a report such that:
+
+        * each line has the following format : Path | Description where:
+        * Path is the root path a page ;
+        * Description is its oneline description ;
+        * lines are alphabetically sorted.
+        """
         return self.receive(Task(c="list", o="String"))
 
     @cache
     def article_has_id(self, id: str) -> bool:
-        """Return if there is an article identified by ID."""
+        """True means that an article identified by ID exists."""
         return self.receive(Task(c=("article_has_id", id), o="Boolean"))
 
-    def argv(self, args: Tuple) -> str | None:
-        """Return a reply to the message represented by ARG."""
+    def argv(self, msg: Tuple) -> str:
+        """Return a report such that:
+
+        * it represents the log of execution of the message MSG.
+        """
 
         res: Any = None
 
-        match args:
+        match msg:
             case ("help",):
                 res = self.help()
 
@@ -155,12 +157,18 @@ class Actor:
                 res = self.list()
 
             case _:
-                res = f"Unexpected message. message = {args}. Try the `help' message."
+                res = f"Unexpected message. message = {msg}. Try the `help' message."
 
         return str(res)
 
     # Instance.Public.Receive
     def receive(self, task: Task) -> Any:
+        """Return a result such that:
+
+        * it is built from executing the task TASK ;
+        * TASK is logged, depending on the logger configuration.
+        """
+
         self._logger.info(f"{self} ← {task}")
 
         match task:
@@ -168,12 +176,67 @@ class Actor:
                 return "TODO: help"
 
             case Task(c=("clone", path, target), o="Article"):
-                path.exists() or error(f"article does not exist. article = {path}")
-                (not target.exists()) or error(f"target exists. target = {target}")
+                if path.exists():
+                    error(f"article does not exist. article = {path}")
+
+                if not target.exists():
+                    error(f"target exists. target = {target}")
+
                 shutil.copytree(path, target)
-                target_article = ArticleT(target)
+                target_article = Article(target)
                 target_article.replace_ids()
                 return target_article
+
+            case Task(c=("page", uuid, template, pages), o="Page"):
+                match self.__article_by_id(uuid):
+                    case None:
+                        error(f"No article with uuid has been found. uuid = {uuid}")
+                    case Article() as res:
+                        article = res
+
+                page_root = pages / uuid
+                page = Page(page_root)
+
+                # Return immediately if the page already represents the article.
+                if (page.exists() and page.mtime()) > article.mtime():
+                    return page
+
+                page = page.reset().copy_to_data(article.data_dir()).make()
+
+                # page_root/bg.webp = resize(article_dir/bg.*)
+                bg_img_path = article.background_img_file()
+                with Image.open(bg_img_path) as img:
+                    width, height = img.size
+                    new_width = 1500
+                    new_height = int((new_width / width) * height)
+                    resized_img = img.resize(
+                        (new_width, new_height), Image.Resampling.LANCZOS
+                    )
+                    temp_webp = tempfile.NamedTemporaryFile(suffix=".webp").name
+                    resized_img.save(temp_webp)
+
+                    temp_jpg = tempfile.NamedTemporaryFile(suffix=".jpg").name
+                    resized_img.save(temp_jpg)
+
+                page = page.copy_to_bg(Path(temp_webp)).copy_to_bg(Path(temp_jpg))
+
+                article_html = article.article_html(self)
+
+                # template_html = template_value
+                with open(template) as f:
+                    template_html = f.read()
+                    template_html = template_html.replace("__LANG__", article.lang())
+                    template_html = template_html.replace(
+                        "__DESCRIPTION__", article.description()
+                    )
+                    template_html = template_html.replace(
+                        "__CSS__", article.article_css()
+                    )
+                    template_html = template_html.replace("__ARTICLE__", article_html)
+
+                page.copy_to_index(template_html)
+
+                return page
 
             case Task(c=("index", pages, uuid), o="Page"):
                 def key(article):
@@ -196,7 +259,7 @@ class Actor:
                     sections += "</ul>"
                     sections += "</x-h2>"
 
-                index_page = Publication(pages / uuid)
+                index_page = Page(pages / uuid)
                 index_page.replace_target("__INDEX__", sections)
 
                 return index_page
@@ -213,60 +276,6 @@ class Actor:
                     sorted(self.__articles(), key=lambda art: art.description()),
                 )
                 return "\n".join(lines)
-
-            case Task(c=("page", uuid, template, pages), o="Page"):
-                match self.__article_by_id(uuid):
-                    case None:
-                        error(f"No article with uuid has been found. uuid = {uuid}")
-                    case ArticleT() as res:
-                        article = res
-
-                page_root = pages / uuid
-                page = Publication(page_root)
-
-                # Return immediately if the page already represents the article.
-                if (page.exists() and page.mtime()) > article.mtime():
-                    return page
-
-                page.reset()
-                page.copy(article.data_dir(), Data())
-                page.make()
-
-                # page_root/bg.webp = resize(article_dir/bg.*)
-                bg_img_path = article.background_img_file()
-                with Image.open(bg_img_path) as img:
-                    width, height = img.size
-                    new_width = 1500
-                    new_height = int((new_width / width) * height)
-                    resized_img = img.resize(
-                        (new_width, new_height), Image.Resampling.LANCZOS
-                    )
-                    temp_webp = tempfile.NamedTemporaryFile(suffix=".webp").name
-                    resized_img.save(temp_webp)
-
-                    temp_jpg = tempfile.NamedTemporaryFile(suffix=".jpg").name
-                    resized_img.save(temp_jpg)
-
-                page.copy(Path(temp_webp), BG())
-                page.copy(Path(temp_jpg), BG())
-
-                article_html = article.article_html(self)
-
-                # template_html = template_value
-                with open(template) as f:
-                    template_html = f.read()
-                    template_html = template_html.replace("__LANG__", article.lang())
-                    template_html = template_html.replace(
-                        "__DESCRIPTION__", article.description()
-                    )
-                    template_html = template_html.replace(
-                        "__CSS__", article.article_css()
-                    )
-                    template_html = template_html.replace("__ARTICLE__", article_html)
-
-                page.copy(template_html, Index())
-
-                return page
 
             case Task(c=("pages", template, pages), o="String"):
                 args = ((self.__root, uuid, template, pages) for uuid in self.__uuids())
@@ -318,7 +327,7 @@ class Actor:
                 sitemap_path = root / "sitemap.xml"
                 with open(sitemap_path, "w") as f:
                     f.write(sitemap_)
-                return sitemap_path
+                return Path(sitemap_path)
 
             case Task(c="duplicated_uuids", o="String"):
                 uuids: list[str] = reduce(
@@ -359,8 +368,17 @@ class Actor:
         self.__resolved_ids = None
         self._logger.info(f"{self}")
 
+
+    def _line(self, art: Article) -> str:
+        """Build a line when listing articles and descriptions."""
+        return f"{art.article_html_file()} | {art.description()}"
+
+    def _build_li(self, uuid: str, desc: str) -> str:
+        """Build a list item in the index."""
+        return f'<li><a href="/page/{uuid}/">{desc}</a></li>'
+
     @cache
-    def __article_by_id(self, id) -> ArticleT | None:
+    def __article_by_id(self, id) -> Article | None:
         return next(
             (article for article in self.__articles() if article.uuid() == id), None
         )
@@ -375,7 +393,7 @@ class Actor:
 
     @cache
     def __articles(self):
-        return [ArticleT(path) for path in self.__paths()]
+        return [Article(path) for path in self.__paths()]
 
     def __str__(self):
-        return f"Actor articles={self.__root}"
+        return f"WebsiteGen articles={self.__root}"

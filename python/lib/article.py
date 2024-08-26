@@ -53,7 +53,7 @@ class Article:
         return self.receive(Task(c="content", o="Path"))
 
     @cache
-    def article_html(self, ctx) -> str:
+    def article_html(self) -> str:
         """Return the html content of the article.
 
         * href references have been replaced.
@@ -64,7 +64,7 @@ class Article:
 
         * __REFERENCE__ is replaced by self.__links()
         """
-        return self.receive(Task(c=("content", ctx), o="HTML"))
+        return self.receive(Task(c="content", o="HTML"))
 
     @cache
     def data_dir(self) -> Path:
@@ -168,7 +168,7 @@ class Article:
                 else:
                     return ""
 
-            case Task(c=("content", ctx), o="HTML"):
+            case Task(c="content", o="HTML"):
                 content = self.read(self.article_html_file())
 
                 def in_page(id):
@@ -178,13 +178,13 @@ class Article:
                         )
 
                 def article_has_id(id):
-                    if ctx.article_has_id(id):
+                    if self._ctx.article_has_id(id):
                         return lambda content: content.replace(
                             f'href="{id}"', f'href="/page/{id}"'
                         )
 
                 def article_with_id(id):
-                    match ctx.article_with_id(id):
+                    match self._ctx.article_with_id(id):
                         case article if isinstance(article, Article):
                             return lambda content: content.replace(
                                 f'href="{id}"', f'href="/page/{article.uuid()}#{id}"'
@@ -243,8 +243,9 @@ class Article:
                 raise AssertionError(f"Unexpected task. task = {task}")
 
     # Instance.Private
-    def __init__(self, root: Path):
+    def __init__(self, root: Path, ctx:Any):
         self._root = root
+        self._ctx = ctx
         self._article_html = root / "article.html"
         self._article_css = root / "article.css"
         match glob(str(root / "bg.*")):

@@ -183,7 +183,7 @@ class WebsiteGen:
                     error(f"target exists. target = {target}")
 
                 shutil.copytree(article, target)
-                target_article = Article(target)
+                target_article = Article(target, self)
                 target_article.replace_ids()
                 return target_article
 
@@ -220,7 +220,7 @@ class WebsiteGen:
 
                 page = page.copy_to_bg(Path(temp_webp)).copy_to_bg(Path(temp_jpg))
 
-                article_html = article.article_html(self)
+                article_html = article.article_html()
 
                 # template_html = template_value
                 with open(template) as f:
@@ -393,7 +393,7 @@ class WebsiteGen:
 
     @cache
     def __articles(self):
-        return [Article(path) for path in self.__paths()]
+        return [Article(path, self) for path in self.__paths()]
 
     def __str__(self):
         return f"WebsiteGen articles={self.__root}"

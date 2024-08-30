@@ -176,10 +176,10 @@ class WebsiteGen:
                 return "TODO: help"
 
             case Task(c=(article, target), o="Clone(article, target)"):
-                if article.exists():
+                if not article.exists():
                     error(f"article does not exist. article = {article}")
 
-                if not target.exists():
+                if target.exists():
                     error(f"target exists. target = {target}")
 
                 shutil.copytree(article, target)
@@ -273,7 +273,7 @@ class WebsiteGen:
 
             case Task(o="Report(list)"):
                 lines = map(
-                    self._line,
+                    lambda s: self._line(s).strip(),
                     sorted(self.__articles(), key=lambda art: art.description()),
                 )
                 return "\n".join(lines)

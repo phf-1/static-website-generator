@@ -498,7 +498,7 @@ new-article: ## Build a new article.
 .PHONY: list
 list: ## List articles.
 	[[ ! -v VIRTUAL_ENV ]] && source _venv/bin/activate
-	${ACTOR} list &>/dev/null
+	${ACTOR} list
 
 
 # Rule

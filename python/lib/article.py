@@ -243,7 +243,7 @@ class Article:
                 raise AssertionError(f"Unexpected task. task = {task}")
 
     # Instance.Private
-    def __init__(self, root: Path, ctx:Any):
+    def __init__(self, root: Path, ctx: Any):
         self._root = root
         self._ctx = ctx
         self._article_html = root / "article.html"

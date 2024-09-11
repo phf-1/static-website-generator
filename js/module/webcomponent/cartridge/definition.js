@@ -9,10 +9,6 @@ import { Cartridge } from "./cartridge";
 import { Utils } from "../../utils";
 
 class Definition extends Cartridge {
-    static properties = {
-        term: {},
-    };
-
     static styles = [
         Cartridge.styles,
         css`
@@ -52,6 +48,16 @@ class Definition extends Cartridge {
         `,
     ];
 
+    static properties = {
+        term: {},
+        of: {},
+    };
+
+    constructor() {
+        super();
+        this.of = "";
+    }
+
     // Public
 
     render() {
@@ -66,6 +72,7 @@ class Definition extends Cartridge {
             </div>
         `;
     }
+
 }
 
 customElements.define("x-definition", Definition);

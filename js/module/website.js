@@ -40,6 +40,7 @@ import "./webcomponent/keyword/failed";
 import "./webcomponent/keyword/todo";
 import "./webcomponent/keyword/waiting";
 import "./webcomponent/math";
+import "./webcomponent/id";
 import "./webcomponent/question-answer";
 import "./webcomponent/toc";
 import { Theorem } from "./theorem";

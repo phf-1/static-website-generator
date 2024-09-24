@@ -13,6 +13,8 @@ from itertools import groupby
 from pathlib import Path
 from typing import Any, Tuple
 
+
+from lib.constant import OK, ERR
 from lib.article import Article
 from lib.page import Page
 from lib.task import Task
@@ -23,25 +25,15 @@ from PIL import Image
 class WebsiteGen:
     """a:WebsiteGen represents a website generator. Send it messages to do things."""
 
-    # Class.Public
+    # Public
     PARALLEL = "PARALLEL"
     SEQUENTIAL = "SEQUENTIAL"
     EXECUTION_VALUES = [PARALLEL, SEQUENTIAL]
 
-    # Class.Private
-    _logger = logging.getLogger(__name__)
 
-    @staticmethod
-    def _make_page(args, execution=PARALLEL) -> Page:
-        """Used to parallelize builds of pages."""
-        articles, uuid, template, pages = args
-        actor = WebsiteGen(articles, execution=execution)
-        return actor.page(uuid, template, pages)
-
-    # Instance.Public.API
     def help(self) -> str:
-        """Help message to the user."""
-        return self.receive(Task(c="help", o="String"))
+        """Return a string describing the interface of this actor for a user."""
+        return self.__receive(Task(o="Manual"))
 
     def clone(self, article: Path, target: Path) -> Article:
         """Return an Article such that:
@@ -49,7 +41,7 @@ class WebsiteGen:
         * its content is a copy of ARTICLE except that all uuids have been replaced ;
         * it has been installed under TARGET.
         """
-        return self.receive(Task(c=(article, target), o="Clone(article, target)"))
+        return self.__receive(Task(c=(article, target), o="Clone(article, target)"))
 
     def page(self, uuid: str, template: Path, pages: Path) -> Page:
         """Return a Page such that:
@@ -58,15 +50,25 @@ class WebsiteGen:
         * it has been built from the template TEMPLATE ;
         * it has been installed under PAGES.
         """
-        return self.receive(Task(c=(uuid, template, pages), o="Page"))
+        return self.__receive(Task(c=(uuid, template, pages), o="Page(uuid, template, pages)"))
 
-    def duplicated_uuids(self) -> str:
-        """Raises an error is duplicated uuids are found or return a report."""
-        return self.receive(Task(o="Report(duplicated_uuids)"))
+    def duplicated_uuids(self) -> tuple:
+        """Return a tuple (code, report) where:
+
+        * code : OK + ERR
+        * report : String
+        * (OK, report) if no duplicated uuids have been found.
+        * (ERR, report) if duplicated uuids have been found.
+        """
+        return self.__receive(Task(o="Report(duplicated_uuids)"))
 
     def pages(self, template: Path, pages: Path) -> str:
-        """Return a report giving the status of pages built under PAGES using TEMPLATE."""
-        return self.receive(Task(c=(template, pages), o="Report(pages)"))
+        """Return a report (string) such that:
+
+        * for all articles, build the matching page under PAGES using TEMPLATE ;
+        * for each build, gather the logs and assemble them into a report.
+        """
+        return self.__receive(Task(c=(template, pages), o="Pages(template, pages)"))
 
     def sitemap(self, root: Path) -> Path:
         """Return a path such that:
@@ -74,7 +76,7 @@ class WebsiteGen:
         * it represents the sitemap of the website ;
         * it has been installed under ROOT.
         """
-        return self.receive(Task(c=("sitemap", root), o="Path"))
+        return self.__receive(Task(c=root, o="Sitemap(root)"))
 
     def index(self, pages: Path, uuid: str) -> Page:
         """Return a Page such that:
@@ -84,14 +86,14 @@ class WebsiteGen:
         * `__INDEX__' has been replaced with and index of PAGES.
         * it is installed under PAGES.
         """
-        return self.receive(Task(c=(pages, uuid), o="Page(index)"))
+        return self.__receive(Task(c=(pages, uuid), o="Index(pages, uuid)"))
 
     def article_with_id(self, id: str) -> Article:
         """Return an Article such that:
 
         * its content has an element with id UUID.
         """
-        return self.receive(Task(c=id, o="ArticleWith(id)"))
+        return self.__receive(Task(c=id, o="ArticleWith(id)"))
 
     def all(self, uuid: str, template: Path, root: Path) -> str:
         """Return a report such that:
@@ -100,7 +102,7 @@ class WebsiteGen:
         * the website has been installed under ROOT using TEMPLATE ;
         * the article with id UUID has been used to build the landing page.
         """
-        return self.receive(Task(c=(uuid, template, root), o="Report(website)"))
+        return self.__receive(Task(c=(uuid, template, root), o="Report(website)"))
 
     def list(self) -> str:
         """Return a report such that:
@@ -110,12 +112,12 @@ class WebsiteGen:
         * Description is its oneline description ;
         * lines are alphabetically sorted.
         """
-        return self.receive(Task(o="Report(list)"))
+        return self.__receive(Task(o="Report(list)"))
 
     @cache
     def article_has_id(self, id: str) -> bool:
         """True means that an article identified by ID exists."""
-        return self.receive(Task(c=id, o="ArticleHas(id)"))
+        return self.__receive(Task(c=id, o="ArticleHas(id)"))
 
     def argv(self, msg: Tuple) -> str:
         """Return a report such that:
@@ -142,7 +144,7 @@ class WebsiteGen:
                 res = self.index(Path(path), uuid)
 
             case ("duplicated-uuids",):
-                res = self.duplicated_uuids()
+                (code, res) = self.duplicated_uuids()
 
             case ("pages", str(template), str(pages)):
                 res = self.pages(Path(template), Path(pages))
@@ -161,8 +163,59 @@ class WebsiteGen:
 
         return str(res)
 
-    # Instance.Public.Receive
-    def receive(self, task: Task) -> Any:
+    # Private
+    _logger = logging.getLogger(__name__)
+
+    def __init__(self, root: Path, execution: str = PARALLEL) -> None:
+        if not root.is_dir():
+            error(f"root is not a directory. root = {root}")
+        self.__root = root
+
+        if execution not in self.EXECUTION_VALUES:
+            error(
+                f"execution is unexpected. execution = {execution}. valid values: {self.EXECUTION_VALUES}"
+            )
+        self.__execution = execution
+        self.__resolved_ids = None
+        self._logger.info(f"{self}")
+
+    def _line(self, art: Article) -> str:
+        """Build a line when listing articles and descriptions."""
+        return f"{art.article_html_file()} | {art.description()}"
+
+    def _build_li(self, uuid: str, desc: str) -> str:
+        """Build a list item in the index."""
+        return f'<li><a href="/page/{uuid}/">{desc}</a></li>'
+
+    @cache
+    def __article_by_id(self, id) -> Article | None:
+        return next(
+            (article for article in self.__articles() if article.uuid() == id), None
+        )
+
+    @cache
+    def __paths(self):
+        return [Path(path) for path in glob(str(self.__root / "*"))]
+
+    @cache
+    def __uuids(self):
+        return [path.parts[-1] for path in self.__paths()]
+
+    @cache
+    def __articles(self):
+        return [Article(path, self) for path in self.__paths()]
+
+    def __str__(self):
+        return f"WebsiteGen articles={self.__root}"
+
+    @staticmethod
+    def _make_page(args, execution=PARALLEL) -> Page:
+        """Used to parallelize builds of pages."""
+        articles, uuid, template, pages = args
+        actor = WebsiteGen(articles, execution=execution)
+        return actor.page(uuid, template, pages)
+
+    def __receive(self, task: Task) -> Any:
         """Return a result such that:
 
         * it is built from executing the task TASK ;
@@ -172,7 +225,7 @@ class WebsiteGen:
         self._logger.info(f"{self} ← {task}")
 
         match task:
-            case Task(c="help", o="String"):
+            case Task(o="Manual"):
                 return "TODO: help"
 
             case Task(c=(article, target), o="Clone(article, target)"):
@@ -187,7 +240,7 @@ class WebsiteGen:
                 target_article.replace_ids()
                 return target_article
 
-            case Task(c=(uuid, template, pages), o="Page"):
+            case Task(c=(uuid, template, pages), o="Page(uuid, template, pages)"):
                 match self.__article_by_id(uuid):
                     case None:
                         error(f"No article with uuid has been found. uuid = {uuid}")
@@ -238,7 +291,7 @@ class WebsiteGen:
 
                 return page
 
-            case Task(c=(pages, uuid), o="Page(index)"):
+            case Task(c=(pages, uuid), o="Index(pages, uuid)"):
 
                 def key(article):
                     timestamp = article.mtime()
@@ -278,7 +331,7 @@ class WebsiteGen:
                 )
                 return "\n".join(lines)
 
-            case Task(c=(template, pages), o="Report(pages)"):
+            case Task(c=(template, pages), o="Pages(template, pages)"):
                 args = ((self.__root, uuid, template, pages) for uuid in self.__uuids())
 
                 if self.__execution == self.PARALLEL:
@@ -293,7 +346,7 @@ class WebsiteGen:
                 return "\n".join([str(res) for res in results])
 
             case Task(c=(uuid, template, root), o="Report(website)"):
-                report = self.duplicated_uuids()
+                (code, report) = self.duplicated_uuids()
                 pages = root / "page"
                 report += "\n".join(
                     [f"page = {page}" for page in self.pages(template, pages).split()]
@@ -302,7 +355,7 @@ class WebsiteGen:
                 report += f"\nsitemap = {self.sitemap(root)}"
                 return report
 
-            case Task(c=("sitemap", root), o="Path"):
+            case Task(c=root, o="Sitemap(root)"):
 
                 def loc(uuid):
                     return f"<loc>https://phfrohring.com/page/{uuid}/</loc>"
@@ -342,12 +395,10 @@ class WebsiteGen:
                     else:
                         seen.add(id)
                 if len(duplicates) == 0:
-                    return "No duplicated uuids found in articles."
+                    return (OK, "No duplicated uuids found in articles.")
                 else:
-                    error(
-                        "Duplicated uuids found in articles:"
-                        + "  \n".join(set(duplicates))
-                    )
+                    msg = "Duplicated uuids found in articles:" + "  \n".join(set(duplicates))
+                    return (ERR, msg)
 
             case Task(c=id, o="ArticleHas(id)"):
                 return next(
@@ -355,45 +406,3 @@ class WebsiteGen:
                     False,
                 )
 
-    # Instance.Private
-    def __init__(self, root: Path, execution: str = PARALLEL) -> None:
-        if not root.is_dir():
-            error(f"root is not a directory. root = {root}")
-        self.__root = root
-
-        if execution not in self.EXECUTION_VALUES:
-            error(
-                f"execution is unexpected. execution = {execution}. valid values: {self.EXECUTION_VALUES}"
-            )
-        self.__execution = execution
-        self.__resolved_ids = None
-        self._logger.info(f"{self}")
-
-    def _line(self, art: Article) -> str:
-        """Build a line when listing articles and descriptions."""
-        return f"{art.article_html_file()} | {art.description()}"
-
-    def _build_li(self, uuid: str, desc: str) -> str:
-        """Build a list item in the index."""
-        return f'<li><a href="/page/{uuid}/">{desc}</a></li>'
-
-    @cache
-    def __article_by_id(self, id) -> Article | None:
-        return next(
-            (article for article in self.__articles() if article.uuid() == id), None
-        )
-
-    @cache
-    def __paths(self):
-        return [Path(path) for path in glob(str(self.__root / "*"))]
-
-    @cache
-    def __uuids(self):
-        return [path.parts[-1] for path in self.__paths()]
-
-    @cache
-    def __articles(self):
-        return [Article(path, self) for path in self.__paths()]
-
-    def __str__(self):
-        return f"WebsiteGen articles={self.__root}"

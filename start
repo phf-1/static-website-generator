@@ -1,0 +1,5 @@
+./configure --source ../articles \
+            --index-uuid 8e11bcd7-a050-40d6-ab93-71bee0640990 \
+            --prefix ../phf-1.github.io
+
+make server

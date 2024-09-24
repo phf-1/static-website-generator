@@ -182,7 +182,8 @@ class Blockcode extends LitElement {
                 this.shadowRoot
                     .querySelector("slot")
                     .assignedNodes()[0]
-                    .wholeText.trimEnd(),
+                    .wholeText
+                    .trimEnd(),
             );
         } else {
             const response = await fetch(url);
